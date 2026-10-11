@@ -1,7 +1,8 @@
 // Capa de IA de Banco 4.0. Tres tareas, todas con respaldo determinista en el navegador:
 //   integracion → completa campos que el extractor por reglas no encontró (con evidencia literal)
-//   proteccion  → observaciones de incoherencia adicionales a las 6 reglas
-//   decision    → memo para el analista (el score, monto, tasa y decisión los fija el modelo de reglas)
+//   perfil      → fase 02: integra comportamiento financiero + contexto del documento (con evidencia literal)
+//   proteccion  → fase 05: señales de fraude/incoherencia + monto y tasa personalizados DENTRO de los topes de las reglas
+//   decision    → fase 06: recomendación (nunca más permisiva que las reglas) + memo. Decide siempre el analista.
 // El proveedor es intercambiable: AI_PROVIDER=workers-ai (por defecto, binding "AI") u openai (cualquier
 // endpoint compatible con /chat/completions, útil para comparar contra un modelo de frontera).
 // Variables: AI_MODEL, AI_MODEL_INTEGRACION | AI_MODEL_PROTECCION | AI_MODEL_DECISION, AI_REASONING_EFFORT,
@@ -121,11 +122,12 @@ const clean = (v, max) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim()
 const squash = (s) => String(s).replace(/[*_`|]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
 const stripAccents = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-// Cada cifra de 3+ dígitos del texto debe existir en el expediente (se ignoran años 19xx/20xx).
+// Cada cifra de 3+ dígitos del texto debe existir en el expediente. No cuentan como dato los años (19xx/20xx),
+// los ceros sueltos («terminan en 000») ni el 100 de un porcentaje.
 const figures = (text) => (String(text).match(/\d[\d.,]*\d|\d/g) || []).map((t) => t.replace(/\D/g, ''));
 export function unknownFigures(text, source) {
   const allowed = new Set(figures(source));
-  return figures(text).filter((f) => f.length >= 3 && !/^(19|20)\d\d$/.test(f) && !allowed.has(f));
+  return figures(text).filter((f) => f.length >= 3 && !/^(19|20)\d\d$/.test(f) && !/^0+$/.test(f) && f !== '100' && !allowed.has(f));
 }
 
 // Solo se aceptan valores cuya evidencia es una cita literal del documento y contiene la cifra.
@@ -155,27 +157,91 @@ export function validateIntegration(raw, markdown, missing) {
 }
 
 const SEVERITIES = new Set(['alta', 'media', 'baja']);
-export function validateReview(raw, facts) {
-  const list = raw && Array.isArray(raw.observaciones) ? raw.observaciones : [];
+const CATEGORIES = new Set(['fraude', 'consistencia']);
+// De más a menos permisiva. La recomendación de la IA nunca puede ser más permisiva que la de las reglas.
+export const DECISIONS = ['aprobar', 'aprobar_con_condiciones', 'reducir_monto', 'rechazar'];
+const CONFIDENCE = new Set(['alta', 'media', 'baja']);
+const list = (v, n, max) => (Array.isArray(v) ? v : []).map((x) => clean(x, max)).filter(Boolean).slice(0, n);
+
+// Fase 02: comportamiento integrado (solo cifras del expediente) + contexto del documento (con evidencia literal).
+export function validatePerfil(raw, facts, markdown) {
+  const comportamiento = clean(raw && raw.comportamiento, 800);
+  if (!comportamiento) throw new AiError('El perfil vino vacío', 502);
+  const unknown = unknownFigures(comportamiento, JSON.stringify(facts));
+  if (unknown.length) throw new AiError(`El perfil citó cifras que no están en el expediente (${unknown.slice(0, 3).join(', ')}); se descartó`, 502);
+  const doc = markdown ? squash(markdown) : '';
+  const contexto = [];
+  for (const c of raw && Array.isArray(raw.contexto) ? raw.contexto : []) {
+    if (!doc || contexto.length >= 6 || !c || typeof c !== 'object') continue;
+    const dato = clean(c.dato, 200);
+    const evidencia = typeof c.evidencia === 'string' ? c.evidencia.trim() : '';
+    const ev = squash(evidencia);
+    if (!dato || ev.length < 8 || ev.length > 400 || !doc.includes(ev)) continue;   // sin cita literal no hay dato
+    if (unknownFigures(dato, evidencia).length) continue;                           // cifras que la evidencia no contiene
+    contexto.push({ dato, evidencia: evidencia.slice(0, 300) });
+  }
+  return { perfil: { comportamiento, contexto } };
+}
+
+// Fase 05: señales de fraude/inconsistencia + personalización de monto y tasa dentro de los topes de las reglas.
+export function validateProteccion(raw, facts) {
   const source = JSON.stringify(facts);
   const observaciones = [];
-  for (const o of list) {
+  for (const o of raw && Array.isArray(raw.observaciones) ? raw.observaciones : []) {
     if (observaciones.length >= 5) break;
     if (!o || typeof o !== 'object') continue;
     const titulo = clean(o.titulo, 120);
     const detalle = clean(o.detalle, 400);
     const severidad = String(o.severidad || '').toLowerCase();
     if (!titulo || !detalle || !SEVERITIES.has(severidad)) continue;
-    if (unknownFigures(`${titulo} ${detalle}`, source).length) continue; // cita cifras que no están en el expediente
+    if (unknownFigures(`${titulo} ${detalle}`, source).length) continue;            // cita cifras que no están en el expediente
+    const categoria = CATEGORIES.has(String(o.categoria || '').toLowerCase()) ? String(o.categoria).toLowerCase() : 'consistencia';
     const campos = (Array.isArray(o.campos) ? o.campos : []).filter((c) => FIELD_KEYS.includes(c)).slice(0, 4);
-    observaciones.push({ severidad, titulo, detalle, campos });
+    observaciones.push({ categoria, severidad, titulo, detalle, campos });
   }
-  return { observaciones };
+
+  const lim = facts.limites || {};
+  const p = raw && raw.personalizacion && typeof raw.personalizacion === 'object' ? raw.personalizacion : null;
+  let personalizacion = null;
+  if (p && Number.isFinite(lim.monto_max) && Number.isFinite(lim.tasa_min) && Number.isFinite(lim.tasa_max)) {
+    const monto = Number(p.monto);
+    const tasa = Number(p.tasa);
+    const montoOk = Number.isFinite(monto) && monto >= 0 && monto <= lim.monto_max;  // nunca por encima del tope de las reglas
+    const tasaOk = Number.isFinite(tasa) && tasa >= lim.tasa_min && tasa <= lim.tasa_max;
+    const justificacion = clean(p.justificacion, 500);
+    const condiciones = list(p.condiciones, 3, 250);
+    const fuera = [];
+    if (p.monto !== undefined && p.monto !== null && !montoOk) fuera.push('monto');
+    if (p.tasa !== undefined && p.tasa !== null && !tasaOk) fuera.push('tasa');
+    if ((montoOk || tasaOk) && justificacion) {
+      const allowed = `${source} ${montoOk ? Math.round(monto) : ''} ${tasaOk ? tasa : ''}`;
+      if (!unknownFigures([justificacion, ...condiciones].join(' '), allowed).length) {
+        personalizacion = { monto: montoOk ? Math.round(monto) : null, tasa: tasaOk ? Math.round(tasa * 10) / 10 : null, justificacion, condiciones, fuera_de_tope: fuera };
+      }
+    }
+  }
+  return { observaciones, personalizacion };
+}
+
+// Fase 06: recomendación con piso en la decisión de las reglas + memo.
+export function validateDecision(raw, facts) {
+  const base = DECISIONS.indexOf(facts.decision_regla);
+  const modelo = String((raw && raw.recomendacion) || '').toLowerCase();
+  if (base === -1) throw new AiError('Falta decision_regla en el expediente', 400);
+  if (!DECISIONS.includes(modelo)) throw new AiError('La recomendación de la IA no es válida', 502);
+  const idx = DECISIONS.indexOf(modelo);
+  const ajustada = idx < base;                       // más permisiva que las reglas: se sube al piso
+  const recomendacion = ajustada ? DECISIONS[base] : modelo;
+  const relacion = ajustada ? 'ajustada' : idx > base ? 'mas_estricta' : 'coincide';
+  const confianza = CONFIDENCE.has(String((raw && raw.confianza) || '').toLowerCase()) ? String(raw.confianza).toLowerCase() : 'media';
+  const memo = validateMemo(raw, facts);
+  const motivos = list(raw && raw.motivos, 3, 300);
+  if (unknownFigures(motivos.join(' '), JSON.stringify(facts)).length) throw new AiError('La recomendación citó cifras que no están en el expediente; se descartó', 502);
+  return { recomendacion, recomendacion_modelo: modelo, relacion, confianza, motivos, memo };
 }
 
 export function validateMemo(raw, facts) {
-  const list = (v) => (Array.isArray(v) ? v : []).map((x) => clean(x, 300)).filter(Boolean).slice(0, 3);
-  const memo = { resumen: clean(raw && raw.resumen, 700), fortalezas: list(raw && raw.fortalezas), riesgos: list(raw && raw.riesgos), condiciones: list(raw && raw.condiciones) };
+  const memo = { resumen: clean(raw && raw.resumen, 700), fortalezas: list(raw && raw.fortalezas, 3, 300), riesgos: list(raw && raw.riesgos, 3, 300), condiciones: list(raw && raw.condiciones, 3, 300) };
   if (!memo.resumen) throw new AiError('El memo vino vacío', 502);
   const text = [memo.resumen, ...memo.fortalezas, ...memo.riesgos, ...memo.condiciones].join(' ');
   const unknown = unknownFigures(text, JSON.stringify(facts));
@@ -216,37 +282,59 @@ const TASKS = {
     },
     finish: (raw, input) => validateIntegration(raw, input.markdown, input.missing)
   },
+  perfil: {
+    temperature: 0.2,
+    prepare(body) {
+      const facts = requireFacts(body);
+      const markdown = body && typeof body.markdown === 'string' && body.markdown.trim() ? body.markdown.slice(0, MAX_DOC) : '';
+      const user = 'Integra la información del cliente en un perfil de comportamiento financiero y de contexto.\n'
+        + '- "comportamiento": 3 a 4 frases sobre cómo se comporta el cliente (tendencia de ventas, rentabilidad, liquidez, endeudamiento y presencia en el sistema financiero). Usa SOLO cifras tal como aparecen en el expediente, con el mismo formato; no calcules cifras nuevas.\n'
+        + (markdown
+          ? '- "contexto": datos cualitativos o adicionales del <documento> relevantes para el riesgo y que NO sean uno de los 15 campos de entrada (sector, antigüedad, garantías, litigios, concentración de clientes o proveedores, partes relacionadas, eventos posteriores, notas a los estados financieros, movimientos o transacciones). Hasta 6. Cada uno con "dato" (hasta 150 caracteres) y "evidencia": fragmento LITERAL del documento. Si no hay nada relevante, lista vacía.\n'
+          : '- "contexto": no hay documento; devuelve una lista vacía.\n')
+        + 'Formato: {"comportamiento":"...","contexto":[{"dato":"...","evidencia":"..."}]}\n\n'
+        + `<expediente>\n${JSON.stringify(facts)}\n</expediente>`
+        + (markdown ? `\n\n<documento>\n${markdown}\n</documento>` : '');
+      return { user, facts, markdown };
+    },
+    finish: (raw, input) => validatePerfil(raw, input.facts, input.markdown)
+  },
   proteccion: {
     temperature: 0.2,
     prepare(body) {
       const facts = requireFacts(body);
-      const user = 'Revisa el expediente y busca incoherencias entre los datos que las reglas automáticas NO cubren. '
-        + 'Ya se evaluaron: variación abrupta de ventas, utilidad neta mayor que EBITDA, tasa implícita fuera de 1%–30%, deuda total menor que la deuda con el banco, vencidos de accionistas y solicitud mayor al 50% de las ventas; no las repitas.\n'
-        + 'Ejemplos de lo que sí interesa: EBITDA mayor que las ventas, patrimonio incompatible con la utilidad, mucho efectivo junto a gastos financieros altos, empleados desproporcionados frente a las ventas, ventas de periodos que no encajan entre sí.\n'
-        + 'Reglas: máximo 5 observaciones; solo con base en los datos dados; si no hay nada relevante devuelve una lista vacía. Cita las cifras tal como vienen en el expediente y no introduzcas cifras calculadas por ti.\n'
-        + 'Cada observación: "severidad" (alta|media|baja), "titulo" (hasta 100 caracteres), "detalle" (1 o 2 frases), "campos" (ids de entradas afectadas).\n'
-        + 'Formato: {"observaciones":[{"severidad":"media","titulo":"...","detalle":"...","campos":["ebitda"]}]}\n\n'
+      const l = facts.limites || {};
+      const user = 'Tienes dos tareas sobre el expediente de crédito.\n\n'
+        + '1) SEÑALES. Busca señales de posible fraude o incoherencias entre los datos que las reglas automáticas NO cubren. '
+        + 'Ya se evaluaron (no las repitas): variación abrupta de ventas, utilidad neta mayor que EBITDA, tasa implícita fuera de 1%–30%, deuda total menor que la deuda con el banco, vencidos de accionistas y solicitud mayor al 50% de las ventas. '
+        + 'Ejemplos: EBITDA mayor que las ventas, patrimonio incompatible con la utilidad, mucho efectivo junto a gastos financieros altos, empleados desproporcionados frente a las ventas, periodos de ventas que no encajan entre sí, cifras redondas o repetidas. '
+        + 'Máximo 5; si no hay nada relevante, lista vacía. Cita las cifras como vienen en el expediente; no introduzcas cifras calculadas por ti. '
+        + 'Cada una: "categoria" ("fraude" si sugiere manipulación o datos falsos; "consistencia" si parece un error o un dato mal capturado), "severidad" (alta|media|baja), "titulo" (hasta 100 caracteres), "detalle" (1 o 2 frases), "campos" (ids de entradas afectadas).\n\n'
+        + `2) PERSONALIZACIÓN. Las reglas calcularon un monto sugerido y una tasa de referencia. Propón un ajuste según el perfil del cliente, DENTRO de estos topes: monto entre 0 y ${l.monto_max} (nunca más que el tope), tasa entre ${l.tasa_min} y ${l.tasa_max} (% anual). Puedes omitir "monto" o "tasa" si no propones cambiarlos. Explica en "justificacion" (2 frases) y da hasta 3 "condiciones" concretas (garantías, covenants, seguimiento). Si no hay razón para ajustar, devuelve "personalizacion": null.\n\n`
+        + 'Formato: {"observaciones":[{"categoria":"consistencia","severidad":"media","titulo":"...","detalle":"...","campos":["ebitda"]}],"personalizacion":{"monto":380000,"tasa":10.5,"justificacion":"...","condiciones":["..."]}}\n\n'
         + `<expediente>\n${JSON.stringify(facts)}\n</expediente>`;
       return { user, facts };
     },
-    finish: (raw, input) => validateReview(raw, input.facts)
+    finish: (raw, input) => validateProteccion(raw, input.facts)
   },
   decision: {
     temperature: 0.3,
     prepare(body) {
       const facts = requireFacts(body);
-      const user = 'Redacta el memo para el analista de crédito con base EXCLUSIVAMENTE en el expediente. '
-        + 'La decisión ya la fijaron las reglas: no la cambies, no propongas otra y no recalcules score, monto ni tasa.\n'
-        + '- "resumen": 3 a 4 frases con la decisión sugerida, el score y su banda, el monto frente a lo solicitado y la tasa.\n'
-        + '- "fortalezas": hasta 3 (indicadores en estado Fuerte).\n'
-        + '- "riesgos": hasta 3 (indicadores Débiles y señales activadas).\n'
-        + '- "condiciones": hasta 3 acciones concretas de garantías, verificación o seguimiento, coherentes con la banda.\n'
-        + 'Copia las cifras EXACTAMENTE como aparecen en el expediente (mismo formato); no introduzcas cifras ni porcentajes calculados por ti. Tono profesional y sobrio; no es una preaprobación.\n'
-        + 'Formato: {"resumen":"...","fortalezas":["..."],"riesgos":["..."],"condiciones":["..."]}\n\n'
+      if (!DECISIONS.includes(facts.decision_regla)) throw new AiError('Falta decision_regla en el expediente', 400);
+      const user = 'Emite tu recomendación de crédito para el analista y redacta el memo, con base EXCLUSIVAMENTE en el expediente.\n'
+        + `Las reglas indican "${facts.decision_regla}". Ese es el piso: puedes recomendar lo mismo o algo más estricto, nunca algo más permisivo. No recalcules score, monto ni tasa.\n`
+        + '- "recomendacion": una de aprobar | aprobar_con_condiciones | reducir_monto | rechazar.\n'
+        + '- "confianza": alta | media | baja, según qué tan claros y completos son los datos.\n'
+        + '- "motivos": hasta 3 razones concretas de la recomendación.\n'
+        + '- "resumen": 3 a 4 frases con la decisión, el score y su banda, el monto frente a lo solicitado y la tasa.\n'
+        + '- "fortalezas": hasta 3. "riesgos": hasta 3 (indicadores débiles, señales activadas y observaciones de la IA). "condiciones": hasta 3 acciones de garantías, verificación o seguimiento.\n'
+        + 'Copia las cifras EXACTAMENTE como aparecen en el expediente; no introduzcas cifras ni porcentajes calculados por ti. Tono profesional y sobrio; no es una preaprobación.\n'
+        + 'Formato: {"recomendacion":"aprobar_con_condiciones","confianza":"media","motivos":["..."],"resumen":"...","fortalezas":["..."],"riesgos":["..."],"condiciones":["..."]}\n\n'
         + `<expediente>\n${JSON.stringify(facts)}\n</expediente>`;
       return { user, facts };
     },
-    finish: (raw, input) => ({ memo: validateMemo(raw, input.facts) })
+    finish: (raw, input) => validateDecision(raw, input.facts)
   }
 };
 

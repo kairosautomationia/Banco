@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handleAi, parseJson, textOf, validateIntegration, validateReview, validateMemo, unknownFigures, createProvider } from '../ai.mjs';
+import { handleAi, parseJson, textOf, validateIntegration, validatePerfil, validateProteccion, validateDecision, validateMemo, unknownFigures, createProvider } from '../ai.mjs';
 
 const DOC = `| Concepto | dic-24 |
 | **EBITDA** | 400.000 |
@@ -9,7 +9,7 @@ const DOC = `| Concepto | dic-24 |
 
 const post = (body) => new Request('https://x/api/ai/x', { method: 'POST', body: typeof body === 'string' ? body : JSON.stringify(body) });
 const envWith = (run, extra = {}) => ({ AI: { run }, ...extra });
-const FACTS = { score: 640, monto_sugerido: '$400.000', tasa_referencial: '10.1% anual', entradas: { ebitda: { etiqueta: 'EBITDA', valor: '$400.000' } } };
+const FACTS = { score: 640, decision_regla: 'aprobar_con_condiciones', monto_sugerido: '$400.000', tasa_referencial: '10.1% anual', limites: { monto_max: 400000, tasa_min: 9.6, tasa_max: 12.1 }, entradas: { ebitda: { etiqueta: 'EBITDA', valor: '$400.000' } } };
 
 test('parseJson tolera cercas de código y bloques <think>', () => {
   assert.deepEqual(parseJson('<think>{"a":0}</think>```json\n{"a":1}\n```'), { a: 1 });
@@ -46,16 +46,56 @@ test('integración: ignora campos que no se pidieron y fuerza escala 1 en entero
   assert.equal(out.campos.employees.escala, 1);
 });
 
-test('revisión: descarta observaciones con cifras ajenas, severidad inválida o sin texto', () => {
+test('protección: descarta observaciones con cifras ajenas, severidad inválida o sin texto', () => {
   const raw = { observaciones: [
-    { severidad: 'alta', titulo: 'EBITDA alto', detalle: 'El EBITDA de $400.000 parece alto.', campos: ['ebitda', 'zzz'] },
+    { categoria: 'fraude', severidad: 'alta', titulo: 'EBITDA alto', detalle: 'El EBITDA de $400.000 parece alto.', campos: ['ebitda', 'zzz'] },
     { severidad: 'media', titulo: 'Inventada', detalle: 'Ventas de $9.876.543.', campos: [] },
     { severidad: 'urgente', titulo: 'x', detalle: 'y', campos: [] },
     { severidad: 'baja', titulo: '', detalle: 'sin título', campos: [] }
   ] };
-  const out = validateReview(raw, FACTS);
+  const out = validateProteccion(raw, FACTS);
   assert.equal(out.observaciones.length, 1);
   assert.deepEqual(out.observaciones[0].campos, ['ebitda']);
+  assert.equal(out.observaciones[0].categoria, 'fraude');
+  assert.equal(validateProteccion({ observaciones: [{ categoria: 'rara', severidad: 'baja', titulo: 'a', detalle: 'b' }] }, FACTS).observaciones[0].categoria, 'consistencia');
+});
+
+test('protección: la personalización nunca supera los topes de las reglas', () => {
+  const ok = validateProteccion({ personalizacion: { monto: 380000, tasa: 10.5, justificacion: 'Se reduce a $380.000 por liquidez baja.', condiciones: ['Garantía real'] } }, FACTS);
+  assert.deepEqual([ok.personalizacion.monto, ok.personalizacion.tasa], [380000, 10.5]);
+  const alto = validateProteccion({ personalizacion: { monto: 450000, tasa: 10.5, justificacion: 'Ajuste por perfil.' } }, FACTS);
+  assert.equal(alto.personalizacion.monto, null);                 // por encima del tope: se ignora
+  assert.deepEqual(alto.personalizacion.fuera_de_tope, ['monto']);
+  assert.equal(validateProteccion({ personalizacion: { monto: 450000, tasa: 20, justificacion: 'x' } }, FACTS).personalizacion, null);
+  assert.equal(validateProteccion({ personalizacion: { monto: 100000 } }, FACTS).personalizacion, null);   // sin justificación
+  assert.equal(validateProteccion({ personalizacion: { monto: 100000, justificacion: 'Cifra 777.777 inventada.' } }, FACTS).personalizacion, null);
+  assert.equal(validateProteccion({ personalizacion: null }, FACTS).personalizacion, null);
+});
+
+test('decisión: la recomendación nunca es más permisiva que las reglas', () => {
+  const memo = { resumen: 'Score 640.', fortalezas: [], riesgos: [], condiciones: [] };
+  const mismo = validateDecision({ recomendacion: 'aprobar_con_condiciones', confianza: 'alta', motivos: ['Score 640'], ...memo }, FACTS);
+  assert.equal(mismo.relacion, 'coincide');
+  const permisiva = validateDecision({ recomendacion: 'aprobar', ...memo }, FACTS);
+  assert.deepEqual([permisiva.recomendacion, permisiva.recomendacion_modelo, permisiva.relacion], ['aprobar_con_condiciones', 'aprobar', 'ajustada']);
+  const estricta = validateDecision({ recomendacion: 'rechazar', confianza: 'rara', ...memo }, FACTS);
+  assert.deepEqual([estricta.recomendacion, estricta.relacion, estricta.confianza], ['rechazar', 'mas_estricta', 'media']);
+  assert.throws(() => validateDecision({ recomendacion: 'comprar', ...memo }, FACTS), /válida/);
+  assert.throws(() => validateDecision({ recomendacion: 'aprobar', ...memo }, { ...FACTS, decision_regla: 'x' }), /decision_regla/);
+  assert.throws(() => validateDecision({ recomendacion: 'rechazar', motivos: ['Pérdida de 987.654'], ...memo }, FACTS), /cifras/);
+});
+
+test('perfil: el contexto exige cita literal del documento y cifras presentes en ella', () => {
+  const raw = { comportamiento: 'EBITDA de $400.000 estable.', contexto: [
+    { dato: 'Garantía hipotecaria', evidencia: 'Garantía hipotecaria sobre planta' },
+    { dato: 'Litigio por 50.000', evidencia: 'Garantía hipotecaria sobre planta' },        // cifra que la evidencia no tiene
+    { dato: 'Cliente único', evidencia: 'Un solo cliente concentra el 90%' }                // no está en el documento
+  ] };
+  const md = '| Nota 4 | Garantía hipotecaria sobre planta industrial |';
+  const out = validatePerfil(raw, FACTS, md);
+  assert.deepEqual(out.perfil.contexto.map((c) => c.dato), ['Garantía hipotecaria']);
+  assert.deepEqual(validatePerfil(raw, FACTS, '').perfil.contexto, []);                    // sin documento no hay contexto
+  assert.throws(() => validatePerfil({ comportamiento: 'Ventas de 9.999.999.', contexto: [] }, FACTS, ''), /cifras/);
 });
 
 test('memo: pasa con cifras del expediente y se rechaza con cifras nuevas', () => {
@@ -64,22 +104,33 @@ test('memo: pasa con cifras del expediente y se rechaza con cifras nuevas', () =
   assert.throws(() => validateMemo({ resumen: 'Se sugiere $750.000.', fortalezas: [], riesgos: [], condiciones: [] }, FACTS), /cifras/);
   assert.throws(() => validateMemo({ resumen: '' }, FACTS), /vacío/);
   assert.deepEqual(unknownFigures('1,2 millones y 35 %', 'nada'), []);
+  assert.deepEqual(unknownFigures('Ventas que terminan en 000, el 100% de los periodos', 'nada'), []);   // no son datos
+  assert.deepEqual(unknownFigures('Ventas de 123.456', 'nada'), ['123456']);
 });
 
-test('handleAi decisión: devuelve memo y modelo por defecto', async () => {
+test('handleAi decisión: devuelve recomendación, memo y modelo por defecto', async () => {
   let seen;
-  const env = envWith(async (model, input) => { seen = { model, input }; return { response: '{"resumen":"Score 640.","fortalezas":[],"riesgos":[],"condiciones":[]}' }; });
+  const env = envWith(async (model, input) => { seen = { model, input }; return { response: '{"recomendacion":"aprobar","confianza":"alta","motivos":[],"resumen":"Score 640.","fortalezas":[],"riesgos":[],"condiciones":[]}' }; });
   const res = await handleAi(post({ facts: FACTS }), env, 'decision');
   const data = await res.json();
   assert.equal(res.status, 200);
   assert.equal(data.model, '@cf/zai-org/glm-5.3-flash');
   assert.equal(data.memo.resumen, 'Score 640.');
+  assert.equal(data.recomendacion, 'aprobar_con_condiciones');     // la IA pidió "aprobar": se sube al piso de las reglas
+  assert.equal(data.relacion, 'ajustada');
   assert.equal(seen.input.reasoning_effort, 'low');
+});
+
+test('handleAi perfil: integra comportamiento y contexto verificado', async () => {
+  const env = envWith(async () => ({ response: '{"comportamiento":"EBITDA de $400.000.","contexto":[{"dato":"Garantía hipotecaria","evidencia":"Garantía hipotecaria sobre planta"}]}' }));
+  const md = 'Nota: Garantía hipotecaria sobre planta industrial';
+  const data = await (await handleAi(post({ facts: FACTS, markdown: md }), env, 'perfil')).json();
+  assert.equal(data.perfil.contexto.length, 1);
 });
 
 test('handleAi: reintenta sin reasoning_effort si el modelo lo rechaza', async () => {
   const calls = [];
-  const env = envWith(async (_m, input) => { calls.push(input); if (input.reasoning_effort) throw new Error('bad param'); return { response: '{"observaciones":[]}' }; });
+  const env = envWith(async (_m, input) => { calls.push(input); if (input.reasoning_effort) throw new Error('bad param'); return { response: '{"observaciones":[],"personalizacion":null}' }; });
   const res = await handleAi(post({ facts: FACTS }), env, 'proteccion');
   assert.equal(res.status, 200);
   assert.equal(calls.length, 2);

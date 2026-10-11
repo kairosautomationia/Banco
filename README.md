@@ -10,13 +10,14 @@ Simulador de decisión de crédito por fases. Cada fase se desbloquea al complet
 
 ## IA (Workers AI)
 
-La IA es un **complemento**: el score, el monto, la tasa, los 6 controles y la decisión siguen saliendo de las reglas. Si la IA falla o no está disponible, el simulador funciona igual y lo indica.
+La IA sigue el flujo del Banco 4.0 (integra → predice → personaliza → detecta fraude → recomienda), pero con una regla fija: **la IA propone dentro de topes y el analista decide**. El score, el monto, la tasa, los 6 controles y la decisión de las reglas no cambian. Si la IA falla o no está disponible, el simulador funciona igual y lo indica.
 
 | Fase | Qué hace la IA | Cómo se protege |
 |---|---|---|
-| 02 Integración | Completa los campos que el extractor por reglas no halló en el documento. | Solo se acepta un valor si su evidencia es una cita literal del documento y contiene la cifra. Aparece marcado «IA · verifícalo». |
-| 05 Protección | Añade observaciones de incoherencia que las 6 reglas no cubren. | Salida validada (severidad, campos, longitud); se descartan las que citan cifras que no están en el expediente. |
-| 06 Decisión | Redacta un memo para el analista. | No decide: recibe la decisión ya tomada. Si el memo cita una cifra que no está en el expediente, se descarta. |
+| 01→02 Integración | Al cargar un documento, completa los campos que el extractor por reglas no halló. | Solo acepta un valor si su evidencia es una cita literal del documento y contiene la cifra. Aparece marcado «IA · verifícalo». |
+| 02 Integración | Integra el comportamiento financiero del cliente y el contexto del documento (garantías, litigios, concentración, notas…). | El comportamiento solo usa cifras del expediente; cada dato de contexto lleva una cita literal del documento. Sin documento no hay contexto. |
+| 05 Protección | Señales de **posible fraude** o de consistencia que las 6 reglas no cubren, y una **propuesta de monto y tasa** con condiciones. | El monto propuesto nunca supera el tope de las reglas y la tasa debe estar dentro de un rango; lo que se sale se ignora. Se descartan señales que citan cifras ajenas al expediente. |
+| 06 Decisión | **Recomienda** (aprobar, aprobar con condiciones, reducir monto o rechazar) con confianza, motivos y memo. | Nunca es más permisiva que las reglas: si lo es, se sube al nivel de las reglas y se avisa. Si es más estricta, se marca para revisión. |
 
 - **Modelo por defecto:** `@cf/zai-org/glm-5.3-flash` (ventana de 1M tokens). Requiere el plan Workers Paid o créditos de AI Gateway. Se cambia con `AI_MODEL`, o por fase con `AI_MODEL_INTEGRACION`, `AI_MODEL_PROTECCION` y `AI_MODEL_DECISION`.
 - **Binding:** `"ai": { "binding": "AI" }` en `wrangler.jsonc`. No necesita clave de API. `AI_REASONING_EFFORT` (por defecto `low`; vacío lo desactiva).

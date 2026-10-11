@@ -38,6 +38,7 @@ let processing = false;
 let timer;
 let lastCalc = null;
 let customName = '';
+let docMarkdown = '';  // texto OCR del documento cargado; alimenta el contexto de la IA en la fase 02
 
 const grouped = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
 const money = (v) => `${v < 0 ? '-' : ''}$${grouped.format(Math.abs(Math.round(v)))}`;
@@ -136,7 +137,7 @@ function phaseHtml(i) {
       ['Accionistas con vencidos', d.overdue === 'si' ? 'Sí' : 'No'], ['Deuda actual con el banco', money(d.bbDebt)],
       ['Deuda solicitada', money(d.requested)], ['Deuda total pro forma', money(d.debt + d.requested)]
     ].map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('');
-    return `<div class="split"><div><h4 class="body-title">Ventas anuales por periodo</h4><div class="bar-chart four show-all" role="img" aria-label="Ventas por periodo: ${periods.map(([p, v]) => `${p} ${money(v)}`).join(', ')}">${bars}</div><p class="body-note">Variación del último año: <b>${pct(c.yoy)}</b></p></div><div class="fact-grid">${facts}</div></div>`;
+    return `<div class="split"><div><h4 class="body-title">Ventas anuales por periodo</h4><div class="bar-chart four show-all" role="img" aria-label="Ventas por periodo: ${periods.map(([p, v]) => `${p} ${money(v)}`).join(', ')}">${bars}</div><p class="body-note">Variación del último año: <b>${pct(c.yoy)}</b></p></div><div class="fact-grid">${facts}</div></div>${aiSlot('perfil')}`;
   }
   if (i === 2) {
     return `<div class="i-table">${c.components.map((k) => { const [t, cls] = ratioLabel(k.ratio); return `<div class="i-row"><div class="b-name"><b>${k.name}</b><small>${k.formula}</small></div><div class="b-value">${k.value}</div><div class="i-status ${cls}">${t}</div><small class="i-rule">${k.rule}</small></div>`; }).join('')}</div>`;
@@ -256,6 +257,7 @@ function advance() {
     unlocked += 1;
     viewPhase = unlocked;
     fillPanels();
+    if (unlocked === 1) requestAi('perfil');
     if (unlocked === 4) requestAi('proteccion');
     if (unlocked === 5) requestAi('decision');
     if (isComplete()) { $('lastUpdate').textContent = 'ahora'; showToast('Análisis completo: recomendación lista'); }
@@ -271,6 +273,7 @@ function resetCase() {
   viewPhase = 0;
   lastCalc = null;
   customName = '';
+  docMarkdown = '';
   clearExtractionMarks();
   applyCase('guia');
   $('formErrors').hidden = true;
@@ -323,7 +326,9 @@ function syncViews() {
     const f = lastCalc.flagCount;
     const hits = lastCalc.flags.filter((x) => x.hit).map((x) => x.label).join('; ');
     $('fraudLiveTitle').textContent = f === 0 ? 'Sin señales de inconsistencia en el expediente' : `${f} señal${f > 1 ? 'es' : ''} de inconsistencia para revisar`;
-    $('fraudLiveText').textContent = `#CR-2026-1048 · ${f} / ${lastCalc.flags.length} controles activados${hits ? ` · ${hits}` : ''}`;
+    const prot = lastCalc.ai && lastCalc.ai.proteccion && lastCalc.ai.proteccion.status === 'ok' ? lastCalc.ai.proteccion.data.observaciones : [];
+    const aiFraud = prot.filter((o) => o.categoria === 'fraude').length;
+    $('fraudLiveText').textContent = `#CR-2026-1048 · ${f} / ${lastCalc.flags.length} controles activados${hits ? ` · ${hits}` : ''}${prot.length ? ` · IA: ${prot.length} observación(es)${aiFraud ? `, ${aiFraud} de posible fraude` : ''}` : ''}`;
   } else {
     $('fraudLiveTitle').textContent = 'Expediente en simulación sin analizar';
     $('fraudLiveText').textContent = '#CR-2026-1048 · Las señales se evalúan en la fase de Protección';
@@ -334,7 +339,7 @@ function syncViews() {
 
 /* ---------- Eventos ---------- */
 $('caseSelect').addEventListener('change', (event) => {
-  if (event.target.value !== 'custom') { customName = ''; clearExtractionMarks(); applyCase(event.target.value); }
+  if (event.target.value !== 'custom') { customName = ''; docMarkdown = ''; clearExtractionMarks(); applyCase(event.target.value); }
   invalidateAnalysis(event);
 });
 MONEY_IDS.forEach((id) => $(id).addEventListener('input', () => formatMoneyInput($(id))));
@@ -419,6 +424,7 @@ async function handleFile(file) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
     if (!data.markdown || !data.markdown.trim()) throw new Error('El OCR no devolvió texto legible del documento.');
+    docMarkdown = data.markdown;
     const result = Extractor.extract(data.markdown);
     const ai = await aiFillMissing(data.markdown, result);
     if (!Object.keys(result.values).length && !Object.keys(ai.values).length) throw new Error('No se reconoció ninguno de los 15 campos. Ingresa los datos manualmente o prueba con otro archivo.');
@@ -473,37 +479,71 @@ async function aiFillMissing(markdown, result) {
   return out;
 }
 
-/* Datos que la IA recibe en las fases 05 y 06: todo ya formateado como lo ve el analista */
-function aiFacts(c) {
+/* Datos que la IA recibe: todo ya formateado como lo ve el analista. La fase 02 solo ve las entradas (aún no hay score). */
+const DECISION_BY_BAND = { low: 'aprobar', mod: 'aprobar_con_condiciones', high: 'reducir_monto' };
+const DECISION_LABELS = { aprobar: 'Aprobar y continuar el análisis', aprobar_con_condiciones: 'Aprobar con condiciones', reducir_monto: 'Reducir el monto o exigir garantías', rechazar: 'Rechazar' };
+
+function aiFacts(c, kind) {
   const d = c.d;
   const inputs = {};
   FIELD_KEYS.forEach((id) => { inputs[id] = { etiqueta: FIELD_LABELS[id] || '¿Accionista ha reportado vencidos?', valor: id === 'overdue' ? (d[id] === 'si' ? 'Sí' : 'No') : INT_IDS.has(id) ? String(d[id]) : money(d[id]) }; });
-  return {
-    decision: c.band.title, banda: c.band.label, score: c.score,
-    monto_solicitado: money(d.requested), monto_sugerido: money(c.suggested), tasa_referencial: `${c.rate.toFixed(1)}% anual`,
+  if (kind === 'perfil') return { entradas: inputs };
+  const rate = Number(c.rate.toFixed(1));
+  const facts = {
+    decision: c.band.title, decision_regla: DECISION_BY_BAND[c.band.css], banda: c.band.label, score: c.score,
+    monto_solicitado: money(d.requested), monto_sugerido: money(c.suggested), tasa_referencial: `${rate.toFixed(1)}% anual`,
     prob_incumplimiento_ref: `${(c.pd * 100).toFixed(1)}%`,
+    limites: { monto_max: c.suggested, tasa_min: Math.max(0, Number((rate - 0.5).toFixed(1))), tasa_max: Number((rate + 2).toFixed(1)) },
     indicadores: c.components.map((k) => ({ nombre: k.name, valor: k.value, estado: ratioLabel(k.ratio)[0], puntos: `${Math.round(k.points)} / ${k.weight}` })),
     senales: c.flags.map((f) => ({ control: f.label, activada: f.hit, detalle: f.detail })),
     entradas: inputs
   };
+  const prot = c.ai && c.ai.proteccion && c.ai.proteccion.status === 'ok' ? c.ai.proteccion.data : null;
+  if (kind === 'decision' && prot) facts.observaciones_ia = prot.observaciones.map((o) => ({ categoria: o.categoria, severidad: o.severidad, titulo: o.titulo }));
+  return facts;
 }
+
+const AI_PANEL = { perfil: 1, proteccion: 4, decision: 5 };
+const AI_TITLE = { perfil: 'Perfil integrado por IA', proteccion: 'Señales de fraude y personalización con IA', decision: 'Recomendación de la IA' };
 
 function aiSlot(kind) {
   const s = lastCalc && lastCalc.ai && lastCalc.ai[kind];
   if (!s) return '';
-  const title = kind === 'proteccion' ? 'Revisión adicional con IA' : 'Memo para el analista';
-  if (s.status === 'loading') return `<div class="ai-box is-loading" role="status"><div class="ai-head"><b>${title}</b></div><p>La IA está preparando esta sección. Lo de arriba ya es el resultado válido.</p></div>`;
+  const title = AI_TITLE[kind];
+  if (s.status === 'loading') return `<div class="ai-box is-loading" role="status"><div class="ai-head"><b>${title}</b></div><p>La IA está trabajando en esta sección. Lo demás ya es el resultado válido de las reglas.</p></div>`;
   if (s.status === 'error') return `<div class="ai-box is-muted"><div class="ai-head"><b>${title}</b></div><p>${s.unavailable ? 'La IA no está disponible en este servidor' : `No disponible: ${esc(s.error)}`}. Se muestran solo las reglas.</p></div>`;
+  const c = lastCalc;
   const tag = `<em class="ai-tag">IA · ${esc(s.data.model)}</em>`;
-  const list = (items) => `<ul>${items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
+  const ul = (items) => `<ul>${items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
+  const col = (name, items) => (items.length ? `<div><h5>${name}</h5>${ul(items)}</div>` : '');
+
+  if (kind === 'perfil') {
+    const p = s.data.perfil;
+    const ctx = p.contexto.length
+      ? `<h5>Contexto encontrado en el documento</h5><ul class="ai-ctx">${p.contexto.map((x) => `<li><b>${esc(x.dato)}</b><small>«${esc(x.evidencia)}»</small></li>`).join('')}</ul>`
+      : `<small class="ai-note">${docMarkdown ? 'No se halló contexto adicional relevante en el documento.' : 'Carga un documento en la fase 01 para integrar también el contexto (sector, garantías, litigios, notas a los estados financieros…).'}</small>`;
+    return `<div class="ai-box"><div class="ai-head"><b>${title}</b>${tag}</div><p>${esc(p.comportamiento)}</p>${ctx}<small class="ai-note">Resume los datos de arriba y cita el documento; no cambia ningún valor.</small></div>`;
+  }
+
   if (kind === 'proteccion') {
     const obs = s.data.observaciones;
-    const body = obs.length ? `<ul class="ai-obs">${obs.map((o) => `<li class="sev-${o.severidad}"><span class="check-tag">${o.severidad}</span><div><b>${esc(o.titulo)}</b><small>${esc(o.detalle)}${o.campos.length ? ` · ${o.campos.map((id) => esc(FIELD_LABELS[id] || id)).join(', ')}` : ''}</small></div></li>`).join('')}</ul>` : '<p>Sin observaciones adicionales a las reglas.</p>';
-    return `<div class="ai-box"><div class="ai-head"><b>${title}</b>${tag}</div>${body}<small class="ai-note">Complementa las reglas y no cambia el score, el monto ni la tasa. Verifica cada observación contra el expediente.</small></div>`;
+    const body = obs.length
+      ? `<ul class="ai-obs">${obs.map((o) => `<li class="sev-${o.severidad}"><span class="check-tag">${o.categoria === 'fraude' ? 'Posible fraude' : 'Consistencia'} · ${o.severidad}</span><div><b>${esc(o.titulo)}</b><small>${esc(o.detalle)}${o.campos.length ? ` · ${o.campos.map((id) => esc(FIELD_LABELS[id] || id)).join(', ')}` : ''}</small></div></li>`).join('')}</ul>`
+      : '<p>Sin señales adicionales a las de las reglas.</p>';
+    const p = s.data.personalizacion;
+    const pers = p
+      ? `<h5>Personalización propuesta</h5><div class="ai-kpis"><div><span>Monto</span><b>${p.monto === null || p.monto === c.suggested ? 'Sin cambio' : money(p.monto)}</b><small>Reglas: ${money(c.suggested)} (tope)</small></div><div><span>Tasa</span><b>${p.tasa === null || p.tasa === Number(c.rate.toFixed(1)) ? 'Sin cambio' : `${p.tasa.toFixed(1)}% anual`}</b><small>Reglas: ${c.rate.toFixed(1)}% anual</small></div></div><p>${esc(p.justificacion)}</p>${p.condiciones.length ? ul(p.condiciones) : ''}${p.fuera_de_tope.length ? `<small class="ai-note">La IA propuso ${p.fuera_de_tope.join(' y ')} fuera de los topes de las reglas; se ignoró.</small>` : ''}`
+      : '<small class="ai-note">La IA no propone ajustar el monto ni la tasa de las reglas.</small>';
+    return `<div class="ai-box"><div class="ai-head"><b>${title}</b>${tag}</div>${body}${pers}<small class="ai-note">Es una propuesta: el monto y la tasa vigentes son los de las reglas y la IA nunca supera su tope de monto. Verifica cada señal contra el expediente.</small></div>`;
   }
-  const m = s.data.memo;
-  const col = (name, items) => (items.length ? `<div><h5>${name}</h5>${list(items)}</div>` : '');
-  return `<div class="ai-box"><div class="ai-head"><b>${title}</b>${tag}</div><p>${esc(m.resumen)}</p><div class="ai-cols">${col('Fortalezas', m.fortalezas)}${col('Riesgos', m.riesgos)}${col('Condiciones sugeridas', m.condiciones)}</div><small class="ai-note">La IA solo redacta: score, monto, tasa y decisión salen de las reglas. Revisa el texto antes de usarlo.</small></div>`;
+
+  const d = s.data;
+  const m = d.memo;
+  const rel = { coincide: 'Coincide con las reglas.', mas_estricta: 'Más estricta que las reglas: revísala antes de decidir.', ajustada: `La IA sugirió «${DECISION_LABELS[d.recomendacion_modelo]}», más permisivo que las reglas; se subió al nivel de las reglas.` }[d.relacion];
+  return `<div class="ai-box"><div class="ai-head"><b>${title}</b>${tag}</div>
+    <div class="ai-reco rel-${d.relacion}"><small>RECOMENDACIÓN</small><b>${DECISION_LABELS[d.recomendacion]}</b><span>Confianza ${d.confianza} · ${rel}</span></div>
+    ${d.motivos.length ? ul(d.motivos) : ''}<h5>Memo para el analista</h5><p>${esc(m.resumen)}</p><div class="ai-cols">${col('Fortalezas', m.fortalezas)}${col('Riesgos', m.riesgos)}${col('Condiciones sugeridas', m.condiciones)}</div>
+    <small class="ai-note">La IA recomienda; la decisión es del analista. Su recomendación nunca es más permisiva que la de las reglas, y el score, monto y tasa salen de las reglas.</small></div>`;
 }
 
 async function requestAi(kind) {
@@ -514,15 +554,16 @@ async function requestAi(kind) {
   calc.ai[kind] = { status: 'loading' };
   refreshAi(kind, calc);
   try {
-    calc.ai[kind] = { status: 'ok', data: await callAi(kind, { facts: aiFacts(calc) }) };
+    calc.ai[kind] = { status: 'ok', data: await callAi(kind, { facts: aiFacts(calc, kind), ...(kind === 'perfil' && docMarkdown ? { markdown: docMarkdown } : {}) }) };
   } catch (err) {
     calc.ai[kind] = { status: 'error', error: err.message, unavailable: err.unavailable };
   }
   refreshAi(kind, calc);
+  if (kind === 'proteccion') syncViews();
 }
 
 function refreshAi(kind, calc) {
-  const i = kind === 'proteccion' ? 4 : 5;
+  const i = AI_PANEL[kind];
   if (calc === lastCalc && i <= unlocked) $(`phaseBody${i}`).innerHTML = phaseHtml(i);
 }
 
