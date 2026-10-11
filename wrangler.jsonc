@@ -10,5 +10,7 @@
     // El Worker corre primero para aplicar la contraseña (ACCESS_PASSWORD) a todo el sitio.
     "run_worker_first": true
   },
+  // Workers AI: integración (lectura del documento), protección (incoherencias) y decisión (memo).
+  "ai": { "binding": "AI" },
   "observability": { "enabled": true }
 }
