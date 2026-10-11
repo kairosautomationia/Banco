@@ -114,7 +114,7 @@ test('handleAi decisión: devuelve recomendación, memo y modelo por defecto', a
   const res = await handleAi(post({ facts: FACTS }), env, 'decision');
   const data = await res.json();
   assert.equal(res.status, 200);
-  assert.equal(data.model, '@cf/zai-org/glm-5.3-flash');
+  assert.equal(data.model, '@cf/zai-org/glm-4.7-flash');
   assert.equal(data.memo.resumen, 'Score 640.');
   assert.equal(data.recomendacion, 'aprobar_con_condiciones');     // la IA pidió "aprobar": se sube al piso de las reglas
   assert.equal(data.relacion, 'ajustada');

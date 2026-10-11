@@ -8,10 +8,12 @@
 // Variables: AI_MODEL, AI_MODEL_INTEGRACION | AI_MODEL_PROTECCION | AI_MODEL_DECISION, AI_REASONING_EFFORT,
 // y para openai: AI_BASE_URL, AI_API_KEY.
 
-export const DEFAULT_MODEL = '@cf/zai-org/glm-5.3-flash';
+// Gratuito en el plan Workers Free (10.000 Neurons/día), 131.072 tokens de contexto, multilingüe.
+// Para un modelo más potente (p. ej. @cf/zai-org/glm-5.3-flash, requiere Workers Paid) define AI_MODEL en wrangler.jsonc > vars.
+export const DEFAULT_MODEL = '@cf/zai-org/glm-4.7-flash';
 const TIMEOUT_MS = 60000;
 const MAX_BODY = 2 * 1024 * 1024;
-const MAX_DOC = 400000;
+const MAX_DOC = 200000;   // caracteres; ~80k tokens, cabe en los 131k de contexto del modelo por defecto
 const MAX_FACTS = 30000;
 
 export const FIELD_KEYS = ['sales24', 'sales23', 'sales22', 'sales21', 'debt', 'ebitda', 'finExp', 'cash', 'employees', 'netIncome', 'equity', 'institutions', 'bbDebt', 'requested', 'overdue'];
