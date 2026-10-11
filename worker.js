@@ -3,6 +3,7 @@
 // Secretos/variables: LLAMA_CLOUD_API_KEY (para el OCR) y ACCESS_PASSWORD (opcional, protege sitio y OCR).
 // La IA (/api/ai/*) vive en ai.mjs y usa el binding "AI" de Workers AI; ver el README para cambiar de proveedor.
 import { handleAi } from './ai.mjs';
+import { MAX_WAIT_MS, pollDelay } from './ocr.mjs';
 
 const BASE = 'https://api.cloud.llamaindex.ai/api/parsing';
 const MAX_BYTES = 20 * 1024 * 1024;
@@ -89,19 +90,19 @@ async function extract(request, env) {
   const job = await llama(env, '/upload', { method: 'POST', body: form });
 
   const started = Date.now();
-  for (;;) {
-    await sleep(2000);
+  for (let attempt = 0; ; attempt += 1) {
+    await sleep(pollDelay(attempt));
     const info = await llama(env, `/job/${job.id}`);
     const status = String(info.status || '').toUpperCase();
     if (status === 'SUCCESS') break;
     if (status === 'ERROR' || status === 'CANCELED') throw new HttpError(`El OCR terminó con estado ${status}`, 502);
-    if (Date.now() - started > 150000) throw new HttpError('El OCR tardó demasiado; intenta de nuevo', 504);
+    if (Date.now() - started > MAX_WAIT_MS) throw new HttpError('El OCR tardó demasiado; intenta de nuevo', 504);
   }
   const result = await llama(env, `/job/${job.id}/result/markdown`);
   return json(200, { markdown: result.markdown || '', filename: baseName });
 }
 
-export default {
+const handler = {
   async fetch(request, env) {
     try {
       if (!authorized(request, env)) {
@@ -122,5 +123,23 @@ export default {
       console.error(err.message);
       return json(err.status || 500, { error: err.message });
     }
+  }
+};
+
+// Cabeceras de seguridad en todas las respuestas (página, OCR, IA y errores): sin esto la página podía incrustarse en un iframe ajeno.
+const SECURITY_HEADERS = {
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'content-security-policy': "frame-ancestors 'none'",
+  'referrer-policy': 'no-referrer',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=()'
+};
+
+export default {
+  async fetch(request, env) {
+    const res = await handler.fetch(request, env);
+    const out = new Response(res.body, res);
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) out.headers.set(name, value);
+    return out;
   }
 };

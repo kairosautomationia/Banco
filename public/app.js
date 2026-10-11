@@ -62,7 +62,7 @@ function validate(d) {
   INPUT_IDS.forEach((id) => { if (!isFinite(d[id])) errors.push(`${FIELD_LABELS[id]}: falta el dato`); });
   if (errors.length) return errors;
   ['sales24', 'sales23', 'sales22', 'sales21'].forEach((id) => { if (d[id] <= 0) errors.push(`${FIELD_LABELS[id]} debe ser mayor que 0`); });
-  ['debt', 'ebitda', 'finExp', 'cash', 'employees', 'equity', 'bbDebt', 'requested'].forEach((id) => { if (d[id] < 0) errors.push(`${FIELD_LABELS[id]} no puede ser negativo`); });
+  ['debt', 'finExp', 'cash', 'employees', 'bbDebt', 'requested'].forEach((id) => { if (d[id] < 0) errors.push(`${FIELD_LABELS[id]} no puede ser negativo`); });
   if (d.requested <= 0) errors.push('La deuda solicitada debe ser mayor que 0');
   if (!Number.isInteger(d.institutions) || d.institutions < 0) errors.push('Instituciones financieras debe ser un entero ≥ 0');
   if (!Number.isInteger(d.employees)) errors.push('Número de empleados debe ser un entero');
@@ -181,7 +181,7 @@ function formatMoneyInput(input) {
   const before = input.value.replace(/[.,]\d{1,2}$/, '');
   const caret = input.selectionStart === null ? before.length : input.selectionStart;
   const digitsLeft = before.slice(0, caret).replace(/[^\d]/g, '').length;
-  const negative = before.trim().startsWith('-') && input.id === 'netIncome';
+  const negative = before.trim().startsWith('-') && ['netIncome', 'ebitda', 'equity'].includes(input.id);
   const digits = before.replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '');
   if (!digits) { input.value = negative ? '-' : ''; return; }
   const formatted = (negative ? '-' : '') + grouped.format(Number(digits));
@@ -200,7 +200,10 @@ function renderHeader() {
 }
 
 /* Resumen de «Datos extraídos»: estado y cifras clave visibles aunque la sección esté plegada */
+const setDataOpen = (open) => { const d = $('dataDetails'); if (d) d.open = open; };
+
 function renderDataSummary() {
+  if (!$('dataStatus') || !$('dataKeys')) return;
   const missing = FIELD_KEYS.filter((id) => (id === 'overdue' ? $(id).closest('label').classList.contains('field-missing') : !isFinite(parseField(id))));
   const status = $('dataStatus');
   status.className = `ds-status ${missing.length ? 'warn' : 'ok'}`;
@@ -254,7 +257,7 @@ function advance() {
     const errors = validate(readInputs());
     if (errors.length) {
       $('formErrors').hidden = false;
-      $('dataDetails').open = true;
+      setDataOpen(true);
       $('formErrors').innerHTML = `<b>Revisa los datos antes de continuar:</b><ul>${errors.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`;
       showToast('Faltan datos o hay valores inválidos');
       return;
@@ -287,7 +290,7 @@ function resetCase() {
   customName = '';
   docMarkdown = '';
   clearExtractionMarks();
-  $('dataDetails').open = false;
+  setDataOpen(false);
   applyCase('guia');
   $('formErrors').hidden = true;
   fillPanels();
@@ -420,7 +423,7 @@ function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
   $('extractReport').hidden = false;
   $('extractReport').innerHTML = `<div class="extract-head"><b>${found.length} de ${FIELD_KEYS.length} campos extraídos de ${esc(filename)}${Object.keys(ai.values).length ? ` (${Object.keys(ai.values).length} completados con IA)` : ''}</b>${warnings.map((w) => `<p class="extract-warning">${esc(w)}</p>`).join('')}</div><details class="extract-more"><summary>Ver detalle y evidencia por campo</summary><ul>${rows}${miss}</ul></details>`;
   $('caseSelect').value = 'custom';
-  $('dataDetails').open = true;  // tras cargar un documento hay que revisar lo extraído
+  setDataOpen(true);  // tras cargar un documento hay que revisar lo extraído
   invalidateAnalysis({ target: { id: 'fileInput' } });
   setUploadStatus(missing.length || warnings.length ? 'warn' : 'ok', missing.length ? `Extracción parcial: faltan ${missing.length} campo(s). Complétalos abajo antes de validar.` : Object.keys(ai.values).length ? 'Extracción completa. Los campos marcados con IA requieren tu verificación contra el documento.' : warnings.length ? 'Extracción completa, con una advertencia. Revisa los valores.' : 'Extracción completa. Revisa los valores y valida los datos.');
 }
@@ -463,9 +466,16 @@ dropzone.addEventListener('drop', (e) => handleFile(e.dataTransfer.files[0]));
 /* ---------- IA: integración, protección y decisión (vía /api/ai/*) ----------
    Siempre es un complemento: si falla o no está disponible, el simulador sigue con sus reglas. */
 const INT_IDS = new Set(['employees', 'institutions']);
+const AI_MAX_DOC = 200000;   // caracteres del documento que se envían a la IA (igual que el servidor)
+const AI_TIMEOUT_MS = 90000;
 
 async function callAi(task, payload) {
-  const res = await fetch(`/api/ai/${task}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+  let res;
+  try {
+    res = await fetch(`/api/ai/${task}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(AI_TIMEOUT_MS) : undefined });
+  } catch (err) {
+    throw new Error(err && (err.name === 'TimeoutError' || err.name === 'AbortError') ? 'La IA tardó demasiado en responder' : 'No se pudo contactar a la IA');
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw Object.assign(new Error(data.error || `IA no disponible (${res.status})`), { unavailable: res.status === 404 });
   return data;
@@ -478,7 +488,7 @@ async function aiFillMissing(markdown, result) {
   if (!missing.length) return out;
   setUploadStatus('busy', `OCR listo. Buscando con IA los ${missing.length} campo(s) que faltan…`);
   try {
-    const data = await callAi('integracion', { markdown, missing });
+    const data = await callAi('integracion', { markdown: markdown.slice(0, AI_MAX_DOC), missing });
     Object.entries(data.campos || {}).forEach(([id, c]) => {
       if (!missing.includes(id)) return;
       if (id === 'overdue') { out.values[id] = c.valor; out.evidence[id] = c.evidencia; return; }
@@ -568,7 +578,7 @@ async function requestAi(kind) {
   calc.ai[kind] = { status: 'loading' };
   refreshAi(kind, calc);
   try {
-    calc.ai[kind] = { status: 'ok', data: await callAi(kind, { facts: aiFacts(calc, kind), ...(kind === 'perfil' && docMarkdown ? { markdown: docMarkdown } : {}) }) };
+    calc.ai[kind] = { status: 'ok', data: await callAi(kind, { facts: aiFacts(calc, kind), ...(kind === 'perfil' && docMarkdown ? { markdown: docMarkdown.slice(0, AI_MAX_DOC) } : {}) }) };
   } catch (err) {
     calc.ai[kind] = { status: 'error', error: err.message, unavailable: err.unavailable };
   }

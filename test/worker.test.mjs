@@ -59,3 +59,28 @@ test('si la IA falla, el Worker responde un error JSON claro (no 500 opaco)', as
   assert.equal(r.status, 502);
   assert.match((await r.json()).error, /3040/);
 });
+
+test('todas las respuestas llevan cabeceras de seguridad (página, IA, OCR, 401 y 404)', async () => {
+  const env = { ASSETS, AI: aiOk };
+  const protegido = { ...env, ACCESS_PASSWORD: 'x' };
+  const respuestas = [
+    await call('/', env), await call('/api/ai/proteccion', env, { method: 'POST', body: JSON.stringify({ facts: FACTS }) }),
+    await call('/api/extract', env), await call('/api/ai/nada', env, { method: 'POST', body: '{}' }), await call('/', protegido)
+  ];
+  for (const r of respuestas) {
+    assert.equal(r.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(r.headers.get('x-frame-options'), 'DENY');
+    assert.match(r.headers.get('content-security-policy'), /frame-ancestors 'none'/);
+    assert.equal(r.headers.get('referrer-policy'), 'no-referrer');
+  }
+  assert.equal(respuestas[4].status, 401);
+});
+
+test('las cabeceras de seguridad no alteran el contenido ni el estado de los assets', async () => {
+  const env = { ASSETS: { fetch: async () => new Response('hola', { status: 200, headers: { 'content-type': 'text/html', etag: 'abc' } }) } };
+  const r = await call('/', env);
+  assert.equal(r.status, 200);
+  assert.equal(await r.text(), 'hola');
+  assert.equal(r.headers.get('etag'), 'abc');
+  assert.equal(r.headers.get('content-type'), 'text/html');
+});

@@ -27,9 +27,11 @@ const FIELD_HELP = {
 };
 
 export class AiError extends Error {
-  constructor(message, status = 502) {
+  // retriable: la salida del modelo no sirvió (vacía, sin JSON, cifras ajenas…); un segundo intento estricto puede arreglarla.
+  constructor(message, status = 502, retriable = false) {
     super(message);
     this.status = status;
+    this.retriable = retriable;
   }
 }
 
@@ -54,7 +56,7 @@ export function textOf(result) {
   if (result && typeof result.response === 'string') return result.response;
   if (result && result.response && typeof result.response === 'object') return JSON.stringify(result.response);
   if (result && result.result && typeof result.result.response === 'string') return result.result.response;
-  throw new AiError('La IA devolvió una respuesta sin texto', 502);
+  throw new AiError('La IA devolvió una respuesta sin texto', 502, true);
 }
 
 function workersAiProvider(env) {
@@ -63,10 +65,13 @@ function workersAiProvider(env) {
   return {
     name: 'workers-ai',
     modelFor: (phase) => pickModel(env, phase, DEFAULT_MODEL),
-    async complete({ model, system, user, maxTokens, temperature }) {
-      const base = { messages: [{ role: 'system', content: system }, { role: 'user', content: user }], max_tokens: maxTokens, temperature };
-      // Si el modelo no acepta reasoning_effort se reintenta una vez sin él.
-      const attempts = effort ? [{ ...base, reasoning_effort: effort }, base] : [base];
+    async complete({ model, system, user, maxTokens, temperature, strict }) {
+      const minimal = { messages: [{ role: 'system', content: system }, { role: 'user', content: user }], max_tokens: maxTokens };
+      // Normal: razonamiento ligero. Si el modelo rechaza un parámetro, se reintenta con menos (primero sin reasoning_effort, al final solo lo mínimo).
+      // Estricto (segundo intento tras una salida inservible): sin razonamiento, para que los tokens alcancen para el JSON.
+      const attempts = strict
+        ? [{ ...minimal, reasoning_effort: 'none' }, minimal]
+        : effort ? [{ ...minimal, temperature, reasoning_effort: effort }, { ...minimal, temperature }, minimal] : [{ ...minimal, temperature }, minimal];
       let last;
       for (const input of attempts) {
         try {
@@ -86,11 +91,11 @@ function openAiProvider(env) {
   return {
     name: 'openai-compatible',
     modelFor: (phase) => pickModel(env, phase, env.AI_MODEL),
-    async complete({ model, system, user, maxTokens, temperature }) {
+    async complete({ model, system, user, maxTokens, temperature, strict }) {
       const res = await fetch(`${env.AI_BASE_URL.replace(/\/+$/, '')}/chat/completions`, {
         method: 'POST',
         headers: { authorization: `Bearer ${env.AI_API_KEY}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ model, messages: [{ role: 'system', content: system }, { role: 'user', content: user }], max_tokens: maxTokens, temperature }),
+        body: JSON.stringify({ model, messages: [{ role: 'system', content: system }, { role: 'user', content: user }], max_tokens: maxTokens, temperature: strict ? 0 : temperature }),
         signal: AbortSignal.timeout(TIMEOUT_MS)
       }).catch((err) => { throw new AiError(`No se pudo contactar al proveedor de IA: ${err.message}`, 502); });
       if (!res.ok) throw new AiError(`El proveedor de IA respondió ${res.status}`, 502);
@@ -111,11 +116,11 @@ export function parseJson(text) {
   const cleaned = String(text).replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/```(?:json)?/gi, '');
   const start = cleaned.indexOf('{');
   const end = cleaned.lastIndexOf('}');
-  if (start === -1 || end <= start) throw new AiError('La IA no devolvió JSON', 502);
+  if (start === -1 || end <= start) throw new AiError('La IA no devolvió JSON', 502, true);
   try {
     return JSON.parse(cleaned.slice(start, end + 1));
   } catch {
-    throw new AiError('La IA devolvió JSON inválido', 502);
+    throw new AiError('La IA devolvió JSON inválido', 502, true);
   }
 }
 
@@ -168,9 +173,9 @@ const list = (v, n, max) => (Array.isArray(v) ? v : []).map((x) => clean(x, max)
 // Fase 02: comportamiento integrado (solo cifras del expediente) + contexto del documento (con evidencia literal).
 export function validatePerfil(raw, facts, markdown) {
   const comportamiento = clean(raw && raw.comportamiento, 800);
-  if (!comportamiento) throw new AiError('El perfil vino vacío', 502);
+  if (!comportamiento) throw new AiError('El perfil vino vacío', 502, true);
   const unknown = unknownFigures(comportamiento, JSON.stringify(facts));
-  if (unknown.length) throw new AiError(`El perfil citó cifras que no están en el expediente (${unknown.slice(0, 3).join(', ')}); se descartó`, 502);
+  if (unknown.length) throw new AiError(`El perfil citó cifras que no están en el expediente (${unknown.slice(0, 3).join(', ')}); se descartó`, 502, true);
   const doc = markdown ? squash(markdown) : '';
   const contexto = [];
   for (const c of raw && Array.isArray(raw.contexto) ? raw.contexto : []) {
@@ -230,7 +235,7 @@ export function validateDecision(raw, facts) {
   const base = DECISIONS.indexOf(facts.decision_regla);
   const modelo = String((raw && raw.recomendacion) || '').toLowerCase();
   if (base === -1) throw new AiError('Falta decision_regla en el expediente', 400);
-  if (!DECISIONS.includes(modelo)) throw new AiError('La recomendación de la IA no es válida', 502);
+  if (!DECISIONS.includes(modelo)) throw new AiError('La recomendación de la IA no es válida', 502, true);
   const idx = DECISIONS.indexOf(modelo);
   const ajustada = idx < base;                       // más permisiva que las reglas: se sube al piso
   const recomendacion = ajustada ? DECISIONS[base] : modelo;
@@ -238,16 +243,16 @@ export function validateDecision(raw, facts) {
   const confianza = CONFIDENCE.has(String((raw && raw.confianza) || '').toLowerCase()) ? String(raw.confianza).toLowerCase() : 'media';
   const memo = validateMemo(raw, facts);
   const motivos = list(raw && raw.motivos, 3, 300);
-  if (unknownFigures(motivos.join(' '), JSON.stringify(facts)).length) throw new AiError('La recomendación citó cifras que no están en el expediente; se descartó', 502);
+  if (unknownFigures(motivos.join(' '), JSON.stringify(facts)).length) throw new AiError('La recomendación citó cifras que no están en el expediente; se descartó', 502, true);
   return { recomendacion, recomendacion_modelo: modelo, relacion, confianza, motivos, memo };
 }
 
 export function validateMemo(raw, facts) {
   const memo = { resumen: clean(raw && raw.resumen, 700), fortalezas: list(raw && raw.fortalezas, 3, 300), riesgos: list(raw && raw.riesgos, 3, 300), condiciones: list(raw && raw.condiciones, 3, 300) };
-  if (!memo.resumen) throw new AiError('El memo vino vacío', 502);
+  if (!memo.resumen) throw new AiError('El memo vino vacío', 502, true);
   const text = [memo.resumen, ...memo.fortalezas, ...memo.riesgos, ...memo.condiciones].join(' ');
   const unknown = unknownFigures(text, JSON.stringify(facts));
-  if (unknown.length) throw new AiError(`El memo citó cifras que no están en el expediente (${unknown.slice(0, 3).join(', ')}); se descartó`, 502);
+  if (unknown.length) throw new AiError(`El memo citó cifras que no están en el expediente (${unknown.slice(0, 3).join(', ')}); se descartó`, 502, true);
   return memo;
 }
 
@@ -262,6 +267,8 @@ function requireFacts(body) {
   if (JSON.stringify(facts).length > MAX_FACTS) throw new AiError('El expediente es demasiado grande', 413);
   return facts;
 }
+
+const STRICT_SUFFIX = '\n\nIMPORTANTE: responde ÚNICAMENTE con el objeto JSON pedido, sin texto antes ni después, sin explicaciones y de forma breve.';
 
 const TASKS = {
   integracion: {
@@ -341,6 +348,7 @@ const TASKS = {
 };
 
 async function readJson(request) {
+  if (Number(request.headers.get('content-length') || 0) > MAX_BODY * 4) throw new AiError('La solicitud es demasiado grande', 413);   // ×4: bytes UTF-8 frente a caracteres
   const text = await request.text();
   if (text.length > MAX_BODY) throw new AiError('La solicitud es demasiado grande', 413);
   try {
@@ -358,8 +366,15 @@ export async function handleAi(request, env, phase) {
     const input = task.prepare(await readJson(request));
     const provider = createProvider(env);
     const model = provider.modelFor(phase);
-    const text = await provider.complete({ model, system: SYSTEM, user: input.user, maxTokens: 4000, temperature: task.temperature });
-    return reply(200, { ok: true, phase, provider: provider.name, model, ...task.finish(parseJson(text), input) });
+    for (const strict of [false, true]) {
+      try {
+        const text = await provider.complete({ model, system: SYSTEM, user: strict ? input.user + STRICT_SUFFIX : input.user, maxTokens: 4000, temperature: task.temperature, strict });
+        return reply(200, { ok: true, phase, provider: provider.name, model, retried: strict, ...task.finish(parseJson(text), input) });
+      } catch (err) {
+        if (strict || !(err instanceof AiError) || !err.retriable) throw err;
+        console.error(`IA ${phase}: salida inservible (${err.message}); reintento estricto`);
+      }
+    }
   } catch (err) {
     console.error(`IA ${phase}: ${err.message}`);
     if (err instanceof AiError) return reply(err.status, { error: err.message });

@@ -21,7 +21,23 @@
   }
 
   const NUM_RE = /(?<![A-Za-z\d\-])\(?-?\s?\$?\s?\d[\d.,]*\)?/g;
-  const numbersIn = (text) => (text.match(NUM_RE) || []).map(parseNumber).filter((n) => isFinite(n));
+  // Un número seguido de % (margen, variación) no es una cifra del estado financiero.
+  function numberTokens(text) {
+    const pct = /\s*%/y;
+    const out = [];
+    for (const m of text.matchAll(NUM_RE)) {
+      pct.lastIndex = m.index + m[0].length;
+      if (pct.test(text)) continue;
+      const value = parseNumber(m[0]);
+      if (isFinite(value)) out.push({ raw: m[0].replace(/[()$\s-]/g, ''), value });
+    }
+    return out;
+  }
+  const numbersIn = (text) => numberTokens(text).map((t) => t.value);
+  // «Ventas | 5 | 6.337.000 | …»: un entero de 1–2 dígitos antes de cifras grandes es el número de nota, no un dato.
+  const dropNoteColumn = (tokens) => (tokens.length > 1 && /^\d{1,2}$/.test(tokens[0].raw) && tokens.slice(1).some((x) => Math.abs(x.value) >= 1000) ? tokens.slice(1) : tokens);
+  // Razones y márgenes («Margen EBITDA», «Utilidad neta / ventas», «Deuda / EBITDA») no son el dato que buscamos.
+  const RATIO = /\b(margen|ratio|cobertura|apalancamiento|veces|multiplo|rentabilidad|rotacion|indice)\b|\//;
 
   function splitLine(raw) {
     const line = raw.replace(/\*\*|__|`/g, '').trim();
@@ -49,14 +65,14 @@
   }
 
   const FIELDS = [
-    { id: 'sales', multi: 4, patterns: [/^(total )?ventas( netas| anuales| totales)?\b/, /^ingresos (por )?(ventas|operacionales|ordinarios|de actividades)/, /^ventas\b/, /^ingresos\b/] },
+    { id: 'sales', multi: 4, keepRatios: true, patterns: [/^(total )?ventas( netas| anuales| totales)?\b/, /^ingresos (por )?(ventas|operacionales|ordinarios|de actividades)/, /^ventas\b/, /^ingresos\b/] },
     { id: 'ebitda', patterns: [/\bebitda\b/] },
-    { id: 'finExp', patterns: [/gastos? financieros?/, /intereses (pagados|por pagar|financieros|generados)/, /costos? financieros?/] },
+    { id: 'finExp', abs: true, patterns: [/gastos? financieros?/, /intereses (pagados|por pagar|financieros|generados)/, /costos? financieros?/] },
     { id: 'cash', patterns: [/efectivo.*(certificados|equivalentes)/, /^efectivo\b/, /caja y bancos/, /^disponible/] },
-    { id: 'employees', int: true, patterns: [/n(u|ú)mero de empleados/, /^empleados/, /^personal\b/, /^n(o|°|º)\.? de empleados/] },
+    { id: 'employees', int: true, keepRatios: true, patterns: [/n(u|ú)mero de empleados/, /^empleados/, /^personal\b/, /^n(o|°|º)\.? de empleados/] },
     { id: 'netIncome', patterns: [/utilidad neta/, /resultado neto/, /ganancia neta/, /utilidad del ejercicio/, /perdida neta/, /resultado del (periodo|ejercicio)/] },
     { id: 'equity', patterns: [/^(total )?patrimonio( neto| contable)?\b/], exclude: /pasivo/ },
-    { id: 'institutions', int: true, patterns: [/instituciones financieras/, /n(u|ú)mero de (bancos|instituciones)/, /cantidad de instituciones/] },
+    { id: 'institutions', int: true, keepRatios: true, patterns: [/instituciones financieras/, /n(u|ú)mero de (bancos|instituciones)/, /cantidad de instituciones/] },
     { id: 'overdue', text: true, patterns: [/vencidos/] },
     { id: 'requested', patterns: [/deuda solicitada/, /incremento (en )?(el )?riesgo/, /monto solicitado/, /^solicitud\b/] },
     { id: 'bbDebt', patterns: [/^deuda actual/, /exposicion actual/] },
@@ -81,7 +97,7 @@
           const p = parsed[i];
           if (!p || used.has(i)) continue;
           const label = norm(p.label);
-          if (!pattern.test(label) || (field.exclude && field.exclude.test(label))) continue;
+          if (!pattern.test(label) || (field.exclude && field.exclude.test(label)) || (!field.keepRatios && RATIO.test(label))) continue;
           if (field.text) {
             const m = norm(p.rest || p.label).match(/\b(si|no)\b\s*$/) || norm(p.rest).match(/\b(si|no)\b/);
             if (!m) continue;
@@ -89,7 +105,7 @@
             setValue('overdue', m[1], p.raw);
             return;
           }
-          let nums = numbersIn(p.rest);
+          let nums = (field.int ? numberTokens(p.rest) : dropNoteColumn(numberTokens(p.rest))).map((x) => x.value);
           if (!nums.length && /^[\s|$]*[-–—][\s|$-]*$/.test(p.rest)) nums = [0];
           if (!nums.length) {
             // valores en la fila siguiente sin etiqueta (encabezado de periodos arriba)
@@ -107,7 +123,7 @@
             ['sales24', 'sales23', 'sales22', 'sales21'].forEach((k, idx) => { if (ordered[idx] !== undefined) setValue(k, ordered[idx], p.raw); });
           } else {
             const v = pick(nums);
-            setValue(field.id, field.int ? Math.round(v) : v, p.raw);
+            setValue(field.id, field.int ? Math.round(v) : field.abs ? Math.abs(v) : v, p.raw);
           }
           return;
         }
