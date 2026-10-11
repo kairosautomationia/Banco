@@ -30,7 +30,7 @@ const STATIC = {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const send = (res, status, body, type = 'application/json; charset=utf-8') => {
   res.writeHead(status, { 'content-type': type, 'cache-control': 'no-store' });
-  res.end(typeof body === 'string' ? body : JSON.stringify(body));
+  res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
 };
 
 function readBody(req) {

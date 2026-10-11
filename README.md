@@ -19,12 +19,13 @@ La IA sigue el flujo del Banco 4.0 (integra → predice → personaliza → dete
 | 05 Protección | Señales de **posible fraude** o de consistencia que las 6 reglas no cubren, y una **propuesta de monto y tasa** con condiciones. | El monto propuesto nunca supera el tope de las reglas y la tasa debe estar dentro de un rango; lo que se sale se ignora. Se descartan señales que citan cifras ajenas al expediente. |
 | 06 Decisión | **Recomienda** (aprobar, aprobar con condiciones, reducir monto o rechazar) con confianza, motivos y memo. | Nunca es más permisiva que las reglas: si lo es, se sube al nivel de las reglas y se avisa. Si es más estricta, se marca para revisión. |
 
-- **Modelo por defecto:** `@cf/zai-org/glm-4.7-flash`: gratuito en el plan Workers Free (10.000 Neurons al día, unos 50 por llamada típica), 131.072 tokens de contexto y multilingüe. Para uno más potente, como `@cf/zai-org/glm-5.3-flash` (1M de contexto, requiere Workers Paid o créditos de AI Gateway), define `AI_MODEL` en `wrangler.jsonc` > `vars`; las variables puestas solo en el panel se pierden en el siguiente deploy. Por fase: `AI_MODEL_INTEGRACION`, `AI_MODEL_PROTECCION` y `AI_MODEL_DECISION`.
+- **Modelo por defecto:** `@cf/zai-org/glm-4.7-flash`: gratuito en el plan Workers Free (10.000 Neurons al día; una llamada típica gasta entre ~50 y ~150 Neurons según cuánto razone el modelo, así que alcanza para decenas de análisis completos al día; un documento largo gasta más), 131.072 tokens de contexto y multilingüe. Para uno más potente, como `@cf/zai-org/glm-5.3-flash` (1M de contexto, requiere Workers Paid o créditos de AI Gateway), define `AI_MODEL` en `wrangler.jsonc` > `vars`; las variables puestas solo en el panel se pierden en el siguiente deploy. Por fase: `AI_MODEL_INTEGRACION`, `AI_MODEL_PROTECCION` y `AI_MODEL_DECISION`.
 - **Binding:** `"ai": { "binding": "AI" }` en `wrangler.jsonc`. No necesita clave de API. `AI_REASONING_EFFORT` (por defecto `low`; vacío lo desactiva).
 - **Cambiar de proveedor** (por ejemplo, para comparar con un modelo de frontera): `AI_PROVIDER=openai` más `AI_BASE_URL`, `AI_API_KEY` y `AI_MODEL`, contra cualquier endpoint compatible con `/chat/completions`. La clave va como secreto del Worker.
 - **Solo en el Worker:** `server.js` (Node local) no incluye la IA. Para probarla en local usa `npx wrangler dev`, que llama a Workers AI en remoto y pide iniciar sesión en Cloudflare.
 - **Privacidad:** el texto del documento y los datos del expediente se envían al proveedor de IA. No cargues lo que no puedas compartir con un tercero.
-- **Pruebas:** `npm test` valida los validadores y el cambio de proveedor con un modelo simulado. No mide la calidad real de ningún modelo.
+- **Pruebas:** `npm test` valida los validadores, el Worker (contraseña y rutas) y el cambio de proveedor con un modelo simulado. No mide la calidad real de ningún modelo.
+- **Prueba en vivo:** `BASE_URL=https://tu-worker.workers.dev ACCESS_PASSWORD=... npm run smoke` comprueba el sitio desplegado y cada tarea de IA con el modelo real.
 
 ## Ejecutar en local
 
