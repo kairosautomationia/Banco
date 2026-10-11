@@ -1,0 +1,13 @@
+{
+  "name": "banco-4-0",
+  "version": "1.0.0",
+  "description": "Simulador de scorecard de personas jurídicas con carga de documentos y OCR",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

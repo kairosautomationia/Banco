@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banco 4.0 | Scorecard de personas jurídicas</title>
+  <meta name="description" content="Simulador de scorecard para personas jurídicas: integra ventas, deuda, cobertura y antecedentes para estimar un score 0–999, sugerir monto y tasa, y detectar inconsistencias." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">B</span><span>Banco<span class="brand-accent">.</span>4.0</span></div>
+      <div class="side-label">CENTRO DE DECISIONES</div>
+      <nav class="nav-list" aria-label="Navegación principal">
+        <button class="nav-item active" aria-label="Simulador" data-view="simulator"><span class="nav-symbol"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>Simulador<span class="nav-count">1</span></button>
+        <button class="nav-item" aria-label="Solicitudes" data-view="requests"><span class="nav-symbol"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Solicitudes</button>
+        <button class="nav-item" aria-label="Monitoreo" data-view="monitoring"><span class="nav-symbol"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Monitoreo</button>
+        <button class="nav-item" aria-label="Señales de fraude" data-view="fraud"><span class="nav-symbol"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></span>Señales de fraude</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="system-status"><i></i><div><b>Modelos en línea</b><small>Sincronizado ahora</small></div></div>
+        <div class="operator"><span class="operator-avatar">FM</span><div><b>Finanzas & Riesgo</b><small>Administrador</small></div><span class="operator-more">···</span></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><p class="breadcrumb">SIMULADOR <span>/</span> NUEVA SOLICITUD</p><h1>Decisión de crédito</h1></div>
+        <div class="topbar-right"><span class="environment"><i></i> Motor IA activo</span><button class="notification" aria-label="Notificaciones"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16v-5a6 6 0 0112 0v5l2 2H4z"/><path d="M10 21a2 2 0 004 0"/></svg><i></i></button></div>
+      </header>
+
+      <div class="view-panel" id="simulatorView">
+      <section class="case-header">
+        <div class="case-identity"><div class="case-avatar" id="caseAvatar">GU</div><div><span class="case-label">EXPEDIENTE DE SIMULACIÓN · PERSONA JURÍDICA</span><h2>Solicitud <strong>#CR-2026-1048</strong></h2><p>Última actualización · <span id="lastUpdate">hace unos segundos</span></p></div></div>
+        <div class="case-meta"><div><span>EMPRESA</span><b id="caseClient">Caso de la guía</b></div><div><span>SEGMENTO</span><b>Persona jurídica</b></div><div><span>DEUDA SOLICITADA</span><b id="caseAmount">$400,000</b></div></div>
+      </section>
+
+      <section class="process-card" aria-label="Proceso de decisión crediticia">
+        <div class="process-top"><div><span class="overline">FLUJO DE DECISIÓN</span><h3>La IA analiza la solicitud paso a paso</h3></div><div class="process-status" id="processStatus"><i></i><span>Esperando solicitud</span></div></div>
+        <div class="process-rail">
+          <div class="rail-progress" id="railProgress"></div>
+          <button class="stage is-current" data-stage="0"><span class="stage-number">01</span><b>Solicitud</b><small>Datos validados</small></button>
+          <button class="stage" data-stage="1"><span class="stage-number">02</span><b>Integración</b><small>Ventas, deuda y accionistas</small></button>
+          <button class="stage" data-stage="2"><span class="stage-number">03</span><b>Riesgo</b><small>Cobertura y apalancamiento</small></button>
+          <button class="stage" data-stage="3"><span class="stage-number">04</span><b>Predicción</b><small>Score 0–999</small></button>
+          <button class="stage" data-stage="4"><span class="stage-number">05</span><b>Protección</b><small>Monto, tasa y señales</small></button>
+          <button class="stage" data-stage="5"><span class="stage-number">06</span><b>Decisión</b><small>Recomendación</small></button>
+        </div>
+      </section>
+
+      <div class="phase-host" id="phaseHost" aria-live="polite">
+        <section class="panel request-panel phase-panel" data-phase="0">
+          <div class="panel-heading"><div><span class="overline">FASE 01 · SOLICITUD · SECCIÓN 1 DE LA GUÍA</span><h3>Carga el expediente financiero</h3></div><span class="editable">OCR + revisión</span></div>
+          <div class="upload-block">
+            <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Cargar un archivo PDF, Word, Excel o CSV con los datos financieros">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
+              <div><b>Arrastra tu archivo aquí o haz clic para cargarlo</b><small>PDF, Word (.docx), Excel (.xlsx) o CSV · máx. 20 MB · el OCR extrae los 15 campos y tú los revisas</small></div>
+              <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" hidden />
+            </div>
+            <div class="upload-status" id="uploadStatus" role="status" aria-live="polite" hidden></div>
+            <div class="extract-report" id="extractReport" hidden></div>
+            <p class="upload-privacy">El archivo se envía al servicio de OCR (LlamaParse) para leerlo. No cargues documentos que no puedas compartir con un tercero.</p>
+          </div>
+          <div class="case-picker"><label>O usa un caso de ejemplo<select id="caseSelect"><option value="guia">Caso de la guía</option><option value="andina">Distribuidora Andina S.A.</option><option value="delta">Constructora Delta S.A.</option><option value="custom">Personalizado</option></select></label></div>
+          <h4 class="subhead">Datos extraídos · revisa y corrige antes de analizar</h4>
+          <fieldset class="ventas-group"><legend>Ventas anuales por periodo <small>Las ventas de los 4 periodos alimentan la tendencia.</small></legend><div class="ventas-grid"><label>dic-24<div class="money-input"><span>$</span><input id="sales24" type="text" inputmode="numeric" autocomplete="off" /></div></label><label>dic-23<div class="money-input"><span>$</span><input id="sales23" type="text" inputmode="numeric" autocomplete="off" /></div></label><label>dic-22<div class="money-input"><span>$</span><input id="sales22" type="text" inputmode="numeric" autocomplete="off" /></div></label><label>dic-21<div class="money-input"><span>$</span><input id="sales21" type="text" inputmode="numeric" autocomplete="off" /></div></label></div></fieldset>
+          <div class="field-grid">
+            <label>Deuda en el sistema financiero<div class="money-input"><span>$</span><input id="debt" type="text" inputmode="numeric" autocomplete="off" /><em>USD</em></div><small class="hint">Debe coincidir con la deuda total del cliente como titular en CDR, incluyendo el banco.</small></label>
+            <label>EBITDA<div class="money-input"><span>$</span><input id="ebitda" type="text" inputmode="numeric" autocomplete="off" /><em>USD</em></div><small class="hint">Utilidad operativa + depreciación y amortización. Último periodo.</small></label>
+            <label>Gastos financieros<div class="money-input"><span>$</span><input id="finExp" type="text" inputmode="numeric" autocomplete="off" /><em>USD</em></div><small class="hint">Intereses de la deuda financiera. Último periodo.</small></label>
+            <label>Efectivo y certificados de depósito<div class="money-input"><span>$</span><input id="cash" type="text" inputmode="numeric" autocomplete="off" /><em>USD</em></div><small class="hint">Liquidez en activos corrientes. Último periodo.</small></label>
+            <label>Número de empleados actual<div class="money-input"><input id="employees" type="number" inputmode="numeric" min="0" step="1" /></div><small class="hint">Solo la compañía evaluada, no el grupo económico.</small></label>
+            <label>Utilidad neta<div class="money-input"><span>$</span><input id="netIncome" type="text" inputmode="numeric" autocomplete="off" /><em>USD</em></div><small class="hint">Utilidad reportada en el último periodo. Puede ser negativa.</small></label>
+            <label>Patrimonio<div class="money-input"><span>$</span><input id="equity" type="text" inputmode="numeric" autocomplete="off" /><em>USD</em></div><small class="hint">Patrimonio contable del último periodo.</small></label>
+            <label>Instituciones financieras con deuda<div class="money-input"><input id="institutions" type="number" inputmode="numeric" min="0" step="1" /></div><small class="hint">Bancos, cooperativas y otras en las que la empresa tiene deuda.</small></label>
+            <label>¿Accionista ha reportado vencidos?<select id="overdue"><option value="no">No</option><option value="si">Sí</option></select><small class="hint">Basta que un accionista haya reportado vencidos en CDR. Si no se conoce, indica No.</small></label>
+            <label>Deuda actual con el banco<div class="money-input"><span>$</span><input id="bbDebt" type="text" inputmode="numeric" autocomplete="off" /><em>USD</em></div><small class="hint">Incluye cupos no tomados de líneas y operaciones no desembolsadas (línea de $1M con $450 mil vigente = $1M).</small></label>
+            <label>Deuda solicitada (incremento de riesgo)<div class="money-input"><span>$</span><input id="requested" type="text" inputmode="numeric" autocomplete="off" /><em>USD</em></div><small class="hint">Incremento de exposición con el banco (de $1M a $1,5M = $500 mil).</small></label>
+          </div>
+          <div class="form-errors" id="formErrors" role="alert" hidden></div>
+          <div class="data-note"><span></span><div><b>Los datos del último periodo alimentan los indicadores</b><small>El score se interpreta como referencia inicial del cliente; debe profundizarse con toda la información de análisis.</small></div></div>
+          <div class="request-actions"><button class="run-button" id="runSimulation">Validar datos y continuar <span>→</span></button><button class="reset-button" data-reset>Reiniciar expediente</button></div>
+        </section>
+        <section class="panel phase-panel" data-phase="1" hidden>
+          <div class="panel-heading"><div><span class="overline phase-overline"></span><h3 class="phase-title"></h3></div><span class="phase-badge">Desbloqueada</span></div>
+          <div class="io-line"><div><span>RECIBE</span><b class="io-in"></b></div><i aria-hidden="true">→</i><div><span>ENTREGA</span><b class="io-out"></b></div></div>
+          <div class="phase-body" id="phaseBody1"></div>
+          <div class="phase-actions"><button class="run-button" data-next>Calcular indicadores de riesgo <span>→</span></button><button class="reset-button" data-back>← Fase anterior</button></div>
+        </section>
+        <section class="panel phase-panel" data-phase="2" hidden>
+          <div class="panel-heading"><div><span class="overline phase-overline"></span><h3 class="phase-title"></h3></div><span class="phase-badge">Desbloqueada</span></div>
+          <div class="io-line"><div><span>RECIBE</span><b class="io-in"></b></div><i aria-hidden="true">→</i><div><span>ENTREGA</span><b class="io-out"></b></div></div>
+          <div class="phase-body" id="phaseBody2"></div>
+          <div class="phase-actions"><button class="run-button" data-next>Estimar el score <span>→</span></button><button class="reset-button" data-back>← Fase anterior</button></div>
+        </section>
+        <section class="panel phase-panel" data-phase="3" hidden>
+          <div class="panel-heading"><div><span class="overline phase-overline"></span><h3 class="phase-title"></h3></div><span class="phase-badge">Desbloqueada</span></div>
+          <div class="io-line"><div><span>RECIBE</span><b class="io-in"></b></div><i aria-hidden="true">→</i><div><span>ENTREGA</span><b class="io-out"></b></div></div>
+          <div class="phase-body" id="phaseBody3"></div>
+          <div class="phase-actions"><button class="run-button" data-next>Calcular monto, tasa y señales <span>→</span></button><button class="reset-button" data-back>← Fase anterior</button></div>
+        </section>
+        <section class="panel phase-panel" data-phase="4" hidden>
+          <div class="panel-heading"><div><span class="overline phase-overline"></span><h3 class="phase-title"></h3></div><span class="phase-badge">Desbloqueada</span></div>
+          <div class="io-line"><div><span>RECIBE</span><b class="io-in"></b></div><i aria-hidden="true">→</i><div><span>ENTREGA</span><b class="io-out"></b></div></div>
+          <div class="phase-body" id="phaseBody4"></div>
+          <div class="phase-actions"><button class="run-button" data-next>Ver la recomendación <span>→</span></button><button class="reset-button" data-back>← Fase anterior</button></div>
+        </section>
+        <section class="panel phase-panel" data-phase="5" hidden>
+          <div class="panel-heading"><div><span class="overline phase-overline"></span><h3 class="phase-title"></h3></div><span class="phase-badge">Desbloqueada</span></div>
+          <div class="io-line"><div><span>RECIBE</span><b class="io-in"></b></div><i aria-hidden="true">→</i><div><span>ENTREGA</span><b class="io-out"></b></div></div>
+          <div class="phase-body" id="phaseBody5"></div>
+          <div class="phase-actions"><button class="run-button" data-reset>Nuevo análisis <span>→</span></button><button class="reset-button" data-back>← Fase anterior</button></div>
+        </section>
+      </div>
+      </div>
+
+      <section class="view-panel secondary-view" id="requestsView">
+        <div class="view-title"><div><p class="breadcrumb">OPERACIÓN <span>/</span> BANDEJA DE ENTRADA</p><h2>Solicitudes de crédito</h2><p>Gestiona el trabajo pendiente del equipo de riesgo.</p></div><button class="outline-action" data-go="simulator">+ Nueva simulación</button></div>
+        <div class="summary-cards"><div><span>EN REVISIÓN</span><b>08</b><small>+2 esta semana</small></div><div><span>PREAPROBADAS</span><b>24</b><small>91% dentro del SLA</small></div><div><span>TIEMPO PROMEDIO</span><b>04:18</b><small>minutos por expediente</small></div></div>
+        <div class="table-card"><div class="table-header"><h3>Cola de solicitudes</h3><span>Actualizada hace 2 min</span></div><div class="request-row header"><span>EXPEDIENTE</span><span>CLIENTE</span><span>MONTO</span><span>ESTADO Y FASE</span><span>RESPONSABLE</span></div><div class="request-row"><b>#CR-2026-1048</b><span id="row1048Client">Caso de la guía</span><span id="row1048Amount">$12,000</span><div class="status-cell"><em class="status-pill review" id="row1048Status">Sin analizar</em><span class="phase-track" id="row1048Track" role="img" aria-label="Fase 1 de 6"></span></div><span>Finanzas & Riesgo</span></div><div class="request-row"><b>#CR-2026-1047</b><span>Constructora Delta S.A.</span><span>$8,500</span><div class="status-cell"><em class="status-pill ready">Lista para revisión</em><span class="phase-track" data-phase="5" role="img" aria-label="Fase 6 de 6"></span></div><span>Equipo Andino</span></div><div class="request-row"><b>#CR-2026-1042</b><span>Comercial Sur Cía. Ltda.</span><span>$5,200</span><div class="status-cell"><em class="status-pill approved">Preaprobada</em><span class="phase-track" data-phase="5" data-done="1" role="img" aria-label="Fase 6 de 6, completa"></span></div><span>Finanzas & Riesgo</span></div></div>
+      </section>
+
+      <section class="view-panel secondary-view" id="monitoringView">
+        <div class="view-title"><div><p class="breadcrumb">CONTROL <span>/</span> MONITOREO CONTINUO</p><h2>Monitoreo del portafolio</h2><p>Observa cambios de riesgo después de la decisión.</p></div><span class="live-badge"><i></i> Datos en tiempo real</span></div>
+        <div class="monitor-grid">
+<article class="metric-card accent-blue" aria-labelledby="mPortfolio"><span id="mPortfolio">PORTAFOLIO MONITOREADO</span><b>$2.4M</b><small><strong class="delta up">▲ 4.3%</strong> vs. septiembre · 412 operaciones activas</small><div class="bar-chart" role="img" aria-label="Portafolio por mes en millones de dólares: mayo 1.7, junio 1.9, julio 2.0, agosto 2.1, septiembre 2.3, octubre 2.4"><div class="bar-col"><b>$1.7M</b><i style="height:71%"></i><span>May</span></div><div class="bar-col"><b>$1.9M</b><i style="height:79%"></i><span>Jun</span></div><div class="bar-col"><b>$2.0M</b><i style="height:83%"></i><span>Jul</span></div><div class="bar-col"><b>$2.1M</b><i style="height:88%"></i><span>Ago</span></div><div class="bar-col"><b>$2.3M</b><i style="height:96%"></i><span>Sep</span></div><div class="bar-col is-now"><b>$2.4M</b><i style="height:100%"></i><span>Oct</span></div></div></article>
+<article class="metric-card accent-green" aria-labelledby="mRisk"><span id="mRisk">RIESGO CONTROLADO</span><b>87.6%</b><small><strong class="delta up">▲ 3.2 pts</strong> vs. mes anterior · de 412 operaciones, 361 dentro de política</small><div class="goal-bar" role="img" aria-label="87.6 por ciento, meta 85 por ciento"><i style="width:87.6%"></i><em style="left:85%"></em></div><div class="goal-legend"><span>0%</span><span class="goal-mark" style="left:85%">Meta 85%</span><span>100%</span></div></article>
+<article class="metric-card accent-orange" aria-labelledby="mAlerts"><span id="mAlerts">ALERTAS ABIERTAS</span><b>06</b><small><strong class="delta warn">2 requieren atención hoy</strong> · detectadas en las fases 02 y 05</small><div class="severity-bar" role="img" aria-label="2 altas, 3 medias, 1 baja"><i class="high" style="flex:2"></i><i class="med" style="flex:3"></i><i class="low" style="flex:1"></i></div><ul class="severity-legend"><li><i class="high"></i>Alta <b>2</b></li><li><i class="med"></i>Media <b>3</b></li><li><i class="low"></i>Baja <b>1</b></li></ul></article>
+</div><div class="table-card funnel-card"><div class="table-header"><h3>Expedientes por fase del proceso</h3><span>El expediente en simulación se suma en su fase actual</span></div><div class="funnel" id="funnel"></div></div><div class="monitor-feed"><div class="table-header"><h3>Actividad reciente</h3><span>Motor autónomo activo</span></div><div class="feed-row"><i class="feed-icon green">✓</i><div><b>Perfil actualizado · Distribuidora Andina S.A.</b><small>Nuevo periodo de ventas integrado al scorecard</small></div><time>hace 4 min</time></div><div class="feed-row"><i class="feed-icon orange">!</i><div><b>Revisión preventiva · Expediente #CR-2026-1042</b><small>Variación abrupta de ventas entre periodos</small></div><time>hace 18 min</time></div></div>
+      </section>
+
+      <section class="view-panel secondary-view" id="fraudView">
+        <div class="view-title"><div><p class="breadcrumb">CONTROL <span>/</span> SEGURIDAD TRANSACCIONAL</p><h2>Señales de fraude</h2><p>Prioriza anomalías y reduce falsos positivos con contexto.</p></div><span class="live-badge warning"><i></i> 06 alertas activas</span></div>
+        <div class="fraud-hero"><div><span class="overline">CENTRO DE PROTECCIÓN</span><h3>El motor detecta patrones antes de la decisión</h3><p>Combinamos ubicación, velocidad, dispositivo y comportamiento para proteger cada operación.</p></div><div class="fraud-score"><b>94.8%</b><span>precisión preventiva</span></div></div><div class="table-card"><div class="table-header"><h3>Alertas que requieren contexto</h3><span>Ordenadas por prioridad</span></div><div class="alert-row fraud-live" id="fraudLive"><span class="priority live">FASE 05</span><div><b id="fraudLiveTitle">Expediente en simulación sin analizar</b><small id="fraudLiveText">#CR-2026-1048 · Las señales se evalúan en la fase de Protección</small></div></div><div class="alert-row"><span class="priority high">ALTA</span><span class="phase-tag">FASE 02</span><div><b>Velocidad transaccional inusual</b><small>#CR-2026-1039 · 8 intentos en 4 minutos</small></div><button>Revisar →</button></div><div class="alert-row"><span class="priority medium">MEDIA</span><span class="phase-tag">FASE 05</span><div><b>Dispositivo no reconocido</b><small>#CR-2026-1042 · Coincidencia parcial de ubicación</small></div><button>Revisar →</button></div></div>
+      </section>
+
+      <footer><span><b>B</b> Banco 4.0 · Laboratorio de decisiones</span><span>Simulación demostrativa · Score referencial, no constituye preaprobación ni oferta de crédito</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="extractor.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
