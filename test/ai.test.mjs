@@ -1,0 +1,127 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { handleAi, parseJson, textOf, validateIntegration, validateReview, validateMemo, unknownFigures, createProvider } from '../ai.mjs';
+
+const DOC = `| Concepto | dic-24 |
+| **EBITDA** | 400.000 |
+| Utilidad neta | (85.000) |
+| Vencidos accionistas | No |`;
+
+const post = (body) => new Request('https://x/api/ai/x', { method: 'POST', body: typeof body === 'string' ? body : JSON.stringify(body) });
+const envWith = (run, extra = {}) => ({ AI: { run }, ...extra });
+const FACTS = { score: 640, monto_sugerido: '$400.000', tasa_referencial: '10.1% anual', entradas: { ebitda: { etiqueta: 'EBITDA', valor: '$400.000' } } };
+
+test('parseJson tolera cercas de código y bloques <think>', () => {
+  assert.deepEqual(parseJson('<think>{"a":0}</think>```json\n{"a":1}\n```'), { a: 1 });
+  assert.throws(() => parseJson('sin json'), /JSON/);
+  assert.throws(() => parseJson('{roto'), /JSON/);
+  assert.throws(() => parseJson('{"a": }'), /inválido/);
+});
+
+test('textOf acepta las formas de respuesta de Workers AI', () => {
+  assert.equal(textOf({ response: 'a' }), 'a');
+  assert.equal(textOf({ choices: [{ message: { content: 'b' } }] }), 'b');
+  assert.equal(textOf({ response: { x: 1 } }), '{"x":1}');
+  assert.throws(() => textOf({}), /sin texto/);
+});
+
+test('integración: acepta valores con evidencia literal y rechaza los inventados', () => {
+  const raw = { campos: {
+    ebitda: { cifra: '400.000', escala: 1, evidencia: '| EBITDA | 400.000 |' },
+    netIncome: { cifra: '(85.000)', escala: 1, evidencia: 'Utilidad neta | (85.000)' },
+    cash: { cifra: '28.128', escala: 1, evidencia: 'Efectivo 28.128' },            // evidencia que no está en el documento
+    equity: { cifra: '999.999', escala: 1, evidencia: 'EBITDA | 400.000' },        // la cifra no está en su evidencia
+    overdue: { valor: 'No', evidencia: 'Vencidos accionistas | No' }
+  } };
+  const out = validateIntegration(raw, DOC, ['ebitda', 'netIncome', 'cash', 'equity', 'overdue', 'debt']);
+  assert.deepEqual(Object.keys(out.campos).sort(), ['ebitda', 'netIncome', 'overdue']);
+  assert.deepEqual(out.rechazados.sort(), ['cash', 'equity']);
+  assert.equal(out.campos.overdue.valor, 'no');
+});
+
+test('integración: ignora campos que no se pidieron y fuerza escala 1 en enteros', () => {
+  const raw = { campos: { ebitda: { cifra: '400.000', escala: 1, evidencia: 'EBITDA | 400.000' }, employees: { cifra: '400.000', escala: 1000, evidencia: 'EBITDA | 400.000' } } };
+  const out = validateIntegration(raw, DOC, ['employees']);
+  assert.deepEqual(Object.keys(out.campos), ['employees']);
+  assert.equal(out.campos.employees.escala, 1);
+});
+
+test('revisión: descarta observaciones con cifras ajenas, severidad inválida o sin texto', () => {
+  const raw = { observaciones: [
+    { severidad: 'alta', titulo: 'EBITDA alto', detalle: 'El EBITDA de $400.000 parece alto.', campos: ['ebitda', 'zzz'] },
+    { severidad: 'media', titulo: 'Inventada', detalle: 'Ventas de $9.876.543.', campos: [] },
+    { severidad: 'urgente', titulo: 'x', detalle: 'y', campos: [] },
+    { severidad: 'baja', titulo: '', detalle: 'sin título', campos: [] }
+  ] };
+  const out = validateReview(raw, FACTS);
+  assert.equal(out.observaciones.length, 1);
+  assert.deepEqual(out.observaciones[0].campos, ['ebitda']);
+});
+
+test('memo: pasa con cifras del expediente y se rechaza con cifras nuevas', () => {
+  const ok = validateMemo({ resumen: 'Score 640 en 2026, monto $400.000 a 10.1% anual.', fortalezas: ['a'], riesgos: [], condiciones: [] }, FACTS);
+  assert.equal(ok.fortalezas.length, 1);
+  assert.throws(() => validateMemo({ resumen: 'Se sugiere $750.000.', fortalezas: [], riesgos: [], condiciones: [] }, FACTS), /cifras/);
+  assert.throws(() => validateMemo({ resumen: '' }, FACTS), /vacío/);
+  assert.deepEqual(unknownFigures('1,2 millones y 35 %', 'nada'), []);
+});
+
+test('handleAi decisión: devuelve memo y modelo por defecto', async () => {
+  let seen;
+  const env = envWith(async (model, input) => { seen = { model, input }; return { response: '{"resumen":"Score 640.","fortalezas":[],"riesgos":[],"condiciones":[]}' }; });
+  const res = await handleAi(post({ facts: FACTS }), env, 'decision');
+  const data = await res.json();
+  assert.equal(res.status, 200);
+  assert.equal(data.model, '@cf/zai-org/glm-5.3-flash');
+  assert.equal(data.memo.resumen, 'Score 640.');
+  assert.equal(seen.input.reasoning_effort, 'low');
+});
+
+test('handleAi: reintenta sin reasoning_effort si el modelo lo rechaza', async () => {
+  const calls = [];
+  const env = envWith(async (_m, input) => { calls.push(input); if (input.reasoning_effort) throw new Error('bad param'); return { response: '{"observaciones":[]}' }; });
+  const res = await handleAi(post({ facts: FACTS }), env, 'proteccion');
+  assert.equal(res.status, 200);
+  assert.equal(calls.length, 2);
+});
+
+test('handleAi: el modelo se cambia por variable de entorno y por fase', async () => {
+  let model;
+  const env = envWith(async (m) => { model = m; return { response: '{"observaciones":[]}' }; }, { AI_MODEL: '@cf/a/b', AI_MODEL_PROTECCION: '@cf/c/d' });
+  await handleAi(post({ facts: FACTS }), env, 'proteccion');
+  assert.equal(model, '@cf/c/d');
+});
+
+test('handleAi: errores claros', async () => {
+  const ok = envWith(async () => ({ response: '{}' }));
+  assert.equal((await handleAi(new Request('https://x', { method: 'GET' }), ok, 'decision')).status, 405);
+  assert.equal((await handleAi(post({}), ok, 'otra')).status, 404);
+  assert.equal((await handleAi(post('no json'), ok, 'decision')).status, 400);
+  assert.equal((await handleAi(post({}), ok, 'decision')).status, 400);                       // sin facts
+  assert.equal((await handleAi(post({ facts: FACTS }), {}, 'decision')).status, 503);         // sin binding AI
+  assert.equal((await handleAi(post({ facts: FACTS }), envWith(async () => ({ response: 'texto libre' })), 'decision')).status, 502);
+  assert.equal((await handleAi(post({ markdown: DOC, missing: ['nope'] }), ok, 'integracion')).status, 400);
+  assert.equal((await handleAi(post({}), ok, '__proto__')).status, 404);
+});
+
+test('handleAi integración extremo a extremo con evidencia verificada', async () => {
+  const env = envWith(async () => ({ response: '```json\n{"campos":{"ebitda":{"cifra":"400.000","escala":1,"evidencia":"EBITDA | 400.000"},"cash":{"cifra":"1","escala":1,"evidencia":"inventado"}}}\n```' }));
+  const data = await (await handleAi(post({ markdown: DOC, missing: ['ebitda', 'cash'] }), env, 'integracion')).json();
+  assert.deepEqual(Object.keys(data.campos), ['ebitda']);
+  assert.deepEqual(data.rechazados, ['cash']);
+});
+
+test('proveedor openai-compatible: se puede cambiar y valida su configuración', async () => {
+  assert.throws(() => createProvider({ AI_PROVIDER: 'openai' }), /faltan/);
+  assert.throws(() => createProvider({ AI_PROVIDER: 'otro' }), /desconocido/);
+  const realFetch = globalThis.fetch;
+  let url, body;
+  globalThis.fetch = async (u, init) => { url = u; body = JSON.parse(init.body); return new Response(JSON.stringify({ choices: [{ message: { content: '{"observaciones":[]}' } }] })); };
+  try {
+    const env = { AI_PROVIDER: 'openai', AI_BASE_URL: 'https://api.example.com/v1/', AI_API_KEY: 'k', AI_MODEL: 'modelo-x' };
+    const data = await (await handleAi(post({ facts: FACTS }), env, 'proteccion')).json();
+    assert.equal(url, 'https://api.example.com/v1/chat/completions');
+    assert.equal(body.model, 'modelo-x');
+    assert.equal(data.provider, 'openai-compatible');
+  } finally { globalThis.fetch = realFetch; }
+});

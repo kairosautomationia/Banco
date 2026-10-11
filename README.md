@@ -8,6 +8,23 @@ Simulador de decisión de crédito por fases. Cada fase se desbloquea al complet
 
 > **Aviso:** los pesos del score, la probabilidad de incumplimiento y la tasa son **referenciales**: la guía define las variables y los rangos, no la fórmula del modelo real. No constituye preaprobación ni oferta de crédito.
 
+## IA (Workers AI)
+
+La IA es un **complemento**: el score, el monto, la tasa, los 6 controles y la decisión siguen saliendo de las reglas. Si la IA falla o no está disponible, el simulador funciona igual y lo indica.
+
+| Fase | Qué hace la IA | Cómo se protege |
+|---|---|---|
+| 02 Integración | Completa los campos que el extractor por reglas no halló en el documento. | Solo se acepta un valor si su evidencia es una cita literal del documento y contiene la cifra. Aparece marcado «IA · verifícalo». |
+| 05 Protección | Añade observaciones de incoherencia que las 6 reglas no cubren. | Salida validada (severidad, campos, longitud); se descartan las que citan cifras que no están en el expediente. |
+| 06 Decisión | Redacta un memo para el analista. | No decide: recibe la decisión ya tomada. Si el memo cita una cifra que no está en el expediente, se descarta. |
+
+- **Modelo por defecto:** `@cf/zai-org/glm-5.3-flash` (ventana de 1M tokens). Requiere el plan Workers Paid o créditos de AI Gateway. Se cambia con `AI_MODEL`, o por fase con `AI_MODEL_INTEGRACION`, `AI_MODEL_PROTECCION` y `AI_MODEL_DECISION`.
+- **Binding:** `"ai": { "binding": "AI" }` en `wrangler.jsonc`. No necesita clave de API. `AI_REASONING_EFFORT` (por defecto `low`; vacío lo desactiva).
+- **Cambiar de proveedor** (por ejemplo, para comparar con un modelo de frontera): `AI_PROVIDER=openai` más `AI_BASE_URL`, `AI_API_KEY` y `AI_MODEL`, contra cualquier endpoint compatible con `/chat/completions`. La clave va como secreto del Worker.
+- **Solo en el Worker:** `server.js` (Node local) no incluye la IA. Para probarla en local usa `npx wrangler dev`, que llama a Workers AI en remoto y pide iniciar sesión en Cloudflare.
+- **Privacidad:** el texto del documento y los datos del expediente se envían al proveedor de IA. No cargues lo que no puedas compartir con un tercero.
+- **Pruebas:** `npm test` valida los validadores y el cambio de proveedor con un modelo simulado. No mide la calidad real de ningún modelo.
+
 ## Ejecutar en local
 
 Requiere Node.js 18 o superior. No tiene dependencias.

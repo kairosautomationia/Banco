@@ -1,6 +1,9 @@
 // Cloudflare Worker: sirve el sitio (carpeta public/) y hace de proxy hacia LlamaParse (OCR).
 // Equivale a server.js. La clave vive como secreto del Worker (LLAMA_CLOUD_API_KEY); nunca llega al navegador.
 // Secretos/variables: LLAMA_CLOUD_API_KEY (para el OCR) y ACCESS_PASSWORD (opcional, protege sitio y OCR).
+// La IA (/api/ai/*) vive en ai.mjs y usa el binding "AI" de Workers AI; ver el README para cambiar de proveedor.
+import { handleAi } from './ai.mjs';
+
 const BASE = 'https://api.cloud.llamaindex.ai/api/parsing';
 const MAX_BYTES = 20 * 1024 * 1024;
 const ALLOWED_EXT = new Set(['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv']);
@@ -112,6 +115,7 @@ export default {
         if (request.method !== 'POST') return json(405, { error: 'Método no permitido' }, { allow: 'POST' });
         return await extract(request, env);
       }
+      if (url.pathname.startsWith('/api/ai/')) return await handleAi(request, env, url.pathname.slice('/api/ai/'.length));
       if (request.method !== 'GET' && request.method !== 'HEAD') return json(405, { error: 'Método no permitido' });
       return await env.ASSETS.fetch(request);
     } catch (err) {
