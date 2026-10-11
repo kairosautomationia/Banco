@@ -27,6 +27,21 @@ La IA sigue el flujo del Banco 4.0 (integra → predice → personaliza → dete
 - **Pruebas:** `npm test` valida los validadores, el Worker (contraseña y rutas) y el cambio de proveedor con un modelo simulado. No mide la calidad real de ningún modelo.
 - **Prueba en vivo:** `BASE_URL=https://tu-worker.workers.dev ACCESS_PASSWORD=... npm run smoke` comprueba el sitio desplegado y cada tarea de IA con el modelo real.
 
+## Operación y límites conocidos
+
+Lo que conviene saber antes de depender del sistema (verificado, no supuesto):
+
+- **Protege el sitio.** Sin el secreto `ACCESS_PASSWORD`, cualquiera que abra la URL puede gastar tu cuota de IA y de OCR. `npm run smoke` avisa si el sitio responde sin contraseña.
+- **La IA nunca decide sola.** Si falla, el simulador sigue con las reglas. Cuando la salida del modelo no sirve (vacía, sin JSON o con cifras ajenas), se reintenta una vez en modo estricto y, si vuelve a fallar, se muestra solo lo determinista.
+- **Plan Workers Free:** 10.000 Neurons/día y 50 subpeticiones por solicitud. El sondeo del OCR usa espera progresiva para no superarlas. Si agotas la cuota diaria, la IA responde error hasta las 00:00 UTC.
+- **Extractor por reglas (heurístico):** ignora porcentajes, razones (`Margen EBITDA`, `Deuda / EBITDA`) y la columna «Nota», y lee los gastos financieros entre paréntesis como positivos. Aun así es un apoyo: revisa cada valor, sobre todo si el documento está en miles o millones (el extractor avisa).
+- **EBITDA y patrimonio pueden ser negativos** (el motor los evalúa con la peor puntuación); el resto de montos no.
+- **Etiquetas de periodo fijas:** las ventas se etiquetan `dic-24 … dic-21` como en la guía. Si cambia el ejercicio, hay que actualizar `index.html`, `app.js` y `extractor.js`.
+- **OCR:** usa la API v1 de LlamaParse (`/api/parsing`). Si LlamaIndex la retira, solo falla la carga de archivos; el simulador y la entrada manual siguen funcionando.
+- **Privacidad:** el documento va a LlamaParse (OCR) y, junto con el expediente, al proveedor de IA. La página carga tipografías de Google Fonts.
+- **Defecto visual conocido:** en móvil (≤ 400 px) la barra de pasos superior desborda unos 70 px; ya existía y no afecta a las funciones.
+- **Pruebas:** `npm test` (Node ≥ 22.7 para las del Worker; en versiones anteriores se omiten). Hay integración continua en cada PR (`.github/workflows/test.yml`).
+
 ## Ejecutar en local
 
 Requiere Node.js 18 o superior. No tiene dependencias.

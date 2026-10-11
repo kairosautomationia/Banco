@@ -33,6 +33,12 @@ async function call(path, init) {
   } catch (err) { return { error: err.message, ms: Date.now() - started }; }
 }
 
+// ¿El sitio está protegido? Sin ACCESS_PASSWORD cualquiera puede gastar la cuota de IA y de OCR.
+{
+  const anon = await fetch(base + '/').catch(() => null);
+  if (anon && anon.status === 200) console.log('AVISO  El sitio responde SIN contraseña: define el secreto ACCESS_PASSWORD en el Worker (la IA y el OCR consumen cuota de cualquiera que lo abra).');
+  else if (anon && anon.status === 401) console.log('OK    El sitio está protegido con contraseña');
+}
 const home = await call('/');
 report(home.res && home.res.status === 200 && /Banco/.test(home.text), 'El sitio carga', home.error || `HTTP ${home.res && home.res.status}${home.res && home.res.status === 401 ? ' — ' + hint(401) : ''}`);
 if (!home.res || home.res.status !== 200) process.exit(1);

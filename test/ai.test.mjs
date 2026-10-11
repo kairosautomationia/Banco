@@ -176,3 +176,52 @@ test('proveedor openai-compatible: se puede cambiar y valida su configuración',
     assert.equal(data.provider, 'openai-compatible');
   } finally { globalThis.fetch = realFetch; }
 });
+
+test('reintento estricto: si el modelo agota los tokens pensando (content=null), el segundo intento sin razonamiento lo recupera', async () => {
+  const seen = [];
+  const env = envWith(async (_m, input) => {
+    seen.push(input);
+    if (seen.length === 1) return { choices: [{ message: { content: null, reasoning_content: 'pensando…' }, finish_reason: 'length' }] };
+    return { response: '{"observaciones":[],"personalizacion":null}' };
+  });
+  const res = await handleAi(post({ facts: FACTS }), env, 'proteccion');
+  const data = await res.json();
+  assert.equal(res.status, 200);
+  assert.equal(data.retried, true);
+  assert.equal(seen.length, 2);
+  assert.match(seen[1].messages[1].content, /IMPORTANTE: responde ÚNICAMENTE/);   // recordatorio de «solo JSON»
+  assert.equal(seen[1].reasoning_effort, 'none');                                 // sin razonamiento
+  assert.equal('temperature' in seen[1], false);                                  // parámetros mínimos
+});
+
+test('reintento estricto: texto libre y JSON truncado también se reintentan; si el segundo falla, error claro tras 2 llamadas', async () => {
+  for (const bad of ['Claro, aquí está mi análisis.', '{"observaciones":[{"titulo":"x","detalle":"']) {
+    let calls = 0;
+    const res = await handleAi(post({ facts: FACTS }), envWith(async () => { calls += 1; return { response: bad }; }), 'proteccion');
+    assert.equal(res.status, 502);
+    assert.equal(calls, 2);
+  }
+});
+
+test('reintento estricto: un memo con cifras ajenas se reintenta; los errores de petición (400) y de plan NO', async () => {
+  let n = 0;
+  const memo = (s) => `{"recomendacion":"aprobar_con_condiciones","confianza":"alta","motivos":[],"resumen":"${s}","fortalezas":[],"riesgos":[],"condiciones":[]}`;
+  const env = envWith(async () => ({ response: memo(++n === 1 ? 'Monto de $987.654.' : 'Score 640.') }));
+  const ok = await (await handleAi(post({ facts: FACTS }), env, 'decision')).json();
+  assert.equal(ok.retried, true);
+  assert.equal(ok.memo.resumen, 'Score 640.');
+  let calls = 0;
+  const sinPlan = await handleAi(post({ facts: FACTS }), envWith(async () => { calls += 1; throw new Error('5035: upgrade to Workers Paid'); }), 'decision');
+  assert.equal(sinPlan.status, 502);
+  assert.equal(calls, 3);                                                          // 3 intentos de parámetros, pero SIN segundo intento estricto
+  assert.equal((await handleAi(post({}), envWith(async () => ({ response: '{}' })), 'decision')).status, 400);
+});
+
+test('un cuerpo enorme se rechaza por Content-Length sin leerlo', async () => {
+  const req = new Request('https://x/api/ai/perfil', { method: 'POST', headers: { 'content-length': String(50 * 1024 * 1024) }, body: '{}' });
+  let tocado = false;
+  req.text = async () => { tocado = true; return '{}'; };
+  const res = await handleAi(req, envWith(async () => ({ response: '{}' })), 'perfil');
+  assert.equal(res.status, 413);
+  assert.equal(tocado, false);
+});
