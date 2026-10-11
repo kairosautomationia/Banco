@@ -100,7 +100,7 @@ http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/extract') return await extract(req, res);
     if (req.method === 'GET' && STATIC[url.pathname]) {
       const [file, type] = STATIC[url.pathname];
-      return send(res, 200, fs.readFileSync(path.join(ROOT, file)), type);
+      return send(res, 200, fs.readFileSync(path.join(ROOT, 'public', file)), type);
     }
     send(res, 404, { error: 'No encontrado' });
   } catch (err) {

@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Debe coincidir con el nombre del Worker en Cloudflare (Workers & Pages > tu proyecto).
+  "name": "banco",
+  "main": "worker.js",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // El Worker corre primero para aplicar la contraseña (ACCESS_PASSWORD) a todo el sitio.
+    "run_worker_first": true
+  },
+  "observability": { "enabled": true }
+}

@@ -32,9 +32,21 @@ Sin clave el simulador funciona con entrada manual y casos de ejemplo; solo la c
 
 ## Desplegar
 
-El sitio necesita el servidor Node porque la clave del OCR no puede ir en el navegador. **GitHub Pages no sirve** para la versión completa (solo aloja archivos estáticos).
+El sitio necesita un backend porque la clave del OCR no puede ir en el navegador. **GitHub Pages no sirve** para la versión completa (solo aloja archivos estáticos).
 
-Opciones sencillas: Render, Railway, Fly.io o cualquier host con Docker.
+### Cloudflare Workers (configuración incluida)
+
+`wrangler.jsonc` y `worker.js` despliegan el sitio (carpeta `public/`) y el proxy del OCR en un Worker.
+
+1. En Cloudflare: Workers & Pages → Create → conecta este repo. Comando de compilación: vacío. Comando de implementación: `npx wrangler deploy`.
+2. El nombre del Worker en Cloudflare debe coincidir con `"name"` de `wrangler.jsonc` (`banco`).
+3. En Settings → Variables and secrets del Worker, crea como **secretos** `LLAMA_CLOUD_API_KEY` y `ACCESS_PASSWORD`.
+
+Cada push a `main` vuelve a desplegar. Prueba local del Worker: `npx wrangler dev` (pon las claves en un archivo `.dev.vars`, que no se sube a git).
+
+### Otros hosts (Node)
+
+Render, Railway, Fly.io o cualquier host con Docker.
 
 - **Sin Docker:** comando de inicio `npm start`, variables `HOST=0.0.0.0`, `LLAMA_CLOUD_API_KEY`, `ACCESS_PASSWORD`.
 - **Con Docker:**
@@ -54,6 +66,7 @@ Los archivos que se cargan se envían a LlamaParse para leerlos. No cargues docu
 
 | Archivo | Función |
 |---|---|
-| `index.html`, `styles.css`, `app.js` | Interfaz y lógica del scorecard por fases |
-| `extractor.js` | Convierte la salida del OCR en los 15 campos |
-| `server.js` | Sirve el sitio y hace de proxy seguro hacia el OCR |
+| `public/index.html`, `public/styles.css`, `public/app.js` | Interfaz y lógica del scorecard por fases |
+| `public/extractor.js` | Convierte la salida del OCR en los 15 campos |
+| `server.js` | Servidor Node (local, Docker, otros hosts): sirve `public/` y hace de proxy seguro hacia el OCR |
+| `worker.js`, `wrangler.jsonc` | Lo mismo para Cloudflare Workers |
