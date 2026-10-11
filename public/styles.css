@@ -247,3 +247,49 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .ai-reco span{font-size:12px;color:#4a6a73}
 .ai-reco.rel-mas_estricta{border-left-color:#e08a2c}
 .ai-reco.rel-ajustada{border-left-color:#c9503a}
+
+/* Sección «Datos extraídos»: desplegable, agrupada y compacta */
+.data-section{margin-top:22px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.data-section>summary{list-style:none;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 16px;cursor:pointer;border-radius:10px}
+.data-section>summary::-webkit-details-marker{display:none}
+.data-section>summary:hover{background:#f8fbfc}
+.data-section>summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.data-section[open]>summary{border-bottom:1px solid var(--line);border-radius:10px 10px 0 0}
+.ds-title{display:grid;gap:2px;min-width:170px}
+.ds-title b{font-size:13px;color:#21425b}
+.ds-title small{font-size:11.5px;color:#587083}
+.ds-status{font-size:11px;font-weight:800;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.ds-status.ok{background:#e6f6f1;color:#17644e}
+.ds-status.warn{background:#fff1e3;color:#8a5517}
+.ds-keys{display:flex;gap:20px;flex-wrap:wrap;flex:1;min-width:0}
+.ds-keys span{display:grid;gap:1px}
+.ds-keys small{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#7890a2}
+.ds-keys b{font-size:12.5px;color:#21425b;font-variant-numeric:tabular-nums}
+.ds-toggle{display:flex;align-items:center;gap:7px;margin-left:auto;font-size:12px;font-weight:700;color:#1769d2;white-space:nowrap}
+.ds-toggle i{width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-3px;transition:transform .2s ease}
+.data-section[open] .ds-toggle i{transform:rotate(-135deg);margin-top:3px}
+.ds-close{display:none}
+.data-section[open] .ds-open{display:none}
+.data-section[open] .ds-close{display:inline}
+.ds-body{padding:14px 16px 16px;display:grid;gap:12px}
+.data-group{border:1px solid var(--line);border-radius:8px;margin:0;padding:8px 14px 14px;min-width:0}
+.data-group legend{padding:0 6px;font-size:12px;font-weight:800;color:#21425b}
+.data-group legend small{margin-left:6px;font-size:11px;font-weight:500;color:#7890a2}
+.data-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 14px}
+.data-grid label{position:relative;display:block;min-width:0;font-size:11.5px;font-weight:700;color:#3d5a6c}
+.data-grid .lbl{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.data-grid .money-input,.data-grid select{height:38px;margin-top:5px}
+.data-grid .info{display:inline-grid;place-items:center;flex:none;width:13px;height:13px;border:1px solid #9db3c2;border-radius:50%;color:#7890a2;font:700 9px/1 Manrope;font-style:normal;cursor:help}
+.data-grid .hint{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;margin:0;padding:8px 10px;border-radius:6px;background:#183650;color:#fff;font-size:11.5px;font-weight:500;line-height:1.4;box-shadow:0 8px 20px rgba(13,33,57,.25)}
+.data-grid label:hover .hint,.data-grid label:focus-within .hint{display:block}
+.ds-note{margin:0;font-size:11.5px;line-height:1.5;color:#587083}
+.extract-more{margin-top:8px}
+.extract-more>summary{cursor:pointer;font-size:12px;font-weight:700;color:#1769d2}
+@media(max-width:1100px){.data-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.data-grid{grid-template-columns:1fr}.ds-keys{display:none}.ds-toggle{margin-left:auto}}
+.data-grid select{width:100%;padding:0 28px 0 10px;border:1px solid #dde7ed;border-radius:6px;background:#fbfcfd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%237890a2' stroke-width='1.6'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 11px center;color:#294a62;font:600 12px Manrope;appearance:none;-webkit-appearance:none;cursor:pointer}
+.data-grid .hint{pointer-events:none}
+.data-grid .field-extracted select{border-color:#38b998;background-color:#f3fbf8}
+.data-grid .field-missing select{border-color:#e39a86;background-color:#fff8f5}
+.data-grid .field-ai select{border-color:#7b8bea;background-color:#f5f6ff}
+@media(max-width:560px){.data-grid .hint{position:static;padding:4px 2px 0;background:none;color:#587083;box-shadow:none}}

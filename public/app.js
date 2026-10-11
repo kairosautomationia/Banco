@@ -196,6 +196,17 @@ function renderHeader() {
   $('caseClient').textContent = key === 'custom' ? (customName || 'Empresa personalizada') : cases[key].name.replace(' (ejemplo)', '');
   $('caseAvatar').textContent = key === 'custom' ? (customName ? customName.replace(/\.[^.]+$/, '').slice(0, 2).toUpperCase() : 'EP') : cases[key].initials;
   $('caseAmount').textContent = money(parseField('requested') || 0);
+  renderDataSummary();
+}
+
+/* Resumen de «Datos extraídos»: estado y cifras clave visibles aunque la sección esté plegada */
+function renderDataSummary() {
+  const missing = FIELD_KEYS.filter((id) => (id === 'overdue' ? $(id).closest('label').classList.contains('field-missing') : !isFinite(parseField(id))));
+  const status = $('dataStatus');
+  status.className = `ds-status ${missing.length ? 'warn' : 'ok'}`;
+  status.textContent = missing.length ? `${missing.length} por completar` : `${FIELD_KEYS.length} de ${FIELD_KEYS.length} completos`;
+  const val = (id) => { const n = parseField(id); return isFinite(n) ? money(n) : 'n.d.'; };
+  $('dataKeys').innerHTML = [['Ventas dic-24', 'sales24'], ['EBITDA', 'ebitda'], ['Deuda sistema', 'debt'], ['Solicitada', 'requested']].map(([k, id]) => `<span><small>${k}</small><b>${val(id)}</b></span>`).join('');
 }
 
 function render() {
@@ -243,6 +254,7 @@ function advance() {
     const errors = validate(readInputs());
     if (errors.length) {
       $('formErrors').hidden = false;
+      $('dataDetails').open = true;
       $('formErrors').innerHTML = `<b>Revisa los datos antes de continuar:</b><ul>${errors.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`;
       showToast('Faltan datos o hay valores inválidos');
       return;
@@ -275,6 +287,7 @@ function resetCase() {
   customName = '';
   docMarkdown = '';
   clearExtractionMarks();
+  $('dataDetails').open = false;
   applyCase('guia');
   $('formErrors').hidden = true;
   fillPanels();
@@ -405,8 +418,9 @@ function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
   const rows = found.map((id) => `<li${byAi(id) ? ' class="ai"' : ''}><b>${labelOf(id)}${byAi(id) ? ' <em class="ai-tag">IA · verifícalo</em>' : ''}</b><span>${show(id)}</span><small>${esc(evidence[id] || '')}</small></li>`).join('');
   const miss = missing.map((id) => `<li class="miss"><b>${labelOf(id)}</b><span>No encontrado</span><small>Complétalo manualmente</small></li>`).join('');
   $('extractReport').hidden = false;
-  $('extractReport').innerHTML = `<div class="extract-head"><b>${found.length} de ${FIELD_KEYS.length} campos extraídos de ${esc(filename)}${Object.keys(ai.values).length ? ` (${Object.keys(ai.values).length} completados con IA)` : ''}</b>${warnings.map((w) => `<p class="extract-warning">${esc(w)}</p>`).join('')}</div><ul>${rows}${miss}</ul>`;
+  $('extractReport').innerHTML = `<div class="extract-head"><b>${found.length} de ${FIELD_KEYS.length} campos extraídos de ${esc(filename)}${Object.keys(ai.values).length ? ` (${Object.keys(ai.values).length} completados con IA)` : ''}</b>${warnings.map((w) => `<p class="extract-warning">${esc(w)}</p>`).join('')}</div><details class="extract-more"><summary>Ver detalle y evidencia por campo</summary><ul>${rows}${miss}</ul></details>`;
   $('caseSelect').value = 'custom';
+  $('dataDetails').open = true;  // tras cargar un documento hay que revisar lo extraído
   invalidateAnalysis({ target: { id: 'fileInput' } });
   setUploadStatus(missing.length || warnings.length ? 'warn' : 'ok', missing.length ? `Extracción parcial: faltan ${missing.length} campo(s). Complétalos abajo antes de validar.` : Object.keys(ai.values).length ? 'Extracción completa. Los campos marcados con IA requieren tu verificación contra el documento.' : warnings.length ? 'Extracción completa, con una advertencia. Revisa los valores.' : 'Extracción completa. Revisa los valores y valida los datos.');
 }
