@@ -114,11 +114,12 @@ test('handleAi decisión: devuelve recomendación, memo y modelo por defecto', a
   const res = await handleAi(post({ facts: FACTS }), env, 'decision');
   const data = await res.json();
   assert.equal(res.status, 200);
-  assert.equal(data.model, '@cf/zai-org/glm-4.7-flash');
+  assert.equal(data.model, '@cf/google/gemma-4-26b-a4b-it');
   assert.equal(data.memo.resumen, 'Score 640.');
   assert.equal(data.recomendacion, 'aprobar_con_condiciones');     // la IA pidió "aprobar": se sube al piso de las reglas
   assert.equal(data.relacion, 'ajustada');
-  assert.equal(seen.input.reasoning_effort, 'low');
+  assert.deepEqual(seen.input.chat_template_kwargs, { enable_thinking: false });   // sin razonamiento: rápido
+  assert.equal('reasoning_effort' in seen.input, false);
 });
 
 test('handleAi perfil: integra comportamiento y contexto verificado', async () => {
@@ -128,9 +129,9 @@ test('handleAi perfil: integra comportamiento y contexto verificado', async () =
   assert.equal(data.perfil.contexto.length, 1);
 });
 
-test('handleAi: reintenta sin reasoning_effort si el modelo lo rechaza', async () => {
+test('handleAi: reintenta sin chat_template_kwargs si el modelo lo rechaza', async () => {
   const calls = [];
-  const env = envWith(async (_m, input) => { calls.push(input); if (input.reasoning_effort) throw new Error('bad param'); return { response: '{"observaciones":[],"personalizacion":null}' }; });
+  const env = envWith(async (_m, input) => { calls.push(input); if (input.chat_template_kwargs) throw new Error('bad param'); return { response: '{"observaciones":[],"personalizacion":null}' }; });
   const res = await handleAi(post({ facts: FACTS }), env, 'proteccion');
   assert.equal(res.status, 200);
   assert.equal(calls.length, 2);

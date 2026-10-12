@@ -8,10 +8,11 @@
 // Variables: AI_MODEL, AI_MODEL_INTEGRACION | AI_MODEL_PROTECCION | AI_MODEL_DECISION, AI_REASONING_EFFORT,
 // y para openai: AI_BASE_URL, AI_API_KEY.
 
-// Gratuito en el plan Workers Free (10.000 Neurons/día), 131.072 tokens de contexto, multilingüe.
-// Para un modelo más potente (p. ej. @cf/zai-org/glm-5.3-flash, requiere Workers Paid) define AI_MODEL en wrangler.jsonc > vars.
-export const DEFAULT_MODEL = '@cf/zai-org/glm-4.7-flash';
-const TIMEOUT_MS = 60000;
+// Gemma 4 26B A4B: MoE con solo 4B parámetros activos (rápido como un modelo pequeño, calidad de uno grande), 256K de contexto,
+// multilingüe, disponible en el plan Workers Free (10.000 Neurons/día). Se usa con el razonamiento apagado: es lo que evita los «tardó demasiado».
+// Para otro modelo (p. ej. @cf/zai-org/glm-5.3-flash, requiere Workers Paid) define AI_MODEL en wrangler.jsonc > vars.
+export const DEFAULT_MODEL = '@cf/google/gemma-4-26b-a4b-it';
+const TIMEOUT_MS = 40000;   // por intento; dos intentos (normal + estricto) caben en los 100 s del navegador
 const MAX_BODY = 700000;   // caracteres; el front envía ≈250 KB como máximo (documento recortado a 200 KB + expediente)
 const MAX_DOC = 200000;   // caracteres; ~80k tokens, cabe en los 131k de contexto del modelo por defecto
 const MAX_FACTS = 30000;
@@ -61,17 +62,20 @@ export function textOf(result) {
 
 function workersAiProvider(env) {
   if (!env.AI || typeof env.AI.run !== 'function') throw new AiError('IA no configurada: falta el binding "AI" en wrangler.jsonc', 503);
-  const effort = env.AI_REASONING_EFFORT === undefined ? 'low' : env.AI_REASONING_EFFORT;
+  // Por defecto sin razonamiento (rápido). AI_REASONING_EFFORT (low|medium|high) lo activa en modelos que lo soporten (p. ej. GLM).
+  const effort = env.AI_REASONING_EFFORT || '';
+  const noThink = { chat_template_kwargs: { enable_thinking: false } };
   return {
     name: 'workers-ai',
     modelFor: (phase) => pickModel(env, phase, DEFAULT_MODEL),
     async complete({ model, system, user, maxTokens, temperature, strict }) {
       const minimal = { messages: [{ role: 'system', content: system }, { role: 'user', content: user }], max_tokens: maxTokens };
-      // Normal: razonamiento ligero. Si el modelo rechaza un parámetro, se reintenta con menos (primero sin reasoning_effort, al final solo lo mínimo).
-      // Estricto (segundo intento tras una salida inservible): sin razonamiento, para que los tokens alcancen para el JSON.
+      // Si el modelo rechaza un parámetro se reintenta con menos (al final solo lo mínimo).
+      // Estricto (segundo intento tras una salida inservible): sin razonamiento y sin temperatura, para que los tokens alcancen para el JSON.
       const attempts = strict
-        ? [{ ...minimal, reasoning_effort: 'none' }, minimal]
-        : effort ? [{ ...minimal, temperature, reasoning_effort: effort }, { ...minimal, temperature }, minimal] : [{ ...minimal, temperature }, minimal];
+        ? [{ ...minimal, ...noThink, reasoning_effort: 'none' }, { ...minimal, ...noThink }, minimal]
+        : effort ? [{ ...minimal, temperature, reasoning_effort: effort }, { ...minimal, temperature }, minimal]
+          : [{ ...minimal, temperature, ...noThink }, { ...minimal, temperature }, minimal];
       let last;
       for (const input of attempts) {
         try {
