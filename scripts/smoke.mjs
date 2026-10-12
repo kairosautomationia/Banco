@@ -1,8 +1,11 @@
 // Prueba de humo contra un despliegue real. No guarda ni imprime la contraseña.
 //   BASE_URL=https://tu-worker.workers.dev ACCESS_PASSWORD=... node scripts/smoke.mjs
 // Comprueba que el sitio cargue, que el front nuevo esté publicado y que cada tarea de IA responda con el modelo.
-const base = (process.env.BASE_URL || process.argv[2] || '').replace(/\/+$/, '');
-if (!/^https?:\/\//.test(base)) { console.error('Uso: BASE_URL=https://... [ACCESS_PASSWORD=...] node scripts/smoke.mjs'); process.exit(2); }
+const args = process.argv.slice(2);
+const fileIdx = args.indexOf('--file');
+const filePath = fileIdx > -1 ? args[fileIdx + 1] : process.env.FILE;
+const base = (process.env.BASE_URL || args.find((a) => /^https?:\/\//.test(a)) || '').replace(/\/+$/, '');
+if (!/^https?:\/\//.test(base)) { console.error('Uso: BASE_URL=https://... [ACCESS_PASSWORD=...] node scripts/smoke.mjs [--file ruta/al/estado-financiero.pdf]'); process.exit(2); }
 const headers = { 'content-type': 'application/json' };
 if (process.env.ACCESS_PASSWORD) headers.authorization = `Basic ${Buffer.from(`user:${process.env.ACCESS_PASSWORD}`).toString('base64')}`;
 
@@ -57,6 +60,39 @@ for (const [name, body, valid] of tasks) {
   try { data = JSON.parse(r.text); } catch { /* respuesta no JSON */ }
   const ok = r.res.status === 200 && data.ok && valid(data);
   report(ok, `IA · ${name} (${(r.ms / 1000).toFixed(1)} s)`, ok ? `modelo ${data.model}` : `HTTP ${r.res.status}: ${data.error || r.text.slice(0, 160)}${hint(r.res.status) ? ` → ${hint(r.res.status)}` : ''}`);
+}
+// OCR real: sube un archivo a /api/extract (LlamaParse) y mide qué campos extrae la app. Con los archivos de test/fixtures compara con la verdad conocida.
+if (filePath) {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { createRequire } = await import('node:module');
+  const { extract } = createRequire(import.meta.url)('../public/extractor.js');
+  const name = path.basename(filePath);
+  const bytes = fs.readFileSync(filePath);
+  console.log(`\nOCR real con ${name} (${(bytes.length / 1024).toFixed(0)} KB):`);
+  const t0 = Date.now();
+  const r = await call('/api/extract', { method: 'POST', headers: { 'content-type': 'application/octet-stream', 'x-filename': encodeURIComponent(name) }, body: bytes });
+  let data = {};
+  try { data = JSON.parse(r.text); } catch { /* no JSON */ }
+  if (r.error || r.res.status !== 200 || !data.markdown) {
+    report(false, 'OCR', r.error || `HTTP ${r.res.status}: ${data.error || r.text.slice(0, 200)}${r.res && r.res.status === 500 ? ' → falta el secreto LLAMA_CLOUD_API_KEY en el Worker' : ''}`);
+  } else {
+    report(true, `OCR (${((Date.now() - t0) / 1000).toFixed(1)} s)`, `${data.markdown.length.toLocaleString('es')} caracteres de texto`);
+    const truthFile = new URL('../test/fixtures/ground-truth.json', import.meta.url);
+    const truth = /^estados-financieros/.test(name) && fs.existsSync(truthFile) ? JSON.parse(fs.readFileSync(truthFile, 'utf8')) : null;
+    const { values, evidence, warnings } = extract(data.markdown);
+    const keys = ['sales24', 'sales23', 'sales22', 'sales21', 'debt', 'ebitda', 'finExp', 'cash', 'employees', 'netIncome', 'equity', 'institutions', 'overdue', 'bbDebt', 'requested'];
+    let ok = 0;
+    for (const k of keys) {
+      const got = values[k];
+      const mark = got === undefined ? '○' : truth ? (got === truth[k] ? '✓' : '✗') : '•';
+      if (mark === '✓') ok += 1;
+      console.log(`  ${mark} ${k.padEnd(13)} ${String(got === undefined ? '— (no encontrado)' : got).padEnd(18)}${truth ? `esperado ${truth[k]}` : ''}${got !== undefined && mark === '✗' ? `   ← ${String(evidence[k]).slice(0, 70)}` : ''}`);
+    }
+    warnings.forEach((w) => console.log(`  ! ${w}`));
+    if (truth) report(ok === keys.length, `Extracción exacta: ${ok} de ${keys.length} campos`, ok === keys.length ? '' : 'revisa los ✗ (valor distinto) y ○ (no encontrado); pásame esta salida');
+    else console.log(`  ${keys.filter((k) => values[k] !== undefined).length} de ${keys.length} campos extraídos (• = valor leído; revísalos contra el documento)`);
+  }
 }
 console.log(fails ? `\n${fails} comprobación(es) fallaron.` : '\nTodo en orden.');
 process.exit(fails ? 1 : 0);

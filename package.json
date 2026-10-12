@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test test/ai.test.mjs test/worker.test.mjs test/extractor.test.mjs test/ocr.test.mjs",
+    "test": "node --test test/ai.test.mjs test/worker.test.mjs test/extractor.test.mjs test/fixtures.test.mjs test/ocr.test.mjs",
     "smoke": "node scripts/smoke.mjs"
   },
   "engines": {

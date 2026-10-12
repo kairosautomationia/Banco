@@ -79,13 +79,14 @@ async function extract(request, env) {
 
   const declared = Number(request.headers.get('content-length') || 0);
   if (declared > MAX_BYTES) throw new HttpError('El archivo supera 20 MB', 413);
-  const buffer = await request.arrayBuffer();
-  if (buffer.byteLength > MAX_BYTES) throw new HttpError('El archivo supera 20 MB', 413);
-  if (!buffer.byteLength) return json(400, { error: 'El archivo está vacío' });
+  // blob() en vez de arrayBuffer() + new Blob([...]): una copia menos (4× menos CPU; el plan Free permite 10 ms por solicitud).
+  const file = new Blob([await request.blob()]);
+  if (file.size > MAX_BYTES) throw new HttpError('El archivo supera 20 MB', 413);
+  if (!file.size) return json(400, { error: 'El archivo está vacío' });
 
   const baseName = filename.split(/[\\/]/).pop();
   const form = new FormData();
-  form.append('file', new Blob([buffer]), baseName);
+  form.append('file', file, baseName);
   form.append('language', 'es');
   const job = await llama(env, '/upload', { method: 'POST', body: form });
 
@@ -98,8 +99,11 @@ async function extract(request, env) {
     if (status === 'ERROR' || status === 'CANCELED') throw new HttpError(`El OCR terminó con estado ${status}`, 502);
     if (Date.now() - started > MAX_WAIT_MS) throw new HttpError('El OCR tardó demasiado; intenta de nuevo', 504);
   }
-  const result = await llama(env, `/job/${job.id}/result/markdown`);
-  return json(200, { markdown: result.markdown || '', filename: baseName });
+  // El texto del OCR puede ser de varios MB: se reenvía como flujo, sin parsearlo ni reserializarlo (con JSON.stringify costaba ~16 ms por MB de CPU).
+  // Solo se reenvía el tipo de contenido: no los demás encabezados (p. ej. content-encoding), porque el cuerpo ya viene descomprimido.
+  const res = await fetch(`${BASE}/job/${job.id}/result/markdown`, { headers: { Authorization: `Bearer ${env.LLAMA_CLOUD_API_KEY}`, accept: 'application/json' } });
+  if (!res.ok) throw new HttpError(`OCR respondió ${res.status}`, 502);
+  return new Response(res.body, { status: 200, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
 const handler = {

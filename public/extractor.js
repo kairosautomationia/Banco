@@ -46,29 +46,37 @@
       if (!cells.length || cells.every((c) => /^[-:\s]+$/.test(c))) return null;
       return { label: cells[0], rest: cells.slice(1).join(' | '), raw: line };
     }
+    if (/[;\t]/.test(line)) {
+      const cells = line.split(/[;\t]/).map((c) => c.trim()).filter(Boolean);
+      if (cells.length >= 2) return { label: cells[0], rest: cells.slice(1).join(' | '), raw: line };
+    }
     const m = line.match(/^(.*?)(?:\s*[:：]\s*|\s{2,}|\s(?=[$(\-]?\s?\d))(.*)$/);
     return m ? { label: m[1], rest: m[2], raw: line } : { label: line, rest: '', raw: line };
   }
 
   const MONTHS = /(ene|feb|mar|abr|may|jun|jul|ago|sep|set|oct|nov|dic)[a-z]*[-\s/.]*'?(\d{2,4})/g;
-  function detectAscending(lines) {
-    for (const line of lines) {
-      const text = norm(line);
-      const years = [];
-      let m;
-      MONTHS.lastIndex = 0;
-      while ((m = MONTHS.exec(text))) years.push(Number(m[2]) < 100 ? 2000 + Number(m[2]) : Number(m[2]));
-      if (years.length < 2) { (text.match(/\b20\d{2}\b/g) || []).forEach((y) => years.push(Number(y))); }
-      if (years.length >= 2) return years[0] < years[years.length - 1];
-    }
-    return false;
+  function yearsOf(line) {
+    const text = norm(line);
+    const years = [];
+    let m;
+    MONTHS.lastIndex = 0;
+    while ((m = MONTHS.exec(text))) years.push(Number(m[2]) < 100 ? 2000 + Number(m[2]) : Number(m[2]));
+    if (years.length < 2) { (text.match(/\b20\d{2}\b/g) || []).forEach((y) => years.push(Number(y))); }
+    return years;
+  }
+  // Por línea: ¿los periodos van de más antiguo a más reciente? Cada tabla trae su encabezado; antes del primero rige el primero del documento.
+  function ascendingMap(lines) {
+    const heads = lines.map(yearsOf);
+    const first = heads.find((y) => y.length >= 2);
+    let cur = first ? first[0] < first[first.length - 1] : false;
+    return heads.map((y) => { if (y.length >= 2) cur = y[0] < y[y.length - 1]; return cur; });
   }
 
   const FIELDS = [
     { id: 'sales', multi: 4, keepRatios: true, patterns: [/^(total )?ventas( netas| anuales| totales)?\b/, /^ingresos (por )?(ventas|operacionales|ordinarios|de actividades)/, /^ventas\b/, /^ingresos\b/] },
     { id: 'ebitda', patterns: [/\bebitda\b/] },
     { id: 'finExp', abs: true, patterns: [/gastos? financieros?/, /intereses (pagados|por pagar|financieros|generados)/, /costos? financieros?/] },
-    { id: 'cash', patterns: [/efectivo.*(certificados|equivalentes)/, /^efectivo\b/, /caja y bancos/, /^disponible/] },
+    { id: 'cash', exclude: /inicio|aumento|disminucion|variacion|generado|utilizado|actividades|neto de/, patterns: [/efectivo.*(certificados|equivalentes)/, /^efectivo\b/, /caja y bancos/, /^disponible/] },
     { id: 'employees', int: true, keepRatios: true, patterns: [/n(u|ú)mero de empleados/, /^empleados/, /^personal\b/, /^n(o|°|º)\.? de empleados/] },
     { id: 'netIncome', patterns: [/utilidad neta/, /resultado neto/, /ganancia neta/, /utilidad del ejercicio/, /perdida neta/, /resultado del (periodo|ejercicio)/] },
     { id: 'equity', patterns: [/^(total )?patrimonio( neto| contable)?\b/], exclude: /pasivo/ },
@@ -76,12 +84,12 @@
     { id: 'overdue', text: true, patterns: [/vencidos/] },
     { id: 'requested', patterns: [/deuda solicitada/, /incremento (en )?(el )?riesgo/, /monto solicitado/, /^solicitud\b/] },
     { id: 'bbDebt', patterns: [/^deuda actual/, /exposicion actual/] },
-    { id: 'debt', patterns: [/deuda en el sistema financiero/, /deuda (financiera )?total/, /total deuda financiera/, /^obligaciones financieras/, /^deuda\b/] }
+    { id: 'debt', patterns: [/deuda en el sistema financiero/, /^total (obligaciones|deuda|pasivos?) financier/, /deuda (financiera )?total/, /total deuda financiera/, /^obligaciones financieras/, /^deuda\b/] }
   ];
 
   function extract(markdown) {
     const rawLines = String(markdown || '').split(/\r?\n/);
-    const asc = detectAscending(rawLines);
+    const ascAt = ascendingMap(rawLines);
     const parsed = rawLines.map(splitLine);
     const used = new Set();
     const out = {};
@@ -89,7 +97,7 @@
     const warnings = [];
 
     const setValue = (id, value, ev) => { out[id] = value; evidence[id] = ev; };
-    const pick = (nums) => (asc ? nums[nums.length - 1] : nums[0]);
+    const pickAt = (nums, i) => (ascAt[i] ? nums[nums.length - 1] : nums[0]);
 
     FIELDS.forEach((field) => {
       for (const pattern of field.patterns) {
@@ -97,6 +105,7 @@
           const p = parsed[i];
           if (!p || used.has(i)) continue;
           const label = norm(p.label);
+          if (field.multi) continue;   // las ventas se resuelven abajo, comparando todas las filas candidatas
           if (!pattern.test(label) || (field.exclude && field.exclude.test(label)) || (!field.keepRatios && RATIO.test(label))) continue;
           if (field.text) {
             const m = norm(p.rest || p.label).match(/\b(si|no)\b\s*$/) || norm(p.rest).match(/\b(si|no)\b/);
@@ -118,17 +127,57 @@
           }
           if (!nums.length) continue;
           used.add(i);
-          if (field.multi) {
-            const ordered = asc ? [...nums].reverse() : nums;
-            ['sales24', 'sales23', 'sales22', 'sales21'].forEach((k, idx) => { if (ordered[idx] !== undefined) setValue(k, ordered[idx], p.raw); });
-          } else {
-            const v = pick(nums);
-            setValue(field.id, field.int ? Math.round(v) : field.abs ? Math.abs(v) : v, p.raw);
-          }
+          const v = pickAt(nums, i);
+          setValue(field.id, field.int ? Math.round(v) : field.abs ? Math.abs(v) : v, p.raw);
           return;
         }
       }
     });
+
+    // Ventas: un estado de resultados trae 2 años y la tabla comparativa 4. Se elige la fila con más periodos;
+    // una etiqueta exacta («Ventas netas») gana a «Ventas por región» o «Ingresos financieros».
+    {
+      const field = FIELDS[0];
+      const EXACT = /^(total )?(ventas|ingresos)( netas| totales| anuales| ordinarios| operacionales| de actividades ordinarias)?:?$/;
+      const NOT_SALES = /financier|no operacional|otros ingresos|interes|dividendo/;
+      for (const exactOnly of [true, false]) {
+        let best = null;
+        for (const pattern of field.patterns) {
+          parsed.forEach((p, i) => {
+            if (!p || used.has(i)) return;
+            const label = norm(p.label);
+            if (!pattern.test(label) || NOT_SALES.test(label) || (exactOnly && !EXACT.test(label))) return;
+            const nums = dropNoteColumn(numberTokens(p.rest)).map((x) => x.value);
+            if (nums.length && (!best || Math.min(nums.length, 4) > Math.min(best.nums.length, 4))) best = { i, nums, p };
+          });
+          if (best) break;
+        }
+        if (best) {
+          used.add(best.i);
+          const ordered = ascAt[best.i] ? [...best.nums].reverse() : best.nums;
+          ['sales24', 'sales23', 'sales22', 'sales21'].forEach((k, idx) => { if (ordered[idx] !== undefined) setValue(k, ordered[idx], best.p.raw); });
+          break;
+        }
+      }
+    }
+
+    // Deuda leída de un solo tramo («Obligaciones financieras a corto plazo»): se suman corto y largo plazo si ambos existen.
+    if (out.debt !== undefined && /corto plazo|largo plazo|corriente/.test(norm(evidence.debt))) {
+      const at = (re) => parsed.findIndex((p) => p && re.test(norm(p.label)) && !RATIO.test(norm(p.label)) && dropNoteColumn(numberTokens(p.rest)).length);
+      const st = at(/^obligaciones financieras.*(corto plazo|(?<!no )corriente)/);
+      const lt = at(/^obligaciones financieras.*(largo plazo|no corriente)/);
+      const val = (i) => pickAt(dropNoteColumn(numberTokens(parsed[i].rest)).map((x) => x.value), i);
+      if (st !== -1 && lt !== -1) setValue('debt', val(st) + val(lt), `Calculado: ${parsed[st].raw} + ${parsed[lt].raw}`);
+      else warnings.push('La deuda se leyó de un solo tramo (corto o largo plazo): verifica el total.');
+    }
+
+    // Empleados dichos en una frase («la Compañía mantiene 112 empleados»).
+    if (out.employees === undefined) {
+      for (const line of rawLines) {
+        const m = norm(line).match(/(mantiene|mantuvo|cuenta con|tiene|emplea|posee|nomina de|dotacion de)\s+(\d{1,6})\s+(empleados|trabajadores|colaboradores)/);
+        if (m) { setValue('employees', Number(m[2]), line.trim().slice(0, 200)); break; }
+      }
+    }
 
     // EBITDA calculado cuando el documento solo trae utilidad operativa y depreciación
     if (out.ebitda === undefined) {
@@ -136,7 +185,7 @@
       const op = find(/utilidad (operativa|operacional)|resultado operacional|resultado operativo/);
       const dep = find(/depreciacion|amortizacion/);
       if (op !== -1 && dep !== -1) {
-        setValue('ebitda', pick(numbersIn(parsed[op].rest)) + pick(numbersIn(parsed[dep].rest)), `Calculado: ${parsed[op].raw} + ${parsed[dep].raw}`);
+        setValue('ebitda', pickAt(numbersIn(parsed[op].rest), op) + pickAt(numbersIn(parsed[dep].rest), dep), `Calculado: ${parsed[op].raw} + ${parsed[dep].raw}`);
       }
     }
 

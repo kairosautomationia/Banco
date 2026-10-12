@@ -73,3 +73,71 @@ test('rendimiento: líneas patológicas y documentos grandes no congelan la pág
   assert.ok(t('1.'.repeat(30000)) < 1500);
   assert.ok(t(' '.repeat(50000) + '1') < 1500);
 });
+
+// ---------- Estados financieros reales y largos ----------
+test('ventas: la tabla comparativa de 4 años gana al estado de resultados de 2 años', () => {
+  const v = values(`| Concepto | Nota | 2024 | 2023 |
+| Ventas netas | 16 | 12.400.000 | 11.200.000 |
+| INFORMACIÓN COMPARATIVA | | | |
+| Concepto | 2024 | 2023 | 2022 | 2021 |
+| Ventas netas | 12.400.000 | 11.200.000 | 10.100.000 | 9.300.000 |`);
+  assert.deepEqual([v.sales24, v.sales23, v.sales22, v.sales21], [12400000, 11200000, 10100000, 9300000]);
+});
+
+test('ventas: el orden de los años se decide por tabla (una descendente y otra ascendente)', () => {
+  const v = values(`| Concepto | 2024 | 2023 |
+| Utilidad neta | 1.020.000 | 950.000 |
+| Concepto | 2021 | 2022 | 2023 | 2024 |
+| Ventas netas | 9.300.000 | 10.100.000 | 11.200.000 | 12.400.000 |
+| Utilidad neta | 790.000 | 870.000 | 950.000 | 1.020.000 |`);
+  assert.deepEqual([v.sales24, v.sales23, v.sales22, v.sales21], [12400000, 11200000, 10100000, 9300000]);
+  assert.equal(v.netIncome, 1020000);   // primera tabla (descendente): el último periodo es el primero
+});
+
+test('ventas: no toma filas de «Ventas por región» ni «Ingresos financieros» aunque tengan más columnas', () => {
+  const v = values(`| Concepto | 2024 | 2023 |
+| Ingresos financieros | 1.000 | 2.000 | 3.000 | 4.000 |
+| Ventas por región norte | 1 | 2 | 3 | 4 | 5 |
+| Ventas netas | 12.400.000 | 11.200.000 |`);
+  assert.deepEqual([v.sales24, v.sales23], [12400000, 11200000]);
+  assert.equal(v.sales22, undefined);
+});
+
+test('ventas: «Ingresos de actividades ordinarias» (NIIF) se reconoce', () => {
+  assert.equal(values('| Ingresos de actividades ordinarias | 18 | 12.400.000 | 11.200.000 |').sales24, 12400000);
+});
+
+test('CSV exportado de Excel en español (; y tabulador) se lee igual que una tabla', () => {
+  const v = values('Ventas netas;16;12.400.000;11.200.000\nEBITDA;;1.850.000;1.630.000\nGastos financieros;19;(160.000);(150.000)');
+  assert.deepEqual([v.sales24, v.sales23, v.ebitda, v.finExp], [12400000, 11200000, 1850000, 160000]);
+  assert.equal(values('Patrimonio\t3.900.000\t3.510.000').equity, 3900000);
+});
+
+test('deuda: prefiere el total; si solo hay corto y largo plazo, los suma; si hay un solo tramo, avisa', () => {
+  assert.equal(values('| Obligaciones financieras a corto plazo | 900.000 |\n| Obligaciones financieras a largo plazo | 1.200.000 |\n| Total obligaciones financieras | 2.100.000 |').debt, 2100000);
+  const suma = extract('| Obligaciones financieras a corto plazo | 12 | 900.000 | 850.000 |\n| Obligaciones financieras a largo plazo | 12 | 1.200.000 | 1.100.000 |');
+  assert.equal(suma.values.debt, 2100000);
+  const uno = extract('| Obligaciones financieras a corto plazo | 900.000 |');
+  assert.equal(uno.values.debt, 900000);
+  assert.ok(uno.warnings.some((w) => /un solo tramo/.test(w)));
+  assert.equal(values('Deuda en el sistema financiero: $ 2.100.000\n| Obligaciones financieras a corto plazo | 900.000 |').debt, 2100000);   // el dato explícito manda
+});
+
+test('efectivo: no toma filas del estado de flujos aunque aparezca antes que el balance', () => {
+  const v = values(`| Efectivo neto generado por actividades de operación | 1.120.000 |
+| Efectivo y equivalentes de efectivo al inicio del periodo | 520.000 |
+| Aumento neto de efectivo | 120.000 |
+| Efectivo y equivalentes de efectivo | 4 | 640.000 | 520.000 |`);
+  assert.equal(v.cash, 640000);
+});
+
+test('empleados: se leen de una frase de las notas, pero no de cualquier mención', () => {
+  assert.equal(values('Al 31 de diciembre de 2024 la Compañía mantiene 112 empleados (2023: 104).').employees, 112);
+  assert.equal(values('La NIIF define como PYME a entidades con menos de 200 empleados.').employees, undefined);
+  assert.equal(values('| Número de empleados | 112 | 104 |\nLa Compañía mantiene 50 empleados.').employees, 112);   // la tabla manda sobre la frase
+});
+
+test('un dato que no está en el documento queda sin valor (nunca se inventa)', () => {
+  const v = values('| Ventas netas | 12.400.000 | 11.200.000 |');
+  for (const k of ['institutions', 'overdue', 'bbDebt', 'requested', 'equity', 'cash']) assert.equal(v[k], undefined, k);
+});
