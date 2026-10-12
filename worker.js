@@ -65,6 +65,23 @@ async function llama(env, pathname, options = {}) {
   return res.json();
 }
 
+// Lee el cuerpo con tope. Sin Content-Length (chunked), request.blob() bufferizaría un cuerpo enorme ENTERO antes de rechazarlo
+// (probado: 200 MB leídos antes del 413) y el Worker solo tiene 128 MB de memoria.
+async function readCapped(request, max) {
+  if (!request.body) return new Blob([]);
+  const reader = request.body.getReader();
+  const chunks = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) { reader.cancel().catch(() => {}); throw new HttpError('El archivo supera 20 MB', 413); }
+    chunks.push(value);
+  }
+  return new Blob(chunks);
+}
+
 async function extract(request, env) {
   if (!env.LLAMA_CLOUD_API_KEY) return json(500, { error: 'Falta el secreto LLAMA_CLOUD_API_KEY en Cloudflare' });
 
@@ -80,7 +97,7 @@ async function extract(request, env) {
   const declared = Number(request.headers.get('content-length') || 0);
   if (declared > MAX_BYTES) throw new HttpError('El archivo supera 20 MB', 413);
   // blob() en vez de arrayBuffer() + new Blob([...]): una copia menos (4× menos CPU; el plan Free permite 10 ms por solicitud).
-  const file = new Blob([await request.blob()]);
+  const file = new Blob([declared ? await request.blob() : await readCapped(request, MAX_BYTES)]);
   if (file.size > MAX_BYTES) throw new HttpError('El archivo supera 20 MB', 413);
   if (!file.size) return json(400, { error: 'El archivo está vacío' });
 
@@ -134,7 +151,8 @@ const handler = {
 const SECURITY_HEADERS = {
   'x-content-type-options': 'nosniff',
   'x-frame-options': 'DENY',
-  'content-security-policy': "frame-ancestors 'none'",
+  // Defensa en profundidad contra XSS: solo scripts propios; estilos en línea (el diseño los usa) y Google Fonts; sin objetos ni <base>.
+  'content-security-policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
   'referrer-policy': 'no-referrer',
   'permissions-policy': 'camera=(), microphone=(), geolocation=()'
 };

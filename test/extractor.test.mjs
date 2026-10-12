@@ -141,3 +141,77 @@ test('un dato que no está en el documento queda sin valor (nunca se inventa)', 
   const v = values('| Ventas netas | 12.400.000 | 11.200.000 |');
   for (const k of ['institutions', 'overdue', 'bbDebt', 'requested', 'equity', 'cash']) assert.equal(v[k], undefined, k);
 });
+
+// ---------- Auditoría independiente: cada caso se reprodujo antes de corregirse ----------
+test('un año suelto en una frase no es una cifra', () => {
+  const v = values('Ventas netas del año 2024: 6.337.000 frente a 7.000.000 en 2023');
+  assert.deepEqual([v.sales24, v.sales23, v.sales22], [6337000, 7000000, undefined]);
+  assert.equal(values('EBITDA 2024: 400.000').ebitda, 400000);
+  assert.equal(values('| Ventas | 2024 |').sales24, undefined);
+});
+
+test('«por acción», «sobre» y otras razones no son el dato', () => {
+  assert.equal(values('| Utilidad neta por acción | 0,25 |\n| Utilidad neta | 316.850 |').netIncome, 316850);
+  assert.equal(values('| Deuda neta sobre EBITDA | 2,5 |\n| EBITDA | 400.000 |').ebitda, 400000);
+  assert.equal(values('| Utilidad neta por acción | 0,25 |').netIncome, undefined);
+});
+
+test('el signo: pérdida neta, menos tipográfico, guion largo pegado y menos al final son negativos', () => {
+  assert.equal(values('| Pérdida neta | 85.000 |').netIncome, -85000);
+  assert.equal(values('| Utilidad neta | −85.000 |').netIncome, -85000);
+  assert.equal(values('| Patrimonio | –150.000 |').equity, -150000);
+  assert.equal(values('| Patrimonio | 150.000- |').equity, -150000);
+  assert.equal(values('Ventas netas – 6.337.000   7.000.000').sales24, 6337000);                  // con espacio detrás, el guion es un separador, no un signo
+});
+
+test('columnas numéricas extra sin % (variación, % del total, nota de 3 dígitos) no entran como periodos', () => {
+  let v = values('| Ventas | 6.337.000 | 7.000.000 | -9,5 |');
+  assert.deepEqual([v.sales24, v.sales23, v.sales22], [6337000, 7000000, undefined]);
+  v = values('| Ventas | 6.337.000 | 100 | 7.000.000 | 100 |');
+  assert.deepEqual([v.sales24, v.sales23, v.sales22], [6337000, 7000000, undefined]);
+  v = values('| Ventas | 105 | 1.300.000 | 1.200.000 |');
+  assert.deepEqual([v.sales24, v.sales23], [1300000, 1200000]);
+});
+
+test('la nota se descarta también con cifras en miles y en campos enteros', () => {
+  assert.equal(values('| Efectivo y equivalentes | 4 | 800 | 700 |').cash, 800);
+  assert.equal(values('| Número de empleados | 5 | 112 |').employees, 112);
+  assert.equal(values('| Gastos financieros | 20 | 30 |').finExp, 20);       // sin cifras claramente mayores no hay nota que descartar
+});
+
+test('patrimonio: gana «Total patrimonio» sobre los subtotales atribuibles', () => {
+  assert.equal(values('| Patrimonio atribuible a los propietarios | 400.000 |\n| Participación no controladora | 84.529 |\n| Total patrimonio | 484.529 |').equity, 484529);
+  assert.equal(values('| Patrimonio atribuible a los propietarios | 400.000 |').equity, undefined);
+});
+
+test('una frase con dos años no cambia el orden de los periodos de las tablas siguientes', () => {
+  const v = values('| Concepto | 2024 | 2023 |\n| Ventas | 6.337.000 | 7.000.000 |\nNota: comparativo 2022 y 2023 de la gestión\n| EBITDA | 500.000 | 450.000 |');
+  assert.equal(v.ebitda, 500000);
+});
+
+test('miles con espacio dentro de una tabla («6 337 000») es una cifra; en texto corrido son dos columnas', () => {
+  const v = values('| Ventas | 6 337 000 | 7 000 000 |');
+  assert.deepEqual([v.sales24, v.sales23], [6337000, 7000000]);
+  assert.equal(values('Efectivo y equivalentes de efectivo   640 520').cash, 640);
+});
+
+test('«vencidos»: solo cuenta una respuesta explícita sobre accionistas; manda el riesgo si hay varias', () => {
+  assert.equal(values('Cuentas por cobrar vencidos: No\nAccionistas con vencidos: Sí').overdue, 'si');
+  assert.equal(values('Accionistas con vencidos: no se dispone de información').overdue, undefined);
+  assert.equal(values('Cuentas por cobrar vencidos: No').overdue, undefined);
+  assert.equal(values('| ¿Accionista ha reportado vencidos? | No |').overdue, 'no');
+  assert.equal(values('Vencidos en la Central de Riesgos: Sí').overdue, 'si');
+});
+
+test('efectivo restringido, deuda neta y «3 empleados clave» no se toman como el dato', () => {
+  assert.equal(values('| Efectivo restringido | 5.000 |').cash, undefined);
+  assert.equal(values('| Deuda neta | 1.000.000 |').debt, undefined);
+  assert.equal(values('La gerencia tiene 3 empleados clave en la operación.').employees, undefined);
+});
+
+test('avisa de la escala en todas las formas habituales', () => {
+  for (const txt of ['Cifras en millones de USD', 'Expresado en dólares (miles)', 'USD miles', 'US$ miles', 'MUSD', 'USD 000', '(Expresado en miles de dólares)', 'Valores en miles']) {
+    assert.ok(extract(`${txt}\nVentas | 6,3 |`).warnings.some((w) => /miles o millones/.test(w)), txt);
+  }
+  assert.equal(extract('Ventas | 6.337.000 |').warnings.some((w) => /miles/.test(w)), false);
+});

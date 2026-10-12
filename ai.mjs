@@ -12,7 +12,7 @@
 // Para un modelo más potente (p. ej. @cf/zai-org/glm-5.3-flash, requiere Workers Paid) define AI_MODEL en wrangler.jsonc > vars.
 export const DEFAULT_MODEL = '@cf/zai-org/glm-4.7-flash';
 const TIMEOUT_MS = 60000;
-const MAX_BODY = 2 * 1024 * 1024;
+const MAX_BODY = 700000;   // caracteres; el front envía ≈250 KB como máximo (documento recortado a 200 KB + expediente)
 const MAX_DOC = 200000;   // caracteres; ~80k tokens, cabe en los 131k de contexto del modelo por defecto
 const MAX_FACTS = 30000;
 

@@ -168,17 +168,23 @@ function phaseHtml(i) {
 /* ---------- Estado y navegación entre fases ---------- */
 const MONEY_IDS = INPUT_IDS.filter((id) => id !== 'employees' && id !== 'institutions');
 const fmtInt = (n) => (n === '' || n === null || n === undefined || !isFinite(Number(n)) ? '' : `${Number(n) < 0 ? '-' : ''}${grouped.format(Math.abs(Math.round(Number(n))))}`);
+/* Quita los centavos sin confundirlos con miles: «1.23» (tras borrar un dígito de «1.234») son miles, no decimales. */
+const stripCents = (raw) => {
+  if (/,\d{1,2}$/.test(raw)) return raw.replace(/,\d{1,2}$/, '');                                                  // coma decimal: 1.234,56
+  if (/^[^.,]*\d{4,}\.\d{1,2}$/.test(raw) || /,\d{3}\.\d{1,2}$/.test(raw)) return raw.replace(/\.\d{1,2}$/, '');   // 1234.56 · 1,234.56
+  return raw;
+};
 const parseField = (id) => {
   const raw = $(id).value.trim();
   if (raw === '') return NaN;
-  if (MONEY_IDS.includes(id)) { const digits = raw.replace(/[.,]\d{1,2}$/, '').replace(/[^\d-]/g, ''); return /\d/.test(digits) ? Number(digits) : NaN; }
+  if (MONEY_IDS.includes(id)) { const digits = stripCents(raw).replace(/[^\d-]/g, ''); return /\d/.test(digits) ? Number(digits) : NaN; }
   return Number(raw);
 };
 const setField = (id, value) => { $(id).value = MONEY_IDS.includes(id) ? fmtInt(value) : value; };
 
 /* Formato de miles con puntos mientras se escribe, conservando la posición del cursor */
 function formatMoneyInput(input) {
-  const before = input.value.replace(/[.,]\d{1,2}$/, '');
+  const before = stripCents(input.value);
   const caret = input.selectionStart === null ? before.length : input.selectionStart;
   const digitsLeft = before.slice(0, caret).replace(/[^\d]/g, '').length;
   const negative = before.trim().startsWith('-') && ['netIncome', 'ebitda', 'equity'].includes(input.id);
@@ -283,6 +289,7 @@ function advance() {
 
 function resetCase() {
   clearTimeout(timer);
+  cancelUpload();
   processing = false;
   unlocked = 0;
   viewPhase = 0;
@@ -355,7 +362,7 @@ function syncViews() {
 
 /* ---------- Eventos ---------- */
 $('caseSelect').addEventListener('change', (event) => {
-  if (event.target.value !== 'custom') { customName = ''; docMarkdown = ''; clearExtractionMarks(); applyCase(event.target.value); }
+  if (event.target.value !== 'custom') { cancelUpload(); customName = ''; docMarkdown = ''; clearExtractionMarks(); applyCase(event.target.value); }
   invalidateAnalysis(event);
 });
 MONEY_IDS.forEach((id) => $(id).addEventListener('input', () => formatMoneyInput($(id))));
@@ -402,7 +409,7 @@ function setUploadStatus(kind, text) {
 function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
   const values = { ...result.values, ...ai.values };
   const evidence = { ...result.evidence, ...ai.evidence };
-  const warnings = [...result.warnings, ...(ai.error ? [`La IA no pudo completar los campos faltantes: ${ai.error}`] : [])];
+  const warnings = [...result.warnings, ...(ai.error ? [`La IA no pudo completar los campos faltantes: ${ai.error}`] : []), ...(ai.scaleNote ? ['La IA detectó cifras en miles o millones: ningún valor se multiplicó. Ajusta la escala de todos los campos antes de analizar.'] : [])];
   const byAi = (id) => ai.values[id] !== undefined;
   customName = filename;
   FIELD_KEYS.forEach((id) => {
@@ -428,29 +435,39 @@ function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
   setUploadStatus(missing.length || warnings.length ? 'warn' : 'ok', missing.length ? `Extracción parcial: faltan ${missing.length} campo(s). Complétalos abajo antes de validar.` : Object.keys(ai.values).length ? 'Extracción completa. Los campos marcados con IA requieren tu verificación contra el documento.' : warnings.length ? 'Extracción completa, con una advertencia. Revisa los valores.' : 'Extracción completa. Revisa los valores y valida los datos.');
 }
 
+let uploadCtl = null;   // carga de archivo en curso
+function cancelUpload() {
+  if (uploadCtl) { uploadCtl.abort(); uploadCtl = null; }
+  $('dropzone').classList.remove('is-busy');
+}
+
 async function handleFile(file) {
   if (!file) return;
   const ext = (file.name.match(/\.[^.]+$/) || [''])[0].toLowerCase();
   if (!['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv'].includes(ext)) { setUploadStatus('error', `Formato no admitido (${ext || 'sin extensión'}). Usa PDF, Word, Excel o CSV.`); return; }
   if (file.size > MAX_FILE_BYTES) { setUploadStatus('error', 'El archivo supera 20 MB.'); return; }
   if (!file.size) { setUploadStatus('error', 'El archivo está vacío.'); return; }
+  cancelUpload();
+  const ctl = (uploadCtl = new AbortController());
   $('dropzone').classList.add('is-busy');
   setUploadStatus('busy', `Leyendo “${file.name}” con OCR… puede tardar hasta un par de minutos.`);
   try {
-    const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-filename': encodeURIComponent(file.name), 'content-type': file.type || 'application/octet-stream' }, body: file });
+    const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-filename': encodeURIComponent(file.name), 'content-type': file.type || 'application/octet-stream' }, body: file, signal: ctl.signal });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
     if (!data.markdown || !data.markdown.trim()) throw new Error('El OCR no devolvió texto legible del documento.');
     docMarkdown = data.markdown;
     const result = Extractor.extract(data.markdown);
     const ai = await aiFillMissing(data.markdown, result);
+    if (ctl.signal.aborted) return;
     if (!Object.keys(result.values).length && !Object.keys(ai.values).length) throw new Error('No se reconoció ninguno de los 15 campos. Ingresa los datos manualmente o prueba con otro archivo.');
     applyExtraction(result, file.name, ai);
   } catch (err) {
+    if (ctl.signal.aborted) return;
     const offline = err instanceof TypeError || location.protocol === 'file:';
     setUploadStatus('error', offline ? 'No se pudo contactar el servidor local. Inícialo con “node server.js” y abre http://localhost:3000.' : err.message);
   } finally {
-    $('dropzone').classList.remove('is-busy');
+    if (uploadCtl === ctl) { uploadCtl = null; $('dropzone').classList.remove('is-busy'); }
     $('fileInput').value = '';
   }
 }
@@ -492,10 +509,11 @@ async function aiFillMissing(markdown, result) {
     Object.entries(data.campos || {}).forEach(([id, c]) => {
       if (!missing.includes(id)) return;
       if (id === 'overdue') { out.values[id] = c.valor; out.evidence[id] = c.evidencia; return; }
-      const n = Extractor.parseNumber(c.cifra) * (c.escala || 1);
+      const n = Extractor.parseNumber(c.cifra);
       if (!isFinite(n)) return;
       out.values[id] = INT_IDS.has(id) ? Math.round(n) : n;
-      out.evidence[id] = `${c.evidencia}${c.escala > 1 ? ` (cifras en ${c.escala === 1000 ? 'miles' : 'millones'}: ×${grouped.format(c.escala)})` : ''}`;
+      out.evidence[id] = `${c.evidencia}${c.escala > 1 ? ` (el documento declara cifras en ${c.escala === 1000 ? 'miles' : 'millones'}; se dejó el valor impreso)` : ''}`;
+      if (c.escala > 1) out.scaleNote = true;
     });
   } catch (err) {
     if (!err.unavailable) out.error = err.message;

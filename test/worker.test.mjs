@@ -186,3 +186,28 @@ test('presupuesto de CPU (plan Free: 10 ms por solicitud): la IA con un document
   tiempos.sort((a, b) => a - b);
   assert.ok(tiempos[3] < 20, `mediana ${tiempos[3].toFixed(1)} ms (margen amplio para CI; en Node suele ser ~2 ms)`);
 });
+
+test('OCR: un cuerpo sin Content-Length (chunked) se corta al pasar 20 MB, sin leerlo entero', async () => {
+  let leidos = 0;
+  const flujo = new ReadableStream({ pull(c) { if (leidos >= 200) return c.close(); leidos += 1; c.enqueue(new Uint8Array(MB)); } });
+  const r = await call('/api/extract', { ASSETS, LLAMA_CLOUD_API_KEY: 'k' }, { method: 'POST', headers: { 'x-filename': 'a.pdf' }, body: flujo, duplex: 'half' });
+  assert.equal(r.status, 413);
+  assert.ok(leidos <= 25, `se leyeron ${leidos} MB de 200 (antes: los 200)`);
+});
+
+test('OCR: un archivo chunked legítimo (sin Content-Length) llega completo a LlamaParse', async () => {
+  await conOcrSimulado(async (llamadas) => {
+    let n = 0;
+    const flujo = new ReadableStream({ pull(c) { if (n >= 3) return c.close(); n += 1; c.enqueue(new Uint8Array(MB)); } });
+    const r = await call('/api/extract', { ASSETS, LLAMA_CLOUD_API_KEY: 'k' }, { method: 'POST', headers: { 'x-filename': 'a.pdf' }, body: flujo, duplex: 'half' });
+    assert.equal(r.status, 200);
+    assert.equal(llamadas.find((c) => c.url.endsWith('/upload')).body.get('file').size, 3 * MB);
+  });
+});
+
+test('CSP: solo scripts propios, sin objetos ni <base>, sin incrustación; permite estilos en línea y Google Fonts', async () => {
+  const csp = (await call('/', { ASSETS })).headers.get('content-security-policy');
+  assert.match(csp, /script-src 'self'(;|$)/);
+  assert.doesNotMatch(csp.match(/script-src[^;]*/)[0], /unsafe-inline|unsafe-eval|\*/);
+  for (const d of ["default-src 'self'", "object-src 'none'", "base-uri 'none'", "frame-ancestors 'none'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com']) assert.ok(csp.includes(d), d);
+});
