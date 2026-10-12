@@ -489,7 +489,7 @@ dropzone.addEventListener('drop', (e) => handleFile(e.dataTransfer.files[0]));
    Siempre es un complemento: si falla o no está disponible, el simulador sigue con sus reglas. */
 const INT_IDS = new Set(['employees', 'institutions']);
 const AI_MAX_DOC = 200000;   // caracteres del documento que se envían a la IA (igual que el servidor)
-const AI_TIMEOUT_MS = 90000;
+const AI_TIMEOUT_MS = 100000;
 
 async function callAi(task, payload) {
   let res;
