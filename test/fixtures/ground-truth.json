@@ -1,0 +1,17 @@
+{
+ "sales24": 12400000,
+ "sales23": 11200000,
+ "sales22": 10100000,
+ "sales21": 9300000,
+ "debt": 2100000,
+ "ebitda": 1850000,
+ "finExp": 160000,
+ "cash": 640000,
+ "employees": 112,
+ "netIncome": 1020000,
+ "equity": 3900000,
+ "institutions": 3,
+ "overdue": "no",
+ "bbDebt": 700000,
+ "requested": 500000
+}
