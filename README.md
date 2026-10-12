@@ -24,7 +24,7 @@ La IA sigue el flujo del Banco 4.0 (integra → predice → personaliza → dete
 - **Cambiar de proveedor** (por ejemplo, para comparar con un modelo de frontera): `AI_PROVIDER=openai` más `AI_BASE_URL`, `AI_API_KEY` y `AI_MODEL`, contra cualquier endpoint compatible con `/chat/completions`. La clave va como secreto del Worker.
 - **Solo en el Worker:** `server.js` (Node local) no incluye la IA. Para probarla en local usa `npx wrangler dev`, que llama a Workers AI en remoto y pide iniciar sesión en Cloudflare.
 - **Privacidad:** el texto del documento y los datos del expediente se envían al proveedor de IA. No cargues lo que no puedas compartir con un tercero.
-- **Pruebas:** `npm test` valida los validadores, el Worker (contraseña y rutas) y el cambio de proveedor con un modelo simulado. No mide la calidad real de ningún modelo.
+- **Pruebas:** `npm test` valida los validadores, el extractor con estados financieros reales, el Worker (contraseña, rutas, subida de archivos de 30 KB a 20 MB y presupuesto de CPU) y el cambio de proveedor con un modelo simulado. No mide la calidad real de ningún modelo ni del OCR.
 - **Prueba en vivo:** `BASE_URL=https://tu-worker.workers.dev ACCESS_PASSWORD=... npm run smoke` comprueba el sitio desplegado y cada tarea de IA con el modelo real.
 
 ## Operación y límites conocidos
@@ -33,9 +33,13 @@ Lo que conviene saber antes de depender del sistema (verificado, no supuesto):
 
 - **Protege el sitio.** Sin el secreto `ACCESS_PASSWORD`, cualquiera que abra la URL puede gastar tu cuota de IA y de OCR. `npm run smoke` avisa si el sitio responde sin contraseña.
 - **La IA nunca decide sola.** Si falla, el simulador sigue con las reglas. Cuando la salida del modelo no sirve (vacía, sin JSON o con cifras ajenas), se reintenta una vez en modo estricto y, si vuelve a fallar, se muestra solo lo determinista.
-- **Plan Workers Free:** 10.000 Neurons/día y 50 subpeticiones por solicitud. El sondeo del OCR usa espera progresiva para no superarlas. Si agotas la cuota diaria, la IA responde error hasta las 00:00 UTC.
-- **Extractor por reglas (heurístico):** ignora porcentajes, razones (`Margen EBITDA`, `Deuda / EBITDA`) y la columna «Nota», y lee los gastos financieros entre paréntesis como positivos. Aun así es un apoyo: revisa cada valor, sobre todo si el documento está en miles o millones (el extractor avisa).
-- **EBITDA y patrimonio pueden ser negativos** (el motor los evalúa con la peor puntuación); el resto de montos no.
+- **Plan Workers Free:** 10.000 Neurons/día, 50 subpeticiones y **10 ms de CPU por solicitud** (superarlo da el error 1102). El sondeo del OCR usa espera progresiva (~30 subpeticiones); el archivo se recibe con una sola copia en memoria y el texto del OCR se reenvía como flujo; la validación de IA con un documento de 200 KB gasta ~2 ms. Medido: un estado de 24–200 KB cabe de sobra; documentos de decenas de MB o de cientos de páginas pueden acercarse al límite en el plan gratuito (en el de pago no hay problema). Si agotas la cuota diaria de Neurons, la IA responde error hasta las 00:00 UTC; un análisis con un documento de ~100 KB gasta unos 400–600 Neurons (≈ 15–25 análisis al día).
+- **Tamaño de archivo:** hasta 20 MB (se rechaza antes de leerlo entero, también sin `Content-Length`). La IA recibe como máximo los primeros 200.000 caracteres del texto; el extractor por reglas lee el documento completo.
+- **Comprobar el OCR real en tu despliegue:** `BASE_URL=https://tu-worker.workers.dev ACCESS_PASSWORD=... npm run smoke -- --file test/fixtures/estados-financieros.pdf` sube el archivo, mide cuánto tarda el OCR y compara los 15 campos extraídos con la verdad conocida (hay también `.docx`, `.xlsx`, `.csv` y un PDF escaneado, solo imagen, que depende por completo del OCR). Con tus propios archivos muestra qué leyó, sin comparar.
+- **Edición manual de cifras:** el punto es separador de miles y la coma, decimal. Los centavos se descartan. «1234.56» y «1,234.56» pegados desde Excel también se entienden.
+- **Seguridad:** el Worker envía CSP (solo scripts propios), `X-Frame-Options`, `nosniff` y `Referrer-Policy` en todas las respuestas. No hay límite de intentos de contraseña (Basic): usa una contraseña larga.
+- **Extractor por reglas (heurístico):** de todas las filas candidatas elige la correcta (ventas de 4 periodos de la tabla comparativa, «Total patrimonio» sobre los subtotales, el total de la deuda o la suma de corto y largo plazo), ignora porcentajes, razones (`Margen EBITDA`, `Deuda / EBITDA`, `por acción`), la columna «Nota», años sueltos y el efectivo del flujo de efectivo, entiende `(85.000)`, `−85.000`, `85.000-` y «Pérdida neta» como negativos, y lee CSV con `;`. Medido con estados financieros sintéticos de 47–388 KB: 105 de 105 campos exactos, y sin la solicitud todo lo que encuentra es correcto. Los datos de la solicitud (instituciones con deuda, vencidos de accionistas, deuda con el banco y deuda solicitada) no existen en un estado financiero: se completan con la IA (si el documento los cita) o a mano. Sigue siendo un apoyo: **revisa cada valor**, sobre todo si el documento está en miles o millones (el extractor avisa y no convierte la escala).
+- **EBITDA, patrimonio y utilidad neta pueden ser negativos** (el motor los evalúa con la peor puntuación); el resto de montos no.
 - **Etiquetas de periodo fijas:** las ventas se etiquetan `dic-24 … dic-21` como en la guía. Si cambia el ejercicio, hay que actualizar `index.html`, `app.js` y `extractor.js`.
 - **OCR:** usa la API v1 de LlamaParse (`/api/parsing`). Si LlamaIndex la retira, solo falla la carga de archivos; el simulador y la entrada manual siguen funcionando.
 - **Privacidad:** el documento va a LlamaParse (OCR) y, junto con el expediente, al proveedor de IA. La página carga tipografías de Google Fonts.
@@ -102,5 +106,10 @@ Los archivos que se cargan se envían a LlamaParse para leerlos. No cargues docu
 |---|---|
 | `public/index.html`, `public/styles.css`, `public/app.js` | Interfaz y lógica del scorecard por fases |
 | `public/extractor.js` | Convierte la salida del OCR en los 15 campos |
-| `server.js` | Servidor Node (local, Docker, otros hosts): sirve `public/` y hace de proxy seguro hacia el OCR |
-| `worker.js`, `wrangler.jsonc` | Lo mismo para Cloudflare Workers |
+| `server.js` | Servidor Node (local, Docker, otros hosts): sirve `public/` y hace de proxy seguro hacia el OCR (sin IA) |
+| `worker.js`, `wrangler.jsonc` | Lo mismo para Cloudflare Workers, con IA, contraseña y cabeceras de seguridad |
+| `ai.mjs` | Capa de IA: proveedores intercambiables, validadores y reintento estricto |
+| `ocr.mjs` | Espera progresiva del sondeo a LlamaParse |
+| `test/` | `npm test` (85 pruebas); `test/fixtures/` tiene estados financieros sintéticos de más de 24 KB con verdad conocida |
+| `scripts/smoke.mjs` | Prueba en vivo contra un despliegue (sitio, IA y OCR) |
+| `.github/workflows/test.yml` | Corre las pruebas en cada PR |

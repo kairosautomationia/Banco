@@ -1,0 +1,3124 @@
+                              Distribuidora Andina S.A.
+Estados financieros al 31 de diciembre de 2024 y 2023 (expresados en USD)
+
+
+SOLICITUD DE CRÉDITO - DATOS DEL EXPEDIENTE
+  Razón social                                Distribuidora Andina S.A.
+
+  Deuda solicitada (incremento de riesgo)     $ 500.000
+
+  Deuda actual con el banco                   $ 700.000
+
+  Deuda en el sistema financiero              $ 2.100.000
+
+  Instituciones financieras con deuda         3
+
+  Número de empleados                         112
+
+  ¿Accionista ha reportado vencidos?          No
+ESTADO DE SITUACIÓN FINANCIERA
+            Concepto                                 Nota       2024        2023
+
+            ACTIVOS
+
+            Efectivo y equivalentes de efectivo        4     640.000     520.000
+
+            Cuentas por cobrar comerciales             5    1.950.000   1.720.000
+
+            Inventarios                                6    2.300.000   2.050.000
+
+            Otros activos corrientes                         210.000     180.000
+
+            Total activos corrientes                        5.100.000   4.470.000
+
+            Propiedad, planta y equipo, neto           7    3.400.000   3.250.000
+
+            Otros activos no corrientes                      450.000     420.000
+
+            Total activos no corrientes                     3.850.000   3.670.000
+
+            TOTAL ACTIVOS                                   8.950.000   8.140.000
+
+            PASIVOS
+
+            Obligaciones financieras a corto plazo    12     900.000     850.000
+
+            Cuentas por pagar comerciales             13    1.650.000   1.500.000
+
+            Otros pasivos corrientes                         400.000     380.000
+
+            Total pasivos corrientes                        2.950.000   2.730.000
+
+            Obligaciones financieras a largo plazo    12    1.200.000   1.100.000
+
+            Impuesto diferido y provisiones           14     900.000     800.000
+
+            Total pasivos no corrientes                     2.100.000   1.900.000
+
+            TOTAL PASIVOS                                   5.050.000   4.630.000
+
+            PATRIMONIO
+
+            Capital social                            15    1.500.000   1.500.000
+
+            Reservas                                         600.000     560.000
+
+            Resultados acumulados                            780.000     500.000
+
+            Resultado del ejercicio                         1.020.000    950.000
+
+            Total patrimonio                                3.900.000   3.510.000
+
+            TOTAL PASIVO Y PATRIMONIO                       8.950.000   8.140.000
+ESTADO DE RESULTADOS INTEGRAL
+         Concepto                                             Nota         2024          2023
+
+         Ventas netas                                          16    12.400.000    11.200.000
+
+         Costo de ventas                                       17    (8.700.000)   (7.900.000)
+
+         Utilidad bruta                                               3.700.000     3.300.000
+
+         Gastos de administración y ventas                     18    (2.100.000)   (1.900.000)
+
+         Utilidad operativa                                           1.600.000     1.400.000
+
+         Gastos financieros                                    19     (160.000)     (150.000)
+
+         Utilidad antes de impuestos                                  1.440.000     1.250.000
+
+         Impuesto a la renta y participación a trabajadores    20     (420.000)     (300.000)
+
+         Utilidad neta                                                1.020.000       950.000
+ESTADO DE FLUJOS DE EFECTIVO
+         Concepto                                                      Nota         2024         2023
+
+         Efectivo neto generado por actividades de operación                  1.120.000        980.000
+
+         Efectivo utilizado en actividades de inversión                       (540.000)     (410.000)
+
+         Efectivo generado por actividades de financiamiento                  (460.000)     (300.000)
+
+         Aumento neto de efectivo                                                 120.000      270.000
+
+         Efectivo y equivalentes de efectivo al inicio del periodo                520.000      250.000
+
+         Efectivo y equivalentes de efectivo al final del periodo                 640.000      520.000
+
+
+
+
+INFORMACIÓN FINANCIERA COMPARATIVA 2021-2024 (USD)
+                  Concepto                2024            2023            2022         2021
+
+                  Ventas netas      12.400.000     11.200.000        10.100.000    9.300.000
+
+                  EBITDA             1.850.000      1.630.000         1.480.000    1.350.000
+
+                  Utilidad neta      1.020.000        950.000          870.000       790.000
+CONCILIACIÓN DEL EBITDA
+                               Concepto                                  2024           2023
+
+                               Utilidad operativa                  1.600.000        1.400.000
+
+                               (+) Depreciación y amortización       250.000         230.000
+
+                               EBITDA                              1.850.000        1.630.000
+
+
+
+
+INDICADORES FINANCIEROS
+                        Indicador                                                     2024       2023
+
+                        Margen EBITDA                                               14,9%       14,6%
+
+                        Margen neto                                                  8,2%       8,5%
+
+                        Razón corriente                                               1,73       1,64
+
+                        Deuda financiera / EBITDA                                     1,1x       1,3x
+
+                        Cobertura de intereses (EBITDA / gastos financieros)         11,6x      10,9x
+
+                        Utilidad neta / ventas                                       8,2%       8,5%
+
+
+
+
+NOTA 4 - EFECTIVO Y EQUIVALENTES DE EFECTIVO
+                             Concepto                                       2024          2023
+
+                             Caja                                          15.000       12.000
+
+                             Bancos locales                              425.000       408.000
+
+                             Certificados de depósito                    200.000       100.000
+
+                             Total efectivo y equivalentes de efectivo   640.000       520.000
+
+
+
+
+NOTA 12 - OBLIGACIONES FINANCIERAS
+                          Institución                                       Tipo      Saldo 2024
+
+                          Banco Alfa (el Banco)             Préstamo comercial           700.000
+
+                          Banco Beta                        Préstamo comercial           800.000
+
+                          Cooperativa Gamma                      Línea de crédito        600.000
+
+                          Total obligaciones financieras                                2.100.000
+
+
+
+
+NOTA 1 - POLÍTICAS CONTABLES SIGNIFICATIVAS
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+Los estados financieros han sido preparados de acuerdo con las Normas Internacionales de Información
+Financiera para Pequeñas y Medianas Entidades (NIIF para las PYMES) y se presentan en dólares de los
+Estados Unidos de América. La Compañía reconoce los ingresos de actividades ordinarias cuando
+transfiere el control de los bienes al cliente, normalmente en el momento de la entrega. Los inventarios se
+valoran al menor entre el costo y el valor neto realizable, aplicando el método de costo promedio
+ponderado. La propiedad, planta y equipo se deprecia por el método de línea recta durante su vida útil
+estimada. Las obligaciones financieras se miden al costo amortizado utilizando la tasa de interés efectiva.
+
+NOTA 21 - PERSONAL
+Al 31 de diciembre de 2024 la Compañía mantiene 112 empleados (2023: 104). Ninguno de los
+accionistas registra operaciones vencidas en la Central de Riesgos.
+ANEXO A - CARTERA POR CLIENTE
+              Cliente                         Vigente   1-30 días   31-60 días
+
+              Cliente 001 - cartera vigente   44.445       4.943        6.468
+
+              Cliente 002 - cartera vigente   87.319       1.582        1.186
+
+              Cliente 003 - cartera vigente   72.239       3.084        5.991
+
+              Cliente 004 - cartera vigente   78.387       1.900        8.313
+
+              Cliente 005 - cartera vigente   30.140       1.228        1.408
+
+              Cliente 006 - cartera vigente   58.838      13.702        1.144
+
+              Cliente 007 - cartera vigente   33.544       2.972        6.955
+
+              Cliente 008 - cartera vigente    9.747      18.528        2.028
+
+              Cliente 009 - cartera vigente   31.260      19.103        1.013
+
+              Cliente 010 - cartera vigente   77.642      19.187        6.499
+
+              Cliente 011 - cartera vigente    8.499       7.244          763
+
+              Cliente 012 - cartera vigente   74.963       4.363        4.744
+
+              Cliente 013 - cartera vigente   56.937       4.726        8.858
+
+              Cliente 014 - cartera vigente   17.439      18.707        5.054
+
+              Cliente 015 - cartera vigente   75.434       5.922        1.688
+
+              Cliente 016 - cartera vigente   78.231      18.717        3.078
+
+              Cliente 017 - cartera vigente   50.810       3.192        8.974
+
+              Cliente 018 - cartera vigente   10.229      18.493          976
+
+              Cliente 019 - cartera vigente   83.134       6.748        8.133
+
+              Cliente 020 - cartera vigente   71.693      14.011        5.146
+
+              Cliente 021 - cartera vigente   63.027      19.187        7.424
+
+              Cliente 022 - cartera vigente   49.393       9.822        4.070
+
+              Cliente 023 - cartera vigente   25.562       7.998        1.341
+
+              Cliente 024 - cartera vigente   77.290       9.838        8.604
+
+              Cliente 025 - cartera vigente   66.895      11.255        7.353
+
+              Cliente 026 - cartera vigente   39.740      19.954        1.199
+
+              Cliente 027 - cartera vigente   17.475      16.775        6.850
+
+              Cliente 028 - cartera vigente   23.621      11.208        2.490
+
+              Cliente 029 - cartera vigente   66.089      13.818          642
+
+              Cliente 030 - cartera vigente   89.584       2.543        5.140
+
+              Cliente 031 - cartera vigente   46.580      11.474        8.137
+
+              Cliente 032 - cartera vigente   78.008      14.948        1.126
+
+              Cliente 033 - cartera vigente   14.267       8.845        7.767
+
+              Cliente 034 - cartera vigente   89.051       2.129          994
+
+              Cliente 035 - cartera vigente   42.580      18.938        7.301
+
+              Cliente 036 - cartera vigente   39.302      12.641        5.685
+
+              Cliente 037 - cartera vigente    4.957      15.128        5.823
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 038 - cartera vigente   24.026       3.836        8.088
+
+Cliente 039 - cartera vigente    9.727       7.150        4.709
+
+Cliente 040 - cartera vigente   18.952       8.113        6.519
+
+Cliente 041 - cartera vigente   53.242      16.269        1.320
+
+Cliente 042 - cartera vigente   23.805      14.718        6.580
+
+Cliente 043 - cartera vigente   74.016       9.104        2.243
+
+Cliente 044 - cartera vigente   58.429      18.029        4.561
+
+Cliente 045 - cartera vigente   56.433      11.756        6.233
+
+Cliente 046 - cartera vigente   32.245       4.945        1.359
+
+Cliente 047 - cartera vigente   25.097       4.957        3.800
+
+Cliente 048 - cartera vigente   88.313       7.645          197
+
+Cliente 049 - cartera vigente   65.565      19.304        2.987
+
+Cliente 050 - cartera vigente   36.438       9.238           67
+
+Cliente 051 - cartera vigente   21.094      13.728        8.758
+
+Cliente 052 - cartera vigente   50.398      19.982        5.220
+
+Cliente 053 - cartera vigente   18.448      16.891          884
+
+Cliente 054 - cartera vigente   61.853      18.326        6.428
+
+Cliente 055 - cartera vigente   54.175      13.073        6.457
+
+Cliente 056 - cartera vigente   15.570      15.778        6.560
+
+Cliente 057 - cartera vigente   10.158       6.245        1.103
+
+Cliente 058 - cartera vigente   29.363      14.438        2.659
+
+Cliente 059 - cartera vigente   16.408      11.142          861
+
+Cliente 060 - cartera vigente   15.419           7        2.478
+
+Cliente 061 - cartera vigente   72.335       3.324        5.957
+
+Cliente 062 - cartera vigente   82.443         835        1.152
+
+Cliente 063 - cartera vigente   29.256      12.328        2.433
+
+Cliente 064 - cartera vigente   85.153       8.265        5.691
+
+Cliente 065 - cartera vigente   80.941      11.932        7.768
+
+Cliente 066 - cartera vigente   18.101       3.779        7.996
+
+Cliente 067 - cartera vigente   63.078      15.741        7.927
+
+Cliente 068 - cartera vigente   42.875       2.814        2.361
+
+Cliente 069 - cartera vigente   15.393      11.227        4.337
+
+Cliente 070 - cartera vigente   64.733       5.290        8.459
+
+Cliente 071 - cartera vigente    5.027       6.724        8.654
+
+Cliente 072 - cartera vigente   49.415       4.803        8.899
+
+Cliente 073 - cartera vigente    5.544      17.305        4.883
+
+Cliente 074 - cartera vigente   86.268       2.982        4.278
+
+Cliente 075 - cartera vigente   69.947      12.016        2.736
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 076 - cartera vigente   48.621       7.300        8.725
+
+Cliente 077 - cartera vigente   72.984      16.472        5.401
+
+Cliente 078 - cartera vigente   85.419       7.308        3.197
+
+Cliente 079 - cartera vigente   33.377      13.129        3.714
+
+Cliente 080 - cartera vigente   28.203      16.961        8.073
+
+Cliente 081 - cartera vigente   48.604         949          457
+
+Cliente 082 - cartera vigente   38.623      15.474        4.246
+
+Cliente 083 - cartera vigente   27.381      19.829        5.640
+
+Cliente 084 - cartera vigente   60.619      11.453        5.974
+
+Cliente 085 - cartera vigente   12.556       7.224        1.673
+
+Cliente 086 - cartera vigente   31.733      15.403        3.222
+
+Cliente 087 - cartera vigente   46.267       6.696        7.907
+
+Cliente 088 - cartera vigente   83.797      19.997           31
+
+Cliente 089 - cartera vigente   64.845      11.272        1.389
+
+Cliente 090 - cartera vigente   88.584       3.929        6.365
+
+Cliente 091 - cartera vigente   28.125      15.664        2.924
+
+Cliente 092 - cartera vigente   58.875      10.895        1.421
+
+Cliente 093 - cartera vigente   53.883      15.176        6.576
+
+Cliente 094 - cartera vigente   13.130       5.205        2.785
+
+Cliente 095 - cartera vigente   18.651         902        2.476
+
+Cliente 096 - cartera vigente   79.438      15.248        2.394
+
+Cliente 097 - cartera vigente   82.160      19.525        7.771
+
+Cliente 098 - cartera vigente   88.149      11.482        2.554
+
+Cliente 099 - cartera vigente   73.913      17.966        2.146
+
+Cliente 100 - cartera vigente    4.804         466        1.683
+
+Cliente 101 - cartera vigente   71.020       4.562        7.107
+
+Cliente 102 - cartera vigente   27.533       6.915          458
+
+Cliente 103 - cartera vigente   35.008       6.972        4.799
+
+Cliente 104 - cartera vigente   67.688       7.881        5.341
+
+Cliente 105 - cartera vigente   35.995      17.837        6.865
+
+Cliente 106 - cartera vigente   19.180       1.995        5.796
+
+Cliente 107 - cartera vigente   62.052      19.115        8.466
+
+Cliente 108 - cartera vigente   57.132      16.438        2.142
+
+Cliente 109 - cartera vigente   71.707       4.975        8.577
+
+Cliente 110 - cartera vigente   68.918         612        7.211
+
+Cliente 111 - cartera vigente   26.000      19.941           64
+
+Cliente 112 - cartera vigente   21.634       5.647        2.319
+
+Cliente 113 - cartera vigente   64.061       3.943        1.011
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 114 - cartera vigente   44.727      16.985        8.695
+
+Cliente 115 - cartera vigente   74.802      15.810        1.738
+
+Cliente 116 - cartera vigente   75.439       1.861        4.071
+
+Cliente 117 - cartera vigente   27.074       9.074          691
+
+Cliente 118 - cartera vigente   14.811      16.636        7.408
+
+Cliente 119 - cartera vigente   75.626         913        1.038
+
+Cliente 120 - cartera vigente   60.097      10.669        8.282
+
+Cliente 121 - cartera vigente   81.447      16.782        3.267
+
+Cliente 122 - cartera vigente   38.331      14.822        8.325
+
+Cliente 123 - cartera vigente   71.898      15.664        8.319
+
+Cliente 124 - cartera vigente   34.460      17.144        4.253
+
+Cliente 125 - cartera vigente   75.336       6.638        7.332
+
+Cliente 126 - cartera vigente   19.974      13.652        1.992
+
+Cliente 127 - cartera vigente   53.427      14.487        5.177
+
+Cliente 128 - cartera vigente   11.508       7.885        7.017
+
+Cliente 129 - cartera vigente   11.584       6.969        4.960
+
+Cliente 130 - cartera vigente   18.036       5.060        5.999
+
+Cliente 131 - cartera vigente   20.740       8.293        2.248
+
+Cliente 132 - cartera vigente   63.307       7.195        1.542
+
+Cliente 133 - cartera vigente   54.200      15.966        2.667
+
+Cliente 134 - cartera vigente   89.534       7.330        2.645
+
+Cliente 135 - cartera vigente   58.560      16.895        6.616
+
+Cliente 136 - cartera vigente   46.448      13.804        3.207
+
+Cliente 137 - cartera vigente   48.742      10.437        1.510
+
+Cliente 138 - cartera vigente   49.966         638        5.537
+
+Cliente 139 - cartera vigente   74.620      15.029        7.216
+
+Cliente 140 - cartera vigente    4.370      12.594        5.431
+
+Cliente 141 - cartera vigente   69.821       9.681        8.392
+
+Cliente 142 - cartera vigente   10.426       3.697        3.744
+
+Cliente 143 - cartera vigente   15.733       2.754        4.351
+
+Cliente 144 - cartera vigente   37.641       1.297        2.974
+
+Cliente 145 - cartera vigente   37.447       4.245        6.918
+
+Cliente 146 - cartera vigente   35.896      13.302        2.447
+
+Cliente 147 - cartera vigente   72.333      16.868        8.103
+
+Cliente 148 - cartera vigente   44.866       2.931        4.572
+
+Cliente 149 - cartera vigente    9.540       6.007        6.968
+
+Cliente 150 - cartera vigente   11.491       8.812          275
+
+Cliente 151 - cartera vigente   85.157       2.902        4.268
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 152 - cartera vigente   12.976      19.928        3.643
+
+Cliente 153 - cartera vigente   10.732       8.665        1.993
+
+Cliente 154 - cartera vigente   61.477         378        5.556
+
+Cliente 155 - cartera vigente   74.491      13.689        4.388
+
+Cliente 156 - cartera vigente   83.487       4.234          707
+
+Cliente 157 - cartera vigente   71.063       7.813        1.793
+
+Cliente 158 - cartera vigente   23.161       8.581          825
+
+Cliente 159 - cartera vigente   25.743       6.611        5.111
+
+Cliente 160 - cartera vigente   84.401       9.994        8.701
+
+Cliente 161 - cartera vigente   28.983       9.501        7.302
+
+Cliente 162 - cartera vigente   67.547       5.829        4.432
+
+Cliente 163 - cartera vigente   47.482         595        4.103
+
+Cliente 164 - cartera vigente    6.843         502          302
+
+Cliente 165 - cartera vigente   68.277      18.056        3.104
+
+Cliente 166 - cartera vigente   69.401      15.556        4.025
+
+Cliente 167 - cartera vigente   60.596       3.482        7.080
+
+Cliente 168 - cartera vigente   88.050      16.220        8.944
+
+Cliente 169 - cartera vigente   53.522      16.603        5.042
+
+Cliente 170 - cartera vigente   30.204       7.522        5.614
+
+Cliente 171 - cartera vigente   28.034       4.578        6.630
+
+Cliente 172 - cartera vigente   47.554       1.782        2.126
+
+Cliente 173 - cartera vigente    3.868       2.317        4.187
+
+Cliente 174 - cartera vigente   58.458       5.349          907
+
+Cliente 175 - cartera vigente   13.073      12.480        8.289
+
+Cliente 176 - cartera vigente   89.889       9.238        3.968
+
+Cliente 177 - cartera vigente   40.411       1.482        7.527
+
+Cliente 178 - cartera vigente   26.294       5.162        4.407
+
+Cliente 179 - cartera vigente   60.435         118        4.312
+
+Cliente 180 - cartera vigente   49.728      10.778        8.963
+
+Cliente 181 - cartera vigente   44.406       8.010          564
+
+Cliente 182 - cartera vigente   42.573       7.139        5.842
+
+Cliente 183 - cartera vigente   25.980          35        5.494
+
+Cliente 184 - cartera vigente   52.020       2.748        7.776
+
+Cliente 185 - cartera vigente   38.559      16.474        3.292
+
+Cliente 186 - cartera vigente   34.529      16.539           81
+
+Cliente 187 - cartera vigente   13.908       8.656        1.470
+
+Cliente 188 - cartera vigente   20.856      13.091          682
+
+Cliente 189 - cartera vigente   53.639         737        4.909
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 190 - cartera vigente   41.877       7.628        1.384
+
+Cliente 191 - cartera vigente   78.753      17.340        2.543
+
+Cliente 192 - cartera vigente   88.185      19.548        6.381
+
+Cliente 193 - cartera vigente   44.747      16.193        2.448
+
+Cliente 194 - cartera vigente   39.247       4.743          717
+
+Cliente 195 - cartera vigente   69.237      14.065        8.282
+
+Cliente 196 - cartera vigente   20.259      17.162        8.263
+
+Cliente 197 - cartera vigente   76.511         526        3.767
+
+Cliente 198 - cartera vigente   13.153       1.021          685
+
+Cliente 199 - cartera vigente   19.444      11.819        1.718
+
+Cliente 200 - cartera vigente   51.364      14.791          831
+
+Cliente 201 - cartera vigente   84.282         617        8.707
+
+Cliente 202 - cartera vigente   34.054      16.033        4.321
+
+Cliente 203 - cartera vigente    2.434      14.973        1.148
+
+Cliente 204 - cartera vigente   67.925      17.537        1.506
+
+Cliente 205 - cartera vigente   88.415      17.235        1.082
+
+Cliente 206 - cartera vigente   64.109       8.263        1.219
+
+Cliente 207 - cartera vigente   36.807       7.693        3.362
+
+Cliente 208 - cartera vigente   32.243      15.084        8.092
+
+Cliente 209 - cartera vigente   52.142       2.514        7.848
+
+Cliente 210 - cartera vigente   39.659       1.531        3.248
+
+Cliente 211 - cartera vigente   12.154      19.651        2.415
+
+Cliente 212 - cartera vigente   45.486       8.321        4.987
+
+Cliente 213 - cartera vigente   83.415      18.604        2.186
+
+Cliente 214 - cartera vigente    3.634      15.807          993
+
+Cliente 215 - cartera vigente   65.674       8.807        1.630
+
+Cliente 216 - cartera vigente   30.533      16.043        4.765
+
+Cliente 217 - cartera vigente   69.703       9.356        7.613
+
+Cliente 218 - cartera vigente   63.066      15.281        1.941
+
+Cliente 219 - cartera vigente   73.968       6.529        5.106
+
+Cliente 220 - cartera vigente   13.253      15.497          286
+
+Cliente 221 - cartera vigente   39.956      15.039        1.252
+
+Cliente 222 - cartera vigente   68.403      14.727        4.401
+
+Cliente 223 - cartera vigente   52.704       6.875        3.452
+
+Cliente 224 - cartera vigente   11.779      19.053        1.479
+
+Cliente 225 - cartera vigente   20.578      17.172        4.289
+
+Cliente 226 - cartera vigente   49.127       4.345        8.335
+
+Cliente 227 - cartera vigente   38.643       3.692        5.983
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 228 - cartera vigente   32.327      16.314        7.964
+
+Cliente 229 - cartera vigente   53.652         813        2.606
+
+Cliente 230 - cartera vigente    2.470      16.111        7.385
+
+Cliente 231 - cartera vigente   55.139       9.894        2.305
+
+Cliente 232 - cartera vigente   56.549      11.270        6.162
+
+Cliente 233 - cartera vigente   43.428       3.961        5.428
+
+Cliente 234 - cartera vigente    2.228      10.634        5.542
+
+Cliente 235 - cartera vigente   54.200       3.933        3.207
+
+Cliente 236 - cartera vigente    3.536       9.497        4.148
+
+Cliente 237 - cartera vigente   50.787       2.129        6.437
+
+Cliente 238 - cartera vigente   53.139      19.306        1.251
+
+Cliente 239 - cartera vigente   49.278      14.026        4.508
+
+Cliente 240 - cartera vigente    8.326       9.195        1.666
+
+Cliente 241 - cartera vigente    8.765       9.359        2.439
+
+Cliente 242 - cartera vigente   34.679       8.707        7.147
+
+Cliente 243 - cartera vigente   68.972      10.341        3.110
+
+Cliente 244 - cartera vigente   50.935      14.016          475
+
+Cliente 245 - cartera vigente   84.692      13.108        8.998
+
+Cliente 246 - cartera vigente   28.664       2.640          810
+
+Cliente 247 - cartera vigente   55.855      14.773        2.270
+
+Cliente 248 - cartera vigente   86.474       9.378        7.955
+
+Cliente 249 - cartera vigente    8.419      18.025        2.085
+
+Cliente 250 - cartera vigente   24.382      15.472        6.797
+
+Cliente 251 - cartera vigente   47.044       9.232        4.878
+
+Cliente 252 - cartera vigente   35.520       8.525        6.655
+
+Cliente 253 - cartera vigente   87.982       7.820        4.928
+
+Cliente 254 - cartera vigente   65.331      18.262        6.461
+
+Cliente 255 - cartera vigente   17.694       5.483        2.648
+
+Cliente 256 - cartera vigente   11.852       6.811        8.201
+
+Cliente 257 - cartera vigente   67.152      18.035        3.604
+
+Cliente 258 - cartera vigente   61.373      10.906        7.372
+
+Cliente 259 - cartera vigente   58.023       4.574        8.974
+
+Cliente 260 - cartera vigente   27.219       7.998        1.486
+
+Cliente 261 - cartera vigente   24.897      11.205        1.492
+
+Cliente 262 - cartera vigente   43.849       7.835        6.034
+
+Cliente 263 - cartera vigente   35.863      18.665        3.311
+
+Cliente 264 - cartera vigente    4.632      13.526        6.272
+
+Cliente 265 - cartera vigente   56.248      17.175        3.440
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 266 - cartera vigente   51.396       8.855        5.541
+
+Cliente 267 - cartera vigente   10.134      16.323        4.546
+
+Cliente 268 - cartera vigente   77.272      11.801        2.062
+
+Cliente 269 - cartera vigente   67.981      17.341        3.538
+
+Cliente 270 - cartera vigente   14.137       8.880        4.070
+
+Cliente 271 - cartera vigente   52.405      13.099        7.304
+
+Cliente 272 - cartera vigente   58.601      10.224          357
+
+Cliente 273 - cartera vigente   18.678       1.056        6.966
+
+Cliente 274 - cartera vigente   64.032      19.240        8.025
+
+Cliente 275 - cartera vigente    2.023       2.396        6.414
+
+Cliente 276 - cartera vigente   71.187      15.340        7.355
+
+Cliente 277 - cartera vigente   34.566       3.573        3.666
+
+Cliente 278 - cartera vigente   22.234       4.982        8.558
+
+Cliente 279 - cartera vigente   16.272      14.985        1.392
+
+Cliente 280 - cartera vigente   74.286       1.295           22
+
+Cliente 281 - cartera vigente   18.469       7.621          615
+
+Cliente 282 - cartera vigente   86.607       9.954        2.096
+
+Cliente 283 - cartera vigente   84.113       8.250        8.654
+
+Cliente 284 - cartera vigente   85.399      14.333        1.837
+
+Cliente 285 - cartera vigente   15.034       2.305        4.920
+
+Cliente 286 - cartera vigente   70.738      19.100        3.140
+
+Cliente 287 - cartera vigente   52.866       8.548        3.663
+
+Cliente 288 - cartera vigente   80.782          37          171
+
+Cliente 289 - cartera vigente   72.448       9.880        7.547
+
+Cliente 290 - cartera vigente   38.517      10.366        3.970
+
+Cliente 291 - cartera vigente   64.299      17.245        3.846
+
+Cliente 292 - cartera vigente   73.696       8.095          479
+
+Cliente 293 - cartera vigente   55.976      10.072          906
+
+Cliente 294 - cartera vigente    4.855       6.360        8.164
+
+Cliente 295 - cartera vigente   86.825      13.763        1.328
+
+Cliente 296 - cartera vigente   35.719       7.465        6.952
+
+Cliente 297 - cartera vigente   50.525       7.431        8.076
+
+Cliente 298 - cartera vigente    6.469      11.077        6.890
+
+Cliente 299 - cartera vigente   49.489      12.987        3.245
+
+Cliente 300 - cartera vigente    2.885       9.571        8.271
+
+Cliente 301 - cartera vigente   10.838       6.724        8.121
+
+Cliente 302 - cartera vigente   28.268      10.214        3.177
+
+Cliente 303 - cartera vigente   32.252      15.240        3.628
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 304 - cartera vigente   36.736       9.664        1.785
+
+Cliente 305 - cartera vigente   83.736      16.245        3.068
+
+Cliente 306 - cartera vigente   31.271      15.894        6.832
+
+Cliente 307 - cartera vigente   89.201       1.848        2.398
+
+Cliente 308 - cartera vigente   53.571       1.781        3.488
+
+Cliente 309 - cartera vigente    5.097      19.533        2.325
+
+Cliente 310 - cartera vigente   56.445       1.698          985
+
+Cliente 311 - cartera vigente   26.130      12.888        7.366
+
+Cliente 312 - cartera vigente   43.182       3.709        1.300
+
+Cliente 313 - cartera vigente   23.709      10.788        3.124
+
+Cliente 314 - cartera vigente   26.315      17.196        7.661
+
+Cliente 315 - cartera vigente    6.180      10.217        6.203
+
+Cliente 316 - cartera vigente   51.005      10.869        7.248
+
+Cliente 317 - cartera vigente   24.185       3.570           47
+
+Cliente 318 - cartera vigente   12.255       9.168        1.323
+
+Cliente 319 - cartera vigente   48.067      13.768        2.026
+
+Cliente 320 - cartera vigente   75.548       6.796        6.228
+
+Cliente 321 - cartera vigente   48.744      10.115        7.085
+
+Cliente 322 - cartera vigente   13.502       1.614        7.757
+
+Cliente 323 - cartera vigente   27.652      12.213        8.872
+
+Cliente 324 - cartera vigente   60.503       6.325        5.297
+
+Cliente 325 - cartera vigente   49.742      15.549          496
+
+Cliente 326 - cartera vigente   84.793      13.461        4.063
+
+Cliente 327 - cartera vigente   83.973      13.263          666
+
+Cliente 328 - cartera vigente   51.226       1.142        7.603
+
+Cliente 329 - cartera vigente   10.202       2.031        4.210
+
+Cliente 330 - cartera vigente   27.551       2.059        5.555
+
+Cliente 331 - cartera vigente   49.575       8.923        5.488
+
+Cliente 332 - cartera vigente   82.868       1.428        4.295
+
+Cliente 333 - cartera vigente   43.482       9.031        4.872
+
+Cliente 334 - cartera vigente    2.494      19.515        1.070
+
+Cliente 335 - cartera vigente    5.179       7.663        1.757
+
+Cliente 336 - cartera vigente   64.283      15.261        6.332
+
+Cliente 337 - cartera vigente   34.905      14.088        8.085
+
+Cliente 338 - cartera vigente   19.394      16.270        2.997
+
+Cliente 339 - cartera vigente    3.141       9.939        2.479
+
+Cliente 340 - cartera vigente   81.594       7.737        5.370
+
+Cliente 341 - cartera vigente   43.883      15.098        5.928
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 342 - cartera vigente   80.081       2.589        8.386
+
+Cliente 343 - cartera vigente   27.862      12.834        2.620
+
+Cliente 344 - cartera vigente   34.415      13.361        1.060
+
+Cliente 345 - cartera vigente   87.137       1.109        7.892
+
+Cliente 346 - cartera vigente   74.429      17.845        5.337
+
+Cliente 347 - cartera vigente   23.062      13.977        1.723
+
+Cliente 348 - cartera vigente   11.458       8.679        1.377
+
+Cliente 349 - cartera vigente   29.307       3.159        6.898
+
+Cliente 350 - cartera vigente   67.336      14.646        2.837
+
+Cliente 351 - cartera vigente   32.696       4.355        6.829
+
+Cliente 352 - cartera vigente   62.414       7.698        8.823
+
+Cliente 353 - cartera vigente   89.087       3.970        4.815
+
+Cliente 354 - cartera vigente   40.506       9.155        4.385
+
+Cliente 355 - cartera vigente   50.886       8.324        4.265
+
+Cliente 356 - cartera vigente   28.108      14.398        4.053
+
+Cliente 357 - cartera vigente   26.344       8.039        3.858
+
+Cliente 358 - cartera vigente   22.096       9.219        3.084
+
+Cliente 359 - cartera vigente   44.773       2.123        6.489
+
+Cliente 360 - cartera vigente   34.984       8.059        8.312
+
+Cliente 361 - cartera vigente   70.984       7.581        1.647
+
+Cliente 362 - cartera vigente   87.632      15.201          606
+
+Cliente 363 - cartera vigente   15.412         147        7.778
+
+Cliente 364 - cartera vigente   32.292      14.689        6.125
+
+Cliente 365 - cartera vigente    7.290       9.623        3.815
+
+Cliente 366 - cartera vigente   17.625       1.651        3.105
+
+Cliente 367 - cartera vigente   80.707      19.110        3.181
+
+Cliente 368 - cartera vigente   11.845      12.197        8.399
+
+Cliente 369 - cartera vigente   25.299      14.716        4.258
+
+Cliente 370 - cartera vigente   89.130         207        1.733
+
+Cliente 371 - cartera vigente   85.552      19.534        5.729
+
+Cliente 372 - cartera vigente   30.527       1.227        6.040
+
+Cliente 373 - cartera vigente   46.566       4.632          723
+
+Cliente 374 - cartera vigente   28.735       8.353          626
+
+Cliente 375 - cartera vigente   80.567       6.666          186
+
+Cliente 376 - cartera vigente   44.893      13.401        6.091
+
+Cliente 377 - cartera vigente   26.267      10.230        1.276
+
+Cliente 378 - cartera vigente   28.661       1.031        8.120
+
+Cliente 379 - cartera vigente   73.833      15.843        1.036
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 380 - cartera vigente   55.499       3.322        6.476
+
+Cliente 381 - cartera vigente   89.035      18.026        2.532
+
+Cliente 382 - cartera vigente   85.778      17.498        1.493
+
+Cliente 383 - cartera vigente   87.597       5.363        6.517
+
+Cliente 384 - cartera vigente   37.542      13.427        4.641
+
+Cliente 385 - cartera vigente   89.531      10.079        6.845
+
+Cliente 386 - cartera vigente    8.731      10.235        5.852
+
+Cliente 387 - cartera vigente   56.274      13.646          298
+
+Cliente 388 - cartera vigente   49.681       6.461        6.401
+
+Cliente 389 - cartera vigente   55.080       6.673           96
+
+Cliente 390 - cartera vigente   58.906       5.130        6.942
+
+Cliente 391 - cartera vigente   16.881       2.965        6.655
+
+Cliente 392 - cartera vigente   77.732      11.951        7.551
+
+Cliente 393 - cartera vigente   23.305       4.259          243
+
+Cliente 394 - cartera vigente    8.775      18.073        2.334
+
+Cliente 395 - cartera vigente   85.973      12.999        1.458
+
+Cliente 396 - cartera vigente   77.086      12.151        8.265
+
+Cliente 397 - cartera vigente   24.503       4.780        5.700
+
+Cliente 398 - cartera vigente   39.132       5.302        8.538
+
+Cliente 399 - cartera vigente   24.516       2.198        1.782
+
+Cliente 400 - cartera vigente   52.296      16.073        3.233
+
+Cliente 401 - cartera vigente   41.533       4.150          712
+
+Cliente 402 - cartera vigente   65.273      10.306          874
+
+Cliente 403 - cartera vigente   81.645      12.710        1.413
+
+Cliente 404 - cartera vigente   83.309       5.251        3.638
+
+Cliente 405 - cartera vigente   83.402      13.254        3.213
+
+Cliente 406 - cartera vigente   63.991       5.995        3.573
+
+Cliente 407 - cartera vigente    7.467      13.098        8.485
+
+Cliente 408 - cartera vigente   22.510      12.569        5.885
+
+Cliente 409 - cartera vigente   18.129       4.897        4.047
+
+Cliente 410 - cartera vigente   27.243       1.346          624
+
+Cliente 411 - cartera vigente   89.542      10.623        1.928
+
+Cliente 412 - cartera vigente   53.096      19.645        7.466
+
+Cliente 413 - cartera vigente   74.096      10.034        6.882
+
+Cliente 414 - cartera vigente   42.397      19.091        4.083
+
+Cliente 415 - cartera vigente   57.802      12.753        6.020
+
+Cliente 416 - cartera vigente   60.561      16.501        7.181
+
+Cliente 417 - cartera vigente   25.430         765           57
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 418 - cartera vigente   83.119      16.039        7.623
+
+Cliente 419 - cartera vigente   32.834      14.641        7.508
+
+Cliente 420 - cartera vigente   25.536      15.506        6.559
+
+Cliente 421 - cartera vigente   16.034       2.199        2.104
+
+Cliente 422 - cartera vigente   48.999      14.109        5.985
+
+Cliente 423 - cartera vigente   14.021      14.482        8.263
+
+Cliente 424 - cartera vigente   68.867       1.335          666
+
+Cliente 425 - cartera vigente   85.419       4.268        1.347
+
+Cliente 426 - cartera vigente   43.120      16.760        1.310
+
+Cliente 427 - cartera vigente    9.112      16.512        6.190
+
+Cliente 428 - cartera vigente   87.556       4.462          423
+
+Cliente 429 - cartera vigente   10.700       3.590        3.173
+
+Cliente 430 - cartera vigente   19.251      16.117        4.716
+
+Cliente 431 - cartera vigente   23.641       7.245        1.073
+
+Cliente 432 - cartera vigente   47.992       8.264        2.601
+
+Cliente 433 - cartera vigente   44.446       9.010        7.477
+
+Cliente 434 - cartera vigente   20.818       8.328        8.228
+
+Cliente 435 - cartera vigente   64.928       6.826        4.306
+
+Cliente 436 - cartera vigente   82.722      16.580        3.889
+
+Cliente 437 - cartera vigente   43.822      12.198          603
+
+Cliente 438 - cartera vigente   28.075       5.966        6.610
+
+Cliente 439 - cartera vigente   23.132       9.115        5.371
+
+Cliente 440 - cartera vigente   51.393       5.529        4.330
+
+Cliente 441 - cartera vigente   17.083      17.390          795
+
+Cliente 442 - cartera vigente   85.403      11.789        7.422
+
+Cliente 443 - cartera vigente   74.768      17.086        1.713
+
+Cliente 444 - cartera vigente   35.034      17.553        6.459
+
+Cliente 445 - cartera vigente   50.688       8.675        6.156
+
+Cliente 446 - cartera vigente   50.358      18.918        2.395
+
+Cliente 447 - cartera vigente   49.218      10.840        1.333
+
+Cliente 448 - cartera vigente   59.970       7.538        2.895
+
+Cliente 449 - cartera vigente   82.658       1.582        4.855
+
+Cliente 450 - cartera vigente   69.647       8.311        5.080
+
+Cliente 451 - cartera vigente   85.786      19.197        5.122
+
+Cliente 452 - cartera vigente    2.234       1.107        3.631
+
+Cliente 453 - cartera vigente   21.577       9.534        7.081
+
+Cliente 454 - cartera vigente   56.747      16.799        5.965
+
+Cliente 455 - cartera vigente    8.262       4.326        8.001
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 456 - cartera vigente   31.787       1.493          365
+
+Cliente 457 - cartera vigente    9.129          85        5.815
+
+Cliente 458 - cartera vigente   41.811       3.485        8.570
+
+Cliente 459 - cartera vigente   48.812      17.501        3.674
+
+Cliente 460 - cartera vigente   56.163      19.123        4.934
+
+Cliente 461 - cartera vigente   79.213       4.381        3.345
+
+Cliente 462 - cartera vigente   50.003      15.561        2.598
+
+Cliente 463 - cartera vigente   19.661         462        3.990
+
+Cliente 464 - cartera vigente   21.570      14.773        1.569
+
+Cliente 465 - cartera vigente   10.345       4.741        4.419
+
+Cliente 466 - cartera vigente   54.684       8.658          188
+
+Cliente 467 - cartera vigente    9.357      18.426        5.739
+
+Cliente 468 - cartera vigente   79.951      18.955        7.270
+
+Cliente 469 - cartera vigente   80.889      16.960        8.074
+
+Cliente 470 - cartera vigente   34.571       5.409            6
+
+Cliente 471 - cartera vigente    7.767       2.016        8.708
+
+Cliente 472 - cartera vigente    5.306      13.303        3.041
+
+Cliente 473 - cartera vigente   33.151       5.217          956
+
+Cliente 474 - cartera vigente   15.751         404        3.231
+
+Cliente 475 - cartera vigente   20.647      13.539        3.268
+
+Cliente 476 - cartera vigente   69.929      19.925        8.305
+
+Cliente 477 - cartera vigente   86.881      13.606        2.861
+
+Cliente 478 - cartera vigente   68.660      10.137        1.044
+
+Cliente 479 - cartera vigente   41.356       1.588        7.830
+
+Cliente 480 - cartera vigente   72.569         208        6.146
+
+Cliente 481 - cartera vigente   59.232      15.245        1.318
+
+Cliente 482 - cartera vigente   87.921      14.827        2.873
+
+Cliente 483 - cartera vigente   31.615       3.449        4.283
+
+Cliente 484 - cartera vigente   32.447       1.271        2.019
+
+Cliente 485 - cartera vigente   45.976       8.627          860
+
+Cliente 486 - cartera vigente   36.863      18.146        7.144
+
+Cliente 487 - cartera vigente   70.582       8.693        4.843
+
+Cliente 488 - cartera vigente   86.148       7.110        1.399
+
+Cliente 489 - cartera vigente   68.509         498        2.781
+
+Cliente 490 - cartera vigente   36.127       7.736        3.322
+
+Cliente 491 - cartera vigente   22.864      10.710        3.144
+
+Cliente 492 - cartera vigente   52.948      10.766        3.918
+
+Cliente 493 - cartera vigente   51.735      17.575        7.692
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 494 - cartera vigente   63.884      17.387          104
+
+Cliente 495 - cartera vigente    5.475      14.326        3.831
+
+Cliente 496 - cartera vigente   76.755      10.084        3.472
+
+Cliente 497 - cartera vigente   53.322      19.180        1.274
+
+Cliente 498 - cartera vigente   76.082       5.621        2.369
+
+Cliente 499 - cartera vigente    6.314         881        1.833
+
+Cliente 500 - cartera vigente   15.982       5.302        5.650
+
+Cliente 501 - cartera vigente   20.591         941          505
+
+Cliente 502 - cartera vigente    7.459       4.535          698
+
+Cliente 503 - cartera vigente   10.890       1.529        1.077
+
+Cliente 504 - cartera vigente   79.394      11.908        3.265
+
+Cliente 505 - cartera vigente   71.978       2.160        6.288
+
+Cliente 506 - cartera vigente   16.039       8.079        3.370
+
+Cliente 507 - cartera vigente   28.628       3.669          554
+
+Cliente 508 - cartera vigente    6.512       2.866        4.708
+
+Cliente 509 - cartera vigente   64.536       3.272        2.173
+
+Cliente 510 - cartera vigente   14.826       6.717        4.824
+
+Cliente 511 - cartera vigente   43.830      11.026        6.942
+
+Cliente 512 - cartera vigente   36.230         685        5.749
+
+Cliente 513 - cartera vigente   35.646       9.260          793
+
+Cliente 514 - cartera vigente   50.237      10.512        8.253
+
+Cliente 515 - cartera vigente   64.401       9.425          507
+
+Cliente 516 - cartera vigente   56.122       1.023        7.150
+
+Cliente 517 - cartera vigente   69.976       3.221        5.681
+
+Cliente 518 - cartera vigente   63.465       1.576        8.812
+
+Cliente 519 - cartera vigente   76.199       7.096        1.489
+
+Cliente 520 - cartera vigente   77.306       9.408        2.791
+
+Cliente 521 - cartera vigente   59.154          42        8.577
+
+Cliente 522 - cartera vigente   28.481       9.448          884
+
+Cliente 523 - cartera vigente    2.571      11.396        8.041
+
+Cliente 524 - cartera vigente   14.542      16.104        3.023
+
+Cliente 525 - cartera vigente   66.825      19.416        5.688
+
+Cliente 526 - cartera vigente   69.520       8.538        2.603
+
+Cliente 527 - cartera vigente   39.189       7.035        3.793
+
+Cliente 528 - cartera vigente   67.315       5.432        1.800
+
+Cliente 529 - cartera vigente   85.431       2.650        8.032
+
+Cliente 530 - cartera vigente   75.564       3.426        5.351
+
+Cliente 531 - cartera vigente   48.611       3.117        6.574
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 532 - cartera vigente   53.720       2.823        6.916
+
+Cliente 533 - cartera vigente   86.654         824        6.094
+
+Cliente 534 - cartera vigente   29.016       9.933        4.312
+
+Cliente 535 - cartera vigente   58.106      17.856        8.211
+
+Cliente 536 - cartera vigente   24.427      12.429        3.826
+
+Cliente 537 - cartera vigente   62.412       4.157        8.708
+
+Cliente 538 - cartera vigente   79.868      19.836          555
+
+Cliente 539 - cartera vigente   47.676      19.057        5.352
+
+Cliente 540 - cartera vigente   70.384       5.089        7.377
+
+Cliente 541 - cartera vigente   88.782      18.144        5.297
+
+Cliente 542 - cartera vigente   24.223      15.176        7.189
+
+Cliente 543 - cartera vigente   35.713      18.978        3.785
+
+Cliente 544 - cartera vigente   18.522      10.946        7.569
+
+Cliente 545 - cartera vigente   86.240       7.796        8.318
+
+Cliente 546 - cartera vigente   27.109       8.764        4.939
+
+Cliente 547 - cartera vigente   82.914       5.065        2.555
+
+Cliente 548 - cartera vigente   34.450      10.700        8.555
+
+Cliente 549 - cartera vigente   47.695       5.273        3.870
+
+Cliente 550 - cartera vigente   45.001       6.202        4.238
+
+Cliente 551 - cartera vigente   15.343       5.393        1.665
+
+Cliente 552 - cartera vigente   27.615      12.590        2.473
+
+Cliente 553 - cartera vigente   21.440       9.899        4.872
+
+Cliente 554 - cartera vigente   59.006       8.972        3.214
+
+Cliente 555 - cartera vigente   16.323       3.501        4.600
+
+Cliente 556 - cartera vigente   29.059      12.725        7.600
+
+Cliente 557 - cartera vigente    6.447         413        6.537
+
+Cliente 558 - cartera vigente   59.216       7.289        8.199
+
+Cliente 559 - cartera vigente   84.887       9.706        7.590
+
+Cliente 560 - cartera vigente    4.898       4.646        4.214
+
+Cliente 561 - cartera vigente   81.129      13.261           90
+
+Cliente 562 - cartera vigente   33.756      14.091        6.900
+
+Cliente 563 - cartera vigente   31.958      19.128        3.745
+
+Cliente 564 - cartera vigente   25.790       4.070        7.436
+
+Cliente 565 - cartera vigente   58.692      10.256        4.256
+
+Cliente 566 - cartera vigente   84.349       3.206        6.874
+
+Cliente 567 - cartera vigente   33.771      13.111        2.563
+
+Cliente 568 - cartera vigente   34.775      13.879        7.909
+
+Cliente 569 - cartera vigente   61.663         644        6.706
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 570 - cartera vigente   69.928       5.998        5.374
+
+Cliente 571 - cartera vigente    3.393      12.737        8.025
+
+Cliente 572 - cartera vigente   15.943       1.249        4.116
+
+Cliente 573 - cartera vigente   73.219       7.139        2.635
+
+Cliente 574 - cartera vigente   28.189      17.013        5.705
+
+Cliente 575 - cartera vigente   15.249      18.827        7.483
+
+Cliente 576 - cartera vigente   72.914       6.716        7.794
+
+Cliente 577 - cartera vigente   69.133         527        6.060
+
+Cliente 578 - cartera vigente   70.378      11.234        6.723
+
+Cliente 579 - cartera vigente   61.888       6.884        3.011
+
+Cliente 580 - cartera vigente   53.444      16.835        2.005
+
+Cliente 581 - cartera vigente   82.478      11.648          927
+
+Cliente 582 - cartera vigente   35.090       8.990        6.256
+
+Cliente 583 - cartera vigente   54.387       2.015          218
+
+Cliente 584 - cartera vigente   11.854      13.716        6.890
+
+Cliente 585 - cartera vigente   84.387      11.538        4.344
+
+Cliente 586 - cartera vigente   16.320       7.354        4.972
+
+Cliente 587 - cartera vigente   54.491      17.271        3.586
+
+Cliente 588 - cartera vigente   53.375      15.142        3.473
+
+Cliente 589 - cartera vigente   23.565       4.236        1.128
+
+Cliente 590 - cartera vigente   85.138       6.329        7.686
+
+Cliente 591 - cartera vigente   86.174      18.417        3.702
+
+Cliente 592 - cartera vigente   21.171      11.571        6.771
+
+Cliente 593 - cartera vigente   63.354       9.645        8.982
+
+Cliente 594 - cartera vigente   87.145       4.101        7.690
+
+Cliente 595 - cartera vigente   48.497       7.551        4.381
+
+Cliente 596 - cartera vigente   51.302       8.308        6.981
+
+Cliente 597 - cartera vigente   26.364      15.780           44
+
+Cliente 598 - cartera vigente   38.858      11.730        4.013
+
+Cliente 599 - cartera vigente   87.773       9.890        5.248
+
+Cliente 600 - cartera vigente   64.855      15.889        7.020
+
+Cliente 601 - cartera vigente   83.705       2.799        5.938
+
+Cliente 602 - cartera vigente   22.021       9.934        6.309
+
+Cliente 603 - cartera vigente    9.479       2.794        5.319
+
+Cliente 604 - cartera vigente   20.402      17.388        5.654
+
+Cliente 605 - cartera vigente   84.989      19.085          245
+
+Cliente 606 - cartera vigente   88.154         376        3.436
+
+Cliente 607 - cartera vigente   11.437       9.600        4.096
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 608 - cartera vigente   81.718       3.326        2.338
+
+Cliente 609 - cartera vigente   32.623       6.083        7.404
+
+Cliente 610 - cartera vigente   47.409       5.002        3.416
+
+Cliente 611 - cartera vigente   54.754      17.515        2.751
+
+Cliente 612 - cartera vigente   81.890      19.934        1.481
+
+Cliente 613 - cartera vigente   89.616      17.973        4.866
+
+Cliente 614 - cartera vigente   27.869      16.202        3.491
+
+Cliente 615 - cartera vigente   71.572       2.576        7.185
+
+Cliente 616 - cartera vigente   89.979       3.833        1.940
+
+Cliente 617 - cartera vigente   36.667      13.731        3.836
+
+Cliente 618 - cartera vigente   20.263      15.507        8.078
+
+Cliente 619 - cartera vigente   75.033       1.915        7.935
+
+Cliente 620 - cartera vigente   63.222       4.732        8.050
+
+Cliente 621 - cartera vigente   34.317      16.324        2.697
+
+Cliente 622 - cartera vigente   72.718      19.647          108
+
+Cliente 623 - cartera vigente   23.018      10.508        7.667
+
+Cliente 624 - cartera vigente   75.737      16.305        4.863
+
+Cliente 625 - cartera vigente   63.048      12.286        6.976
+
+Cliente 626 - cartera vigente   56.895       2.470        2.957
+
+Cliente 627 - cartera vigente   85.498      11.808          467
+
+Cliente 628 - cartera vigente    4.694      19.977          751
+
+Cliente 629 - cartera vigente   45.313       3.079        8.366
+
+Cliente 630 - cartera vigente   65.461      15.881        2.367
+
+Cliente 631 - cartera vigente    6.442       6.991        6.809
+
+Cliente 632 - cartera vigente   83.956       4.158        5.547
+
+Cliente 633 - cartera vigente   14.381      11.998        5.592
+
+Cliente 634 - cartera vigente   64.198      17.220        3.452
+
+Cliente 635 - cartera vigente   39.244      14.260        5.602
+
+Cliente 636 - cartera vigente   57.363       8.243          863
+
+Cliente 637 - cartera vigente   39.899       9.597        5.819
+
+Cliente 638 - cartera vigente   66.714      13.229        5.467
+
+Cliente 639 - cartera vigente   68.027       8.902        8.297
+
+Cliente 640 - cartera vigente   47.194       6.669        8.064
+
+Cliente 641 - cartera vigente   17.457      10.842        3.150
+
+Cliente 642 - cartera vigente   43.562       9.804        2.090
+
+Cliente 643 - cartera vigente   78.867       2.869          656
+
+Cliente 644 - cartera vigente   54.281      18.163        6.652
+
+Cliente 645 - cartera vigente   73.486      18.810          814
+Cliente                         Vigente   1-30 días   31-60 días
+
+Cliente 646 - cartera vigente   54.229       9.843        1.777
+
+Cliente 647 - cartera vigente    2.814       1.520        3.111
+
+Cliente 648 - cartera vigente   64.266      19.945          985
+
+Cliente 649 - cartera vigente   67.646      17.814        6.161
+
+Cliente 650 - cartera vigente   82.831       4.818        1.359
+
+Cliente 651 - cartera vigente   29.852       1.293        7.501
+
+Cliente 652 - cartera vigente   83.956       5.698        1.660
+
+Cliente 653 - cartera vigente   88.981       5.940          605
+
+Cliente 654 - cartera vigente   57.256       3.296          219
+
+Cliente 655 - cartera vigente   50.348       4.544        5.068
+
+Cliente 656 - cartera vigente   75.675       8.454        4.948
+
+Cliente 657 - cartera vigente   26.219      13.821          561
+
+Cliente 658 - cartera vigente   43.743         668        7.056
+
+Cliente 659 - cartera vigente   76.230      18.949          894
+
+Cliente 660 - cartera vigente   67.243      18.596        8.554
+
+Cliente 661 - cartera vigente    7.161       3.894        6.898
+
+Cliente 662 - cartera vigente   77.408      13.259        7.314
+
+Cliente 663 - cartera vigente   10.810         463        6.342
+
+Cliente 664 - cartera vigente   79.838      19.397        2.544
+
+Cliente 665 - cartera vigente   64.317      13.514        8.991
+
+Cliente 666 - cartera vigente   15.375       2.717        7.736
+
+Cliente 667 - cartera vigente   29.823       4.973          254
+
+Cliente 668 - cartera vigente   57.967         156          152
+
+Cliente 669 - cartera vigente   89.735       3.986        1.444
+
+Cliente 670 - cartera vigente   30.605       3.976        2.113
+
+Cliente 671 - cartera vigente   63.909         582        4.512
+
+Cliente 672 - cartera vigente   76.578       7.938        7.385
+
+Cliente 673 - cartera vigente   26.564       1.642        5.994
+
+Cliente 674 - cartera vigente   20.979       2.762        4.802
+
+Cliente 675 - cartera vigente   84.394      18.267        8.160
+
+Cliente 676 - cartera vigente   62.369       8.324          862
+
+Cliente 677 - cartera vigente    6.190         373          992
+
+Cliente 678 - cartera vigente    3.930       2.610        6.372
+
+Cliente 679 - cartera vigente   42.771      10.239        2.719
+
+Cliente 680 - cartera vigente   65.744      19.954          979
+
+Cliente 681 - cartera vigente   43.455      12.044        7.188
+
+Cliente 682 - cartera vigente   63.577       5.454        2.374
+
+Cliente 683 - cartera vigente   17.296      11.903        2.687
+              Cliente                           Vigente    1-30 días        31-60 días
+
+              Cliente 684 - cartera vigente      84.536      13.695             7.814
+
+              Cliente 685 - cartera vigente      52.559      14.835             4.456
+
+              Cliente 686 - cartera vigente      76.293      10.940             4.790
+
+              Cliente 687 - cartera vigente      38.687        1.986            5.440
+
+              Cliente 688 - cartera vigente      81.406          507            2.475
+
+              Cliente 689 - cartera vigente      80.792      10.112             7.021
+
+              Cliente 690 - cartera vigente      34.258      12.342             6.346
+
+              Cliente 691 - cartera vigente      51.309      19.719             3.839
+
+              Cliente 692 - cartera vigente      61.148        9.283               27
+
+              Cliente 693 - cartera vigente      44.143        8.619            4.391
+
+              Cliente 694 - cartera vigente      57.377        5.153              692
+
+              Cliente 695 - cartera vigente      39.817        4.609            2.408
+
+              Cliente 696 - cartera vigente      37.893      17.951             8.191
+
+              Cliente 697 - cartera vigente      47.462      17.516             1.393
+
+              Cliente 698 - cartera vigente      72.776      18.142             7.942
+
+              Cliente 699 - cartera vigente      52.035        6.567            3.834
+
+              Cliente 700 - cartera vigente      42.562      19.886               943
+
+
+
+
+ANEXO B - INVENTARIO POR PRODUCTO
+             Producto                         Unidades    Costo unitario      Obsoleto
+
+             Producto 001 - existencias          3.339              243                  0
+
+             Producto 002 - existencias          1.792              135                  0
+
+             Producto 003 - existencias          4.903              389                  0
+
+             Producto 004 - existencias           176               202                  0
+
+             Producto 005 - existencias          3.866              281                  0
+
+             Producto 006 - existencias           818               279                  0
+
+             Producto 007 - existencias          3.009              400                  0
+
+             Producto 008 - existencias           613               124                  0
+
+             Producto 009 - existencias          3.361              301                  0
+
+             Producto 010 - existencias          4.368              137                  0
+
+             Producto 011 - existencias          4.375              169                  0
+
+             Producto 012 - existencias          4.004              264                  0
+
+             Producto 013 - existencias          4.927              108                  0
+
+             Producto 014 - existencias          1.649              113                  0
+
+             Producto 015 - existencias          1.675                 52                0
+
+             Producto 016 - existencias          1.580              363                  0
+
+             Producto 017 - existencias          2.474              190                  0
+
+             Producto 018 - existencias          4.833              293                  0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 019 - existencias      3.040             211          0
+
+Producto 020 - existencias      4.337              81          0
+
+Producto 021 - existencias      2.117              27          0
+
+Producto 022 - existencias      4.140             196          0
+
+Producto 023 - existencias       969              195          0
+
+Producto 024 - existencias      3.896              46          0
+
+Producto 025 - existencias      1.379             166          0
+
+Producto 026 - existencias      4.992              20          0
+
+Producto 027 - existencias      2.925             148          0
+
+Producto 028 - existencias      4.355             315          0
+
+Producto 029 - existencias       268               53          0
+
+Producto 030 - existencias       375              109          0
+
+Producto 031 - existencias      4.732             253          0
+
+Producto 032 - existencias      4.906             295          0
+
+Producto 033 - existencias      1.849             138          0
+
+Producto 034 - existencias      2.392             223          0
+
+Producto 035 - existencias       895              233          0
+
+Producto 036 - existencias      4.958             316          0
+
+Producto 037 - existencias      1.172             135          0
+
+Producto 038 - existencias       410              178          0
+
+Producto 039 - existencias      1.746              97          0
+
+Producto 040 - existencias      3.198              47          0
+
+Producto 041 - existencias       325               31          0
+
+Producto 042 - existencias       385              290          0
+
+Producto 043 - existencias      3.128             366          0
+
+Producto 044 - existencias      3.854             254          0
+
+Producto 045 - existencias       625              311          0
+
+Producto 046 - existencias      3.355              66          0
+
+Producto 047 - existencias       836              136          0
+
+Producto 048 - existencias      2.710             294          0
+
+Producto 049 - existencias      2.010             333          0
+
+Producto 050 - existencias       835              347          0
+
+Producto 051 - existencias      4.249             206          0
+
+Producto 052 - existencias      1.596             234          0
+
+Producto 053 - existencias      1.408             194          0
+
+Producto 054 - existencias      2.026             374          0
+
+Producto 055 - existencias      1.916              93          0
+
+Producto 056 - existencias       416              136          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 057 - existencias      2.983              35          0
+
+Producto 058 - existencias      4.628              19          0
+
+Producto 059 - existencias       485              137          0
+
+Producto 060 - existencias      4.305             368          0
+
+Producto 061 - existencias      4.060              33          0
+
+Producto 062 - existencias       927               79          0
+
+Producto 063 - existencias      2.702             391          0
+
+Producto 064 - existencias       147              106          0
+
+Producto 065 - existencias      2.547             306          0
+
+Producto 066 - existencias      4.945             230          0
+
+Producto 067 - existencias       963              246          0
+
+Producto 068 - existencias      2.753             195          0
+
+Producto 069 - existencias      2.205             204          0
+
+Producto 070 - existencias      1.116             196          0
+
+Producto 071 - existencias      4.042             199          0
+
+Producto 072 - existencias      1.480             230          0
+
+Producto 073 - existencias      2.053              78          0
+
+Producto 074 - existencias       203              244          0
+
+Producto 075 - existencias      1.698              23          0
+
+Producto 076 - existencias      1.385             117          0
+
+Producto 077 - existencias       737              321          0
+
+Producto 078 - existencias      3.156             388          0
+
+Producto 079 - existencias      1.244             233          0
+
+Producto 080 - existencias       894              202          0
+
+Producto 081 - existencias       278              326          0
+
+Producto 082 - existencias       715              236          0
+
+Producto 083 - existencias      2.883             170          0
+
+Producto 084 - existencias      2.015             249          0
+
+Producto 085 - existencias      1.047             326          0
+
+Producto 086 - existencias      3.098              78          0
+
+Producto 087 - existencias      2.819             118          0
+
+Producto 088 - existencias       564               97          0
+
+Producto 089 - existencias      3.797             288          0
+
+Producto 090 - existencias      1.285             229          0
+
+Producto 091 - existencias      1.323             141          0
+
+Producto 092 - existencias      3.526             215          0
+
+Producto 093 - existencias      2.121              84          0
+
+Producto 094 - existencias       308              143          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 095 - existencias      4.777             156          0
+
+Producto 096 - existencias      2.840              90          0
+
+Producto 097 - existencias      2.235             256          0
+
+Producto 098 - existencias       994              167          0
+
+Producto 099 - existencias      3.837             252          0
+
+Producto 100 - existencias      1.035              83          0
+
+Producto 101 - existencias      4.306              34          0
+
+Producto 102 - existencias      1.829             291          0
+
+Producto 103 - existencias      4.011             151          0
+
+Producto 104 - existencias      1.076             136          0
+
+Producto 105 - existencias      1.751             191          0
+
+Producto 106 - existencias      3.639             138          0
+
+Producto 107 - existencias      2.055             126          0
+
+Producto 108 - existencias       899              204          0
+
+Producto 109 - existencias      2.470             217          0
+
+Producto 110 - existencias      1.428              34          0
+
+Producto 111 - existencias      2.504              78          0
+
+Producto 112 - existencias       231              231          0
+
+Producto 113 - existencias      4.259             179          0
+
+Producto 114 - existencias      4.284              76          0
+
+Producto 115 - existencias      3.729               5          0
+
+Producto 116 - existencias      4.413             151          0
+
+Producto 117 - existencias      1.622             189          0
+
+Producto 118 - existencias      3.665              25          0
+
+Producto 119 - existencias      3.450             116          0
+
+Producto 120 - existencias      2.367             297          0
+
+Producto 121 - existencias      1.580              75          0
+
+Producto 122 - existencias      1.575             272          0
+
+Producto 123 - existencias      1.987             369          0
+
+Producto 124 - existencias      1.538             105          0
+
+Producto 125 - existencias       749               49          0
+
+Producto 126 - existencias      4.158             394          0
+
+Producto 127 - existencias      2.343              94          0
+
+Producto 128 - existencias      1.787              75          0
+
+Producto 129 - existencias      1.674             303          0
+
+Producto 130 - existencias      2.623             108          0
+
+Producto 131 - existencias       182               38          0
+
+Producto 132 - existencias      4.356             213          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 133 - existencias       553              270          0
+
+Producto 134 - existencias      2.947             176          0
+
+Producto 135 - existencias      2.408             332          0
+
+Producto 136 - existencias      4.138              51          0
+
+Producto 137 - existencias       226              214          0
+
+Producto 138 - existencias      4.004              73          0
+
+Producto 139 - existencias      2.281             132          0
+
+Producto 140 - existencias      1.624             293          0
+
+Producto 141 - existencias      3.107              23          0
+
+Producto 142 - existencias      1.439             364          0
+
+Producto 143 - existencias      3.140             299          0
+
+Producto 144 - existencias      4.973               7          0
+
+Producto 145 - existencias      3.017             271          0
+
+Producto 146 - existencias      3.751             269          0
+
+Producto 147 - existencias       684               66          0
+
+Producto 148 - existencias      3.022             370          0
+
+Producto 149 - existencias      2.104             169          0
+
+Producto 150 - existencias      3.224             300          0
+
+Producto 151 - existencias       601              154          0
+
+Producto 152 - existencias       982              379          0
+
+Producto 153 - existencias      4.153             233          0
+
+Producto 154 - existencias      4.305              18          0
+
+Producto 155 - existencias      4.445             280          0
+
+Producto 156 - existencias      1.200              15          0
+
+Producto 157 - existencias      2.095              50          0
+
+Producto 158 - existencias      1.932             321          0
+
+Producto 159 - existencias      1.594              90          0
+
+Producto 160 - existencias       941              164          0
+
+Producto 161 - existencias      2.151             289          0
+
+Producto 162 - existencias       346               14          0
+
+Producto 163 - existencias       890              362          0
+
+Producto 164 - existencias      1.698             138          0
+
+Producto 165 - existencias       244              311          0
+
+Producto 166 - existencias      4.822             242          0
+
+Producto 167 - existencias      4.383             127          0
+
+Producto 168 - existencias      3.738              57          0
+
+Producto 169 - existencias      2.972              53          0
+
+Producto 170 - existencias      1.566              28          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 171 - existencias      2.336              68          0
+
+Producto 172 - existencias      3.908             257          0
+
+Producto 173 - existencias      4.899             261          0
+
+Producto 174 - existencias      2.390              61          0
+
+Producto 175 - existencias      1.099              67          0
+
+Producto 176 - existencias      3.423              75          0
+
+Producto 177 - existencias      4.536             308          0
+
+Producto 178 - existencias      1.963             121          0
+
+Producto 179 - existencias      1.306             347          0
+
+Producto 180 - existencias      4.792             241          0
+
+Producto 181 - existencias      3.349              89          0
+
+Producto 182 - existencias       251              330          0
+
+Producto 183 - existencias      3.284             360          0
+
+Producto 184 - existencias      3.544             310          0
+
+Producto 185 - existencias      4.405              23          0
+
+Producto 186 - existencias      3.341              31          0
+
+Producto 187 - existencias      3.075             178          0
+
+Producto 188 - existencias      3.382             128          0
+
+Producto 189 - existencias      2.844             371          0
+
+Producto 190 - existencias      3.668             293          0
+
+Producto 191 - existencias      2.726             210          0
+
+Producto 192 - existencias      4.696              32          0
+
+Producto 193 - existencias      2.761             269          0
+
+Producto 194 - existencias      1.301             353          0
+
+Producto 195 - existencias      2.995             132          0
+
+Producto 196 - existencias      3.558             344          0
+
+Producto 197 - existencias       194              191          0
+
+Producto 198 - existencias       993              276          0
+
+Producto 199 - existencias      1.635              40          0
+
+Producto 200 - existencias      2.757             226          0
+
+Producto 201 - existencias      1.744             263          0
+
+Producto 202 - existencias       270              120          0
+
+Producto 203 - existencias      1.242             220          0
+
+Producto 204 - existencias      3.352             237          0
+
+Producto 205 - existencias       483               25          0
+
+Producto 206 - existencias       381              333          0
+
+Producto 207 - existencias      2.277             352          0
+
+Producto 208 - existencias      2.339             326          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 209 - existencias      4.542              23          0
+
+Producto 210 - existencias       923              133          0
+
+Producto 211 - existencias      1.096             271          0
+
+Producto 212 - existencias       211              227          0
+
+Producto 213 - existencias      2.038              25          0
+
+Producto 214 - existencias      2.455              62          0
+
+Producto 215 - existencias      2.601             182          0
+
+Producto 216 - existencias      1.467              66          0
+
+Producto 217 - existencias       594              309          0
+
+Producto 218 - existencias      4.308             142          0
+
+Producto 219 - existencias       792              243          0
+
+Producto 220 - existencias      4.935             278          0
+
+Producto 221 - existencias      1.315             230          0
+
+Producto 222 - existencias      1.115             266          0
+
+Producto 223 - existencias      1.176             155          0
+
+Producto 224 - existencias      3.430             300          0
+
+Producto 225 - existencias      2.461             145          0
+
+Producto 226 - existencias      2.093             381          0
+
+Producto 227 - existencias       819              384          0
+
+Producto 228 - existencias      4.575             152          0
+
+Producto 229 - existencias      3.820             317          0
+
+Producto 230 - existencias      4.770             118          0
+
+Producto 231 - existencias      3.267             108          0
+
+Producto 232 - existencias      4.593             368          0
+
+Producto 233 - existencias      3.104             240          0
+
+Producto 234 - existencias      4.589             160          0
+
+Producto 235 - existencias      4.014             245          0
+
+Producto 236 - existencias      2.643              20          0
+
+Producto 237 - existencias      2.084             175          0
+
+Producto 238 - existencias      1.915             101          0
+
+Producto 239 - existencias      4.297             284          0
+
+Producto 240 - existencias      3.238             304          0
+
+Producto 241 - existencias      3.347              11          0
+
+Producto 242 - existencias      2.988              88          0
+
+Producto 243 - existencias      2.054             170          0
+
+Producto 244 - existencias      4.660             171          0
+
+Producto 245 - existencias      4.125             143          0
+
+Producto 246 - existencias      2.433             115          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 247 - existencias      2.520              34          0
+
+Producto 248 - existencias       278               86          0
+
+Producto 249 - existencias      4.614              39          0
+
+Producto 250 - existencias      2.950             230          0
+
+Producto 251 - existencias       608              269          0
+
+Producto 252 - existencias      3.277             230          0
+
+Producto 253 - existencias      3.000             381          0
+
+Producto 254 - existencias       994              271          0
+
+Producto 255 - existencias      1.944             351          0
+
+Producto 256 - existencias      1.365             218          0
+
+Producto 257 - existencias      2.860             347          0
+
+Producto 258 - existencias      2.987              76          0
+
+Producto 259 - existencias      1.758             320          0
+
+Producto 260 - existencias      2.367             270          0
+
+Producto 261 - existencias       878              383          0
+
+Producto 262 - existencias      3.993             142          0
+
+Producto 263 - existencias      1.142             216          0
+
+Producto 264 - existencias       946                7          0
+
+Producto 265 - existencias      3.462             397          0
+
+Producto 266 - existencias      4.605             304          0
+
+Producto 267 - existencias      1.062             259          0
+
+Producto 268 - existencias      3.356             297          0
+
+Producto 269 - existencias      1.325             218          0
+
+Producto 270 - existencias      2.388             323          0
+
+Producto 271 - existencias      1.009             199          0
+
+Producto 272 - existencias      3.805             359          0
+
+Producto 273 - existencias      3.851             152          0
+
+Producto 274 - existencias      2.988             154          0
+
+Producto 275 - existencias      2.991             205          0
+
+Producto 276 - existencias      4.409             289          0
+
+Producto 277 - existencias      4.977             201          0
+
+Producto 278 - existencias      2.737               8          0
+
+Producto 279 - existencias      4.192             199          0
+
+Producto 280 - existencias      3.737             158          0
+
+Producto 281 - existencias      1.609             279          0
+
+Producto 282 - existencias      2.590              79          0
+
+Producto 283 - existencias      3.668             299          0
+
+Producto 284 - existencias      3.188             302          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 285 - existencias      2.000              50          0
+
+Producto 286 - existencias      2.804             170          0
+
+Producto 287 - existencias      2.087             171          0
+
+Producto 288 - existencias      1.773             223          0
+
+Producto 289 - existencias       187               18          0
+
+Producto 290 - existencias       488              136          0
+
+Producto 291 - existencias      4.727             259          0
+
+Producto 292 - existencias      2.556             279          0
+
+Producto 293 - existencias      2.659             280          0
+
+Producto 294 - existencias      3.681             269          0
+
+Producto 295 - existencias      4.337             377          0
+
+Producto 296 - existencias      3.623             204          0
+
+Producto 297 - existencias      3.903             188          0
+
+Producto 298 - existencias       433              309          0
+
+Producto 299 - existencias      2.976             236          0
+
+Producto 300 - existencias       185              351          0
+
+Producto 301 - existencias       659              273          0
+
+Producto 302 - existencias      1.978              55          0
+
+Producto 303 - existencias      3.454             196          0
+
+Producto 304 - existencias      4.203             210          0
+
+Producto 305 - existencias      4.698             298          0
+
+Producto 306 - existencias      1.363             101          0
+
+Producto 307 - existencias      3.550             254          0
+
+Producto 308 - existencias      3.390             230          0
+
+Producto 309 - existencias      4.912             180          0
+
+Producto 310 - existencias      4.442             387          0
+
+Producto 311 - existencias       855               92          0
+
+Producto 312 - existencias      3.071             167          0
+
+Producto 313 - existencias      3.103              43          0
+
+Producto 314 - existencias      2.644             267          0
+
+Producto 315 - existencias      1.538              61          0
+
+Producto 316 - existencias      2.515             358          0
+
+Producto 317 - existencias      2.912             265          0
+
+Producto 318 - existencias      3.547             328          0
+
+Producto 319 - existencias      1.381             273          0
+
+Producto 320 - existencias      2.475             266          0
+
+Producto 321 - existencias      1.802             263          0
+
+Producto 322 - existencias      1.640             216          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 323 - existencias      1.594              35          0
+
+Producto 324 - existencias      4.728             313          0
+
+Producto 325 - existencias       973              185          0
+
+Producto 326 - existencias      4.768             328          0
+
+Producto 327 - existencias       446              359          0
+
+Producto 328 - existencias      3.470              10          0
+
+Producto 329 - existencias       122              162          0
+
+Producto 330 - existencias      4.629               7          0
+
+Producto 331 - existencias      2.594             208          0
+
+Producto 332 - existencias       906              305          0
+
+Producto 333 - existencias       226              347          0
+
+Producto 334 - existencias       341              105          0
+
+Producto 335 - existencias      1.535             259          0
+
+Producto 336 - existencias      4.632             295          0
+
+Producto 337 - existencias      2.279             336          0
+
+Producto 338 - existencias      4.453             268          0
+
+Producto 339 - existencias      1.277             299          0
+
+Producto 340 - existencias      1.726             215          0
+
+Producto 341 - existencias      1.095              79          0
+
+Producto 342 - existencias      1.384             270          0
+
+Producto 343 - existencias      4.273              59          0
+
+Producto 344 - existencias       337               56          0
+
+Producto 345 - existencias       723               92          0
+
+Producto 346 - existencias      4.380             256          0
+
+Producto 347 - existencias      3.929             318          0
+
+Producto 348 - existencias      3.627              36          0
+
+Producto 349 - existencias       202              355          0
+
+Producto 350 - existencias      4.841             170          0
+
+Producto 351 - existencias      1.279             371          0
+
+Producto 352 - existencias      2.051             186          0
+
+Producto 353 - existencias      2.356              91          0
+
+Producto 354 - existencias       369              141          0
+
+Producto 355 - existencias       914              303          0
+
+Producto 356 - existencias       616              183          0
+
+Producto 357 - existencias      1.670             235          0
+
+Producto 358 - existencias      3.259              15          0
+
+Producto 359 - existencias       547              117          0
+
+Producto 360 - existencias      3.343             303          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 361 - existencias       459              230          0
+
+Producto 362 - existencias       547              322          0
+
+Producto 363 - existencias      2.052             132          0
+
+Producto 364 - existencias      1.925              27          0
+
+Producto 365 - existencias      1.405             305          0
+
+Producto 366 - existencias      1.521             166          0
+
+Producto 367 - existencias       150              238          0
+
+Producto 368 - existencias      2.587             219          0
+
+Producto 369 - existencias      2.164             258          0
+
+Producto 370 - existencias       653              129          0
+
+Producto 371 - existencias      3.293             350          0
+
+Producto 372 - existencias      4.890             118          0
+
+Producto 373 - existencias      3.487             163          0
+
+Producto 374 - existencias      3.365             369          0
+
+Producto 375 - existencias      4.068              16          0
+
+Producto 376 - existencias      2.093              49          0
+
+Producto 377 - existencias      1.521              92          0
+
+Producto 378 - existencias      3.035             199          0
+
+Producto 379 - existencias      1.628               8          0
+
+Producto 380 - existencias      2.481             207          0
+
+Producto 381 - existencias      4.700             190          0
+
+Producto 382 - existencias      1.041             176          0
+
+Producto 383 - existencias      4.472             202          0
+
+Producto 384 - existencias      2.851             211          0
+
+Producto 385 - existencias       636               68          0
+
+Producto 386 - existencias      3.559             184          0
+
+Producto 387 - existencias      4.637             130          0
+
+Producto 388 - existencias      3.273             102          0
+
+Producto 389 - existencias      3.925             150          0
+
+Producto 390 - existencias      2.921             126          0
+
+Producto 391 - existencias      3.668              22          0
+
+Producto 392 - existencias      2.386             345          0
+
+Producto 393 - existencias       307              179          0
+
+Producto 394 - existencias      1.377             128          0
+
+Producto 395 - existencias      1.163              52          0
+
+Producto 396 - existencias      1.708             143          0
+
+Producto 397 - existencias      4.563              70          0
+
+Producto 398 - existencias      4.646             231          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 399 - existencias      3.926             127          0
+
+Producto 400 - existencias      1.404             193          0
+
+Producto 401 - existencias      2.991             115          0
+
+Producto 402 - existencias      3.419             197          0
+
+Producto 403 - existencias      4.857             111          0
+
+Producto 404 - existencias      2.535             248          0
+
+Producto 405 - existencias      4.235             109          0
+
+Producto 406 - existencias      1.961             236          0
+
+Producto 407 - existencias      1.172             366          0
+
+Producto 408 - existencias      2.236             310          0
+
+Producto 409 - existencias      3.707             305          0
+
+Producto 410 - existencias      3.114             278          0
+
+Producto 411 - existencias      2.117             211          0
+
+Producto 412 - existencias      4.279             113          0
+
+Producto 413 - existencias      1.128             389          0
+
+Producto 414 - existencias      1.105             352          0
+
+Producto 415 - existencias      4.302              51          0
+
+Producto 416 - existencias      4.544             143          0
+
+Producto 417 - existencias      3.252              19          0
+
+Producto 418 - existencias      4.750              79          0
+
+Producto 419 - existencias      2.645              12          0
+
+Producto 420 - existencias      3.294             368          0
+
+Producto 421 - existencias       804              360          0
+
+Producto 422 - existencias      1.550             123          0
+
+Producto 423 - existencias      2.729             101          0
+
+Producto 424 - existencias       992               39          0
+
+Producto 425 - existencias      4.703             190          0
+
+Producto 426 - existencias      4.198             393          0
+
+Producto 427 - existencias      2.532             103          0
+
+Producto 428 - existencias       639              372          0
+
+Producto 429 - existencias      2.649              50          0
+
+Producto 430 - existencias      1.954             152          0
+
+Producto 431 - existencias      1.133             371          0
+
+Producto 432 - existencias      3.368             149          0
+
+Producto 433 - existencias      3.015             211          0
+
+Producto 434 - existencias      3.904             326          0
+
+Producto 435 - existencias      1.182             146          0
+
+Producto 436 - existencias      1.545              20          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 437 - existencias      3.103             352          0
+
+Producto 438 - existencias      2.978             216          0
+
+Producto 439 - existencias       306              342          0
+
+Producto 440 - existencias      3.889             132          0
+
+Producto 441 - existencias      3.381             185          0
+
+Producto 442 - existencias       900               98          0
+
+Producto 443 - existencias      2.487              63          0
+
+Producto 444 - existencias      2.319             316          0
+
+Producto 445 - existencias      1.895             369          0
+
+Producto 446 - existencias       431              212          0
+
+Producto 447 - existencias       427              316          0
+
+Producto 448 - existencias      1.427             225          0
+
+Producto 449 - existencias      1.722             392          0
+
+Producto 450 - existencias      2.582              84          0
+
+Producto 451 - existencias      3.219             383          0
+
+Producto 452 - existencias       421              287          0
+
+Producto 453 - existencias      2.647             327          0
+
+Producto 454 - existencias      1.571             294          0
+
+Producto 455 - existencias      1.964             296          0
+
+Producto 456 - existencias      4.178             371          0
+
+Producto 457 - existencias      4.366             135          0
+
+Producto 458 - existencias      3.662             348          0
+
+Producto 459 - existencias      4.812             183          0
+
+Producto 460 - existencias       107               62          0
+
+Producto 461 - existencias      2.445              26          0
+
+Producto 462 - existencias      4.893             315          0
+
+Producto 463 - existencias       487              130          0
+
+Producto 464 - existencias      1.010              24          0
+
+Producto 465 - existencias      2.709             112          0
+
+Producto 466 - existencias      2.931             388          0
+
+Producto 467 - existencias       805              218          0
+
+Producto 468 - existencias      3.324             387          0
+
+Producto 469 - existencias      1.908             148          0
+
+Producto 470 - existencias      4.419              51          0
+
+Producto 471 - existencias      2.959             222          0
+
+Producto 472 - existencias      3.725             179          0
+
+Producto 473 - existencias      4.221             383          0
+
+Producto 474 - existencias      3.809             265          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 475 - existencias       544              351          0
+
+Producto 476 - existencias      1.787             224          0
+
+Producto 477 - existencias      4.293              70          0
+
+Producto 478 - existencias      4.110             395          0
+
+Producto 479 - existencias      1.650              27          0
+
+Producto 480 - existencias      4.680             138          0
+
+Producto 481 - existencias      1.529             284          0
+
+Producto 482 - existencias      1.440             331          0
+
+Producto 483 - existencias      2.033             283          0
+
+Producto 484 - existencias      2.232             132          0
+
+Producto 485 - existencias       586               91          0
+
+Producto 486 - existencias      3.031             182          0
+
+Producto 487 - existencias      3.472              52          0
+
+Producto 488 - existencias      1.749             330          0
+
+Producto 489 - existencias      2.644              75          0
+
+Producto 490 - existencias      1.218             356          0
+
+Producto 491 - existencias      4.084             348          0
+
+Producto 492 - existencias      4.054             126          0
+
+Producto 493 - existencias      2.080               8          0
+
+Producto 494 - existencias      4.322             359          0
+
+Producto 495 - existencias      3.745              73          0
+
+Producto 496 - existencias      2.979             362          0
+
+Producto 497 - existencias      2.552              73          0
+
+Producto 498 - existencias      1.262             305          0
+
+Producto 499 - existencias      4.714             128          0
+
+Producto 500 - existencias      2.832             327          0
+
+Producto 501 - existencias      1.066             285          0
+
+Producto 502 - existencias      3.578             394          0
+
+Producto 503 - existencias      1.486             351          0
+
+Producto 504 - existencias      1.368             311          0
+
+Producto 505 - existencias      3.877             397          0
+
+Producto 506 - existencias      3.426             110          0
+
+Producto 507 - existencias      1.037             358          0
+
+Producto 508 - existencias      2.470              11          0
+
+Producto 509 - existencias      3.053             254          0
+
+Producto 510 - existencias      1.791              27          0
+
+Producto 511 - existencias       594              148          0
+
+Producto 512 - existencias      2.589             105          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 513 - existencias      1.005             364          0
+
+Producto 514 - existencias      2.630             234          0
+
+Producto 515 - existencias      1.025              87          0
+
+Producto 516 - existencias      2.758             232          0
+
+Producto 517 - existencias      3.939             296          0
+
+Producto 518 - existencias      3.073             153          0
+
+Producto 519 - existencias      1.477             290          0
+
+Producto 520 - existencias       688               28          0
+
+Producto 521 - existencias       188              244          0
+
+Producto 522 - existencias      4.077              47          0
+
+Producto 523 - existencias      2.817             383          0
+
+Producto 524 - existencias      4.717             140          0
+
+Producto 525 - existencias       991              335          0
+
+Producto 526 - existencias      4.104             227          0
+
+Producto 527 - existencias      4.100             102          0
+
+Producto 528 - existencias      4.548             169          0
+
+Producto 529 - existencias       168              188          0
+
+Producto 530 - existencias       845              334          0
+
+Producto 531 - existencias      2.442             326          0
+
+Producto 532 - existencias      2.159             339          0
+
+Producto 533 - existencias      2.115              45          0
+
+Producto 534 - existencias      1.235             387          0
+
+Producto 535 - existencias       326               17          0
+
+Producto 536 - existencias      3.338              79          0
+
+Producto 537 - existencias      2.527             193          0
+
+Producto 538 - existencias      1.621             331          0
+
+Producto 539 - existencias      4.404             354          0
+
+Producto 540 - existencias      1.480              57          0
+
+Producto 541 - existencias      2.642             385          0
+
+Producto 542 - existencias      2.776             199          0
+
+Producto 543 - existencias      1.611             336          0
+
+Producto 544 - existencias      3.018             168          0
+
+Producto 545 - existencias      1.986             193          0
+
+Producto 546 - existencias      1.216             287          0
+
+Producto 547 - existencias      3.125             134          0
+
+Producto 548 - existencias      2.060              34          0
+
+Producto 549 - existencias       437               59          0
+
+Producto 550 - existencias      4.743             326          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 551 - existencias      3.403              30          0
+
+Producto 552 - existencias      1.873             258          0
+
+Producto 553 - existencias      3.565             260          0
+
+Producto 554 - existencias      1.390             158          0
+
+Producto 555 - existencias      4.860             325          0
+
+Producto 556 - existencias       757               77          0
+
+Producto 557 - existencias      1.963              88          0
+
+Producto 558 - existencias      1.232             231          0
+
+Producto 559 - existencias      3.388              50          0
+
+Producto 560 - existencias       427              230          0
+
+Producto 561 - existencias      4.027             102          0
+
+Producto 562 - existencias      1.888             375          0
+
+Producto 563 - existencias      3.151               6          0
+
+Producto 564 - existencias       362              317          0
+
+Producto 565 - existencias      4.288             222          0
+
+Producto 566 - existencias      1.272             150          0
+
+Producto 567 - existencias       689              343          0
+
+Producto 568 - existencias       553              268          0
+
+Producto 569 - existencias      3.550             178          0
+
+Producto 570 - existencias       613              229          0
+
+Producto 571 - existencias       172              346          0
+
+Producto 572 - existencias      1.544             376          0
+
+Producto 573 - existencias      1.447             198          0
+
+Producto 574 - existencias      2.522               7          0
+
+Producto 575 - existencias      3.730             293          0
+
+Producto 576 - existencias      2.951             295          0
+
+Producto 577 - existencias      1.700             245          0
+
+Producto 578 - existencias       796              282          0
+
+Producto 579 - existencias      2.751             269          0
+
+Producto 580 - existencias      3.872             224          0
+
+Producto 581 - existencias      4.480             325          0
+
+Producto 582 - existencias      1.364             210          0
+
+Producto 583 - existencias       767               35          0
+
+Producto 584 - existencias      2.815             316          0
+
+Producto 585 - existencias      2.533             294          0
+
+Producto 586 - existencias      4.778             220          0
+
+Producto 587 - existencias      3.119             251          0
+
+Producto 588 - existencias      1.221             158          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 589 - existencias      2.913             276          0
+
+Producto 590 - existencias       328              101          0
+
+Producto 591 - existencias      1.922             352          0
+
+Producto 592 - existencias      3.764             358          0
+
+Producto 593 - existencias       798               80          0
+
+Producto 594 - existencias      4.843             195          0
+
+Producto 595 - existencias      4.645             302          0
+
+Producto 596 - existencias      3.510             189          0
+
+Producto 597 - existencias      4.441             128          0
+
+Producto 598 - existencias      4.726             230          0
+
+Producto 599 - existencias      3.346             138          0
+
+Producto 600 - existencias      1.035             121          0
+
+Producto 601 - existencias      1.578             108          0
+
+Producto 602 - existencias      4.590             388          0
+
+Producto 603 - existencias      1.019             118          0
+
+Producto 604 - existencias      2.176             337          0
+
+Producto 605 - existencias       877              101          0
+
+Producto 606 - existencias      4.448             348          0
+
+Producto 607 - existencias      2.160             368          0
+
+Producto 608 - existencias      4.108             121          0
+
+Producto 609 - existencias      4.638             239          0
+
+Producto 610 - existencias      1.955             282          0
+
+Producto 611 - existencias      4.791             361          0
+
+Producto 612 - existencias      1.025             381          0
+
+Producto 613 - existencias      4.304             306          0
+
+Producto 614 - existencias      4.743              46          0
+
+Producto 615 - existencias      3.442             352          0
+
+Producto 616 - existencias       701              230          0
+
+Producto 617 - existencias      1.200             262          0
+
+Producto 618 - existencias      4.610             264          0
+
+Producto 619 - existencias      1.038             325          0
+
+Producto 620 - existencias      4.320              57          0
+
+Producto 621 - existencias      3.868             356          0
+
+Producto 622 - existencias      3.310             283          0
+
+Producto 623 - existencias      1.502             103          0
+
+Producto 624 - existencias      4.712             248          0
+
+Producto 625 - existencias       862               75          0
+
+Producto 626 - existencias      3.158             321          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 627 - existencias       571              212          0
+
+Producto 628 - existencias      2.040              29          0
+
+Producto 629 - existencias      3.150              26          0
+
+Producto 630 - existencias       224              364          0
+
+Producto 631 - existencias      4.968             114          0
+
+Producto 632 - existencias      3.865             158          0
+
+Producto 633 - existencias      1.087             367          0
+
+Producto 634 - existencias      1.210             223          0
+
+Producto 635 - existencias       818              323          0
+
+Producto 636 - existencias      1.751             293          0
+
+Producto 637 - existencias      1.039             377          0
+
+Producto 638 - existencias      3.005              91          0
+
+Producto 639 - existencias      3.106             386          0
+
+Producto 640 - existencias      2.896             395          0
+
+Producto 641 - existencias       195              135          0
+
+Producto 642 - existencias      1.105             127          0
+
+Producto 643 - existencias      3.155             267          0
+
+Producto 644 - existencias      4.398             187          0
+
+Producto 645 - existencias      4.105              27          0
+
+Producto 646 - existencias      2.995              56          0
+
+Producto 647 - existencias      3.014             286          0
+
+Producto 648 - existencias      2.781             313          0
+
+Producto 649 - existencias      1.025              22          0
+
+Producto 650 - existencias      2.086             135          0
+
+Producto 651 - existencias      3.002             103          0
+
+Producto 652 - existencias      3.759              15          0
+
+Producto 653 - existencias      4.862             230          0
+
+Producto 654 - existencias      1.030              15          0
+
+Producto 655 - existencias      4.098              61          0
+
+Producto 656 - existencias       704              137          0
+
+Producto 657 - existencias      1.617              81          0
+
+Producto 658 - existencias      4.640             153          0
+
+Producto 659 - existencias      3.219              78          0
+
+Producto 660 - existencias      4.919             133          0
+
+Producto 661 - existencias      4.510             358          0
+
+Producto 662 - existencias      2.301             232          0
+
+Producto 663 - existencias       213               17          0
+
+Producto 664 - existencias      2.904              82          0
+Producto                     Unidades   Costo unitario   Obsoleto
+
+Producto 665 - existencias      4.090             261          0
+
+Producto 666 - existencias      4.064              21          0
+
+Producto 667 - existencias       390               43          0
+
+Producto 668 - existencias      1.593             322          0
+
+Producto 669 - existencias      3.315             248          0
+
+Producto 670 - existencias      1.396             359          0
+
+Producto 671 - existencias      3.774             206          0
+
+Producto 672 - existencias      1.977             317          0
+
+Producto 673 - existencias      4.335              43          0
+
+Producto 674 - existencias      3.056             173          0
+
+Producto 675 - existencias      4.427             115          0
+
+Producto 676 - existencias      2.649              72          0
+
+Producto 677 - existencias      4.926             324          0
+
+Producto 678 - existencias       457              113          0
+
+Producto 679 - existencias      1.490             189          0
+
+Producto 680 - existencias      3.931             174          0
+
+Producto 681 - existencias      4.827             244          0
+
+Producto 682 - existencias      3.277             186          0
+
+Producto 683 - existencias      2.675               8          0
+
+Producto 684 - existencias      2.848             301          0
+
+Producto 685 - existencias      4.060             175          0
+
+Producto 686 - existencias      1.956              15          0
+
+Producto 687 - existencias      2.137             240          0
+
+Producto 688 - existencias       471              328          0
+
+Producto 689 - existencias      1.294             377          0
+
+Producto 690 - existencias      1.276             144          0
+
+Producto 691 - existencias      3.249             144          0
+
+Producto 692 - existencias       620              261          0
+
+Producto 693 - existencias      2.246             187          0
+
+Producto 694 - existencias      4.760             298          0
+
+Producto 695 - existencias      4.426             304          0
+
+Producto 696 - existencias      1.239             362          0
+
+Producto 697 - existencias       379              292          0
+
+Producto 698 - existencias       880              107          0
+
+Producto 699 - existencias      3.591             329          0
+
+Producto 700 - existencias      4.783             329          0
+

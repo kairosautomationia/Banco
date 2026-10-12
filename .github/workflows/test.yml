@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+# Solo lectura: las pruebas no necesitan escribir en el repositorio.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest

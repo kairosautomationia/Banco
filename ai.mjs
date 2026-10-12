@@ -12,7 +12,7 @@
 // Para un modelo más potente (p. ej. @cf/zai-org/glm-5.3-flash, requiere Workers Paid) define AI_MODEL en wrangler.jsonc > vars.
 export const DEFAULT_MODEL = '@cf/zai-org/glm-4.7-flash';
 const TIMEOUT_MS = 60000;
-const MAX_BODY = 2 * 1024 * 1024;
+const MAX_BODY = 700000;   // caracteres; el front envía ≈250 KB como máximo (documento recortado a 200 KB + expediente)
 const MAX_DOC = 200000;   // caracteres; ~80k tokens, cabe en los 131k de contexto del modelo por defecto
 const MAX_FACTS = 30000;
 
@@ -126,7 +126,7 @@ export function parseJson(text) {
 
 /* ---------- Validadores (la salida del modelo nunca se usa sin pasar por aquí) ---------- */
 const clean = (v, max) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, max) : '');
-const squash = (s) => String(s).replace(/[*_`|]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+const squash = (s) => String(s).replace(/[*_`|\s]+/g, ' ').trim().toLowerCase();   // una sola pasada
 const stripAccents = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 // Cada cifra de 3+ dígitos del texto debe existir en el expediente. No cuentan como dato los años (19xx/20xx),
@@ -139,7 +139,8 @@ export function unknownFigures(text, source) {
 
 // Solo se aceptan valores cuya evidencia es una cita literal del documento y contiene la cifra.
 export function validateIntegration(raw, markdown, missing) {
-  const doc = squash(markdown);
+  let doc = null;
+  const docText = () => (doc === null ? (doc = squash(markdown)) : doc);   // el documento (hasta 200 KB) solo se normaliza si hay algo que validar
   const src = raw && raw.campos && typeof raw.campos === 'object' ? raw.campos : {};
   const campos = {};
   const rechazados = [];
@@ -148,7 +149,7 @@ export function validateIntegration(raw, markdown, missing) {
     if (!item || typeof item !== 'object') continue;
     const evidencia = typeof item.evidencia === 'string' ? item.evidencia.trim() : '';
     const ev = squash(evidencia);
-    if (ev.length < 3 || ev.length > 400 || !doc.includes(ev)) { rechazados.push(id); continue; }
+    if (ev.length < 3 || ev.length > 400 || !docText().includes(ev)) { rechazados.push(id); continue; }
     if (id === 'overdue') {
       const valor = stripAccents(String(item.valor === undefined ? '' : item.valor).toLowerCase().trim());
       if (valor === 'si' || valor === 'no') campos[id] = { valor, evidencia };
@@ -176,14 +177,15 @@ export function validatePerfil(raw, facts, markdown) {
   if (!comportamiento) throw new AiError('El perfil vino vacío', 502, true);
   const unknown = unknownFigures(comportamiento, JSON.stringify(facts));
   if (unknown.length) throw new AiError(`El perfil citó cifras que no están en el expediente (${unknown.slice(0, 3).join(', ')}); se descartó`, 502, true);
-  const doc = markdown ? squash(markdown) : '';
+  let doc = null;
+  const docText = () => (doc === null ? (doc = markdown ? squash(markdown) : '') : doc);
   const contexto = [];
   for (const c of raw && Array.isArray(raw.contexto) ? raw.contexto : []) {
-    if (!doc || contexto.length >= 6 || !c || typeof c !== 'object') continue;
+    if (!markdown || contexto.length >= 6 || !c || typeof c !== 'object') continue;
     const dato = clean(c.dato, 200);
     const evidencia = typeof c.evidencia === 'string' ? c.evidencia.trim() : '';
     const ev = squash(evidencia);
-    if (!dato || ev.length < 8 || ev.length > 400 || !doc.includes(ev)) continue;   // sin cita literal no hay dato
+    if (!dato || ev.length < 8 || ev.length > 400 || !docText().includes(ev)) continue;   // sin cita literal no hay dato
     if (unknownFigures(dato, evidencia).length) continue;                           // cifras que la evidencia no contiene
     contexto.push({ dato, evidencia: evidencia.slice(0, 300) });
   }
