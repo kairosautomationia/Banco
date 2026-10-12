@@ -72,3 +72,29 @@ test('edición de cifras: los decimales pegados desde Excel (ES y EN) siguen des
     assert.equal(stripCents(pegado).replace(/\D/g, ''), digitos, pegado);
   }
 });
+
+test('notificaciones: tope de 30, contador «9+», estado de lectura y vacío', () => {
+  const { notify, notifs } = vm.runInContext('({ notify, notifs })', ctx);
+  notifs.length = 0;
+  for (let i = 0; i < 35; i++) notify('info', `aviso ${i}`);
+  assert.equal(notifs.length, 30);                                        // el historial no crece sin límite
+  assert.equal(notifs[0].title, 'aviso 34');                              // lo más reciente primero
+  assert.equal(els.get('notifCount').textContent, '9+');
+  assert.equal(els.get('notifCount').hidden, false);
+  notifs.forEach((n) => { n.read = true; });
+  vm.runInContext('renderNotifs()', ctx);
+  assert.equal(els.get('notifCount').hidden, true);                       // todo leído: sin contador
+  notifs.length = 0;
+  vm.runInContext('renderNotifs()', ctx);
+  assert.equal(els.get('notifEmpty').hidden, false);                      // sin notificaciones: estado vacío
+  assert.equal(els.get('notifList').innerHTML, '');
+});
+
+test('notificaciones: el texto de un archivo o de la IA se escapa (sin XSS)', () => {
+  const { notify, notifs } = vm.runInContext('({ notify, notifs })', ctx);
+  notifs.length = 0;
+  notify('warn', '“<img src=x onerror=alert(1)>.pdf” leído', '<script>alert(2)</script> Faltan: Patrimonio.');
+  const html = els.get('notifList').innerHTML;
+  assert.ok(html.includes('&lt;img src=x onerror=alert(1)>') && html.includes('&lt;script>'));
+  assert.ok(!html.includes('<img') && !html.includes('<script'));
+});

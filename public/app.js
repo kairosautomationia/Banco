@@ -281,6 +281,9 @@ function advance() {
     if (unlocked === 1) requestAi('perfil');
     if (unlocked === 4) requestAi('proteccion');
     if (unlocked === 5) requestAi('decision');
+    if (unlocked === 1) notify('ok', 'Datos validados', 'El expediente quedó listo; continúa con la fase 02.', { phase: 1 });
+    if (unlocked === 4) { const c = lastCalc; notify(c.flagCount ? 'warn' : 'ok', c.flagCount ? `${c.flagCount} de ${c.flags.length} controles de consistencia activados` : 'Controles de consistencia en orden', c.flagCount ? c.flags.filter((f) => f.hit).map((f) => f.label).join('; ') : `0 de ${c.flags.length} señales activadas.`, { phase: 4 }); }
+    if (isComplete()) notify('ok', 'Análisis completo', `${lastCalc.band.label} · monto sugerido ${money(lastCalc.suggested)}.`, { phase: 5 });
     if (isComplete()) { $('lastUpdate').textContent = 'ahora'; showToast('Análisis completo: recomendación lista'); }
     else showToast(`Fase ${String(unlocked + 1).padStart(2, '0')} desbloqueada`);
     render();
@@ -298,6 +301,7 @@ function resetCase() {
   docMarkdown = '';
   clearExtractionMarks();
   setDataOpen(false);
+  notify('info', 'Expediente reiniciado', 'Se restauró el caso de la guía.', { phase: 0 });
   applyCase('guia');
   $('formErrors').hidden = true;
   fillPanels();
@@ -325,7 +329,7 @@ function invalidateAnalysis(event) {
   lastCalc = null;
   fillPanels();
   render();
-  if (hadProgress) showToast('Los datos cambiaron: vuelve a validar para continuar');
+  if (hadProgress) { showToast('Los datos cambiaron: vuelve a validar para continuar'); notify('warn', 'Los datos cambiaron', 'El análisis se invalidó: vuelve a validar los datos.', { phase: 0 }); }
 }
 
 /* ---------- Sincronización con las otras vistas ---------- */
@@ -379,7 +383,6 @@ document.querySelectorAll('.stage').forEach((stageButton) => stageButton.addEven
   goTo(i);
 }));
 document.querySelectorAll('.alert-row button').forEach((button) => button.addEventListener('click', () => showToast('Alerta asignada a Finanzas & Riesgo')));
-document.querySelector('.notification').addEventListener('click', () => showToast('3 notificaciones nuevas'));
 
 const viewMap = { simulator: 'simulatorView', requests: 'requestsView', monitoring: 'monitoringView', fraud: 'fraudView' };
 function openView(view) {
@@ -404,6 +407,7 @@ function setUploadStatus(kind, text) {
   el.hidden = false;
   el.className = `upload-status ${kind}`;
   el.textContent = text;
+  if (kind === 'error') notify('error', 'No se pudo cargar el archivo', text, { phase: 0 });
 }
 
 function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
@@ -432,6 +436,7 @@ function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
   $('caseSelect').value = 'custom';
   setDataOpen(true);  // tras cargar un documento hay que revisar lo extraído
   invalidateAnalysis({ target: { id: 'fileInput' } });
+  notify(missing.length || warnings.length ? 'warn' : 'ok', `“${filename}” leído: ${found.length} de ${FIELD_KEYS.length} campos`, [Object.keys(ai.values).length ? `${Object.keys(ai.values).length} completados con IA: verifícalos.` : '', missing.length ? `Faltan: ${missing.map(labelOf).join(', ')}.` : '', ...warnings].filter(Boolean).join(' '), { phase: 0 });
   setUploadStatus(missing.length || warnings.length ? 'warn' : 'ok', missing.length ? `Extracción parcial: faltan ${missing.length} campo(s). Complétalos abajo antes de validar.` : Object.keys(ai.values).length ? 'Extracción completa. Los campos marcados con IA requieren tu verificación contra el documento.' : warnings.length ? 'Extracción completa, con una advertencia. Revisa los valores.' : 'Extracción completa. Revisa los valores y valida los datos.');
 }
 
@@ -602,12 +607,89 @@ async function requestAi(kind) {
   }
   refreshAi(kind, calc);
   if (kind === 'proteccion') syncViews();
+  if (calc === lastCalc) notifyAi(kind, calc.ai[kind]);
 }
 
 function refreshAi(kind, calc) {
   const i = AI_PANEL[kind];
   if (calc === lastCalc && i <= unlocked) $(`phaseBody${i}`).innerHTML = phaseHtml(i);
 }
+
+/* ---------- Centro de notificaciones: eventos reales de la app (la campana del encabezado) ---------- */
+const notifs = [];
+let notifSeq = 0;
+const NOTIF_ICON = { ok: '✓', info: 'i', warn: '!', error: '×' };
+const hhmm = (ts) => new Date(ts).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+
+function notify(type, title, text = '', go = null) {
+  notifs.unshift({ id: ++notifSeq, ts: Date.now(), type, title, text, go, read: false });
+  if (notifs.length > 30) notifs.length = 30;
+  renderNotifs();
+  $('notifLive').textContent = title;   // lo anuncian los lectores de pantalla
+}
+
+function renderNotifs() {
+  const unread = notifs.filter((n) => !n.read).length;
+  const badge = $('notifCount');
+  badge.hidden = unread === 0;
+  badge.textContent = unread > 9 ? '9+' : String(unread);
+  $('notifBtn').setAttribute('aria-label', unread ? `Notificaciones: ${unread} sin leer` : 'Notificaciones');
+  $('notifEmpty').hidden = notifs.length > 0;
+  $('notifList').innerHTML = notifs.map((n) => `<li class="notif-item ${n.type}${n.read ? '' : ' unread'}"><button type="button" data-notif="${n.id}"><span class="ni" aria-hidden="true">${NOTIF_ICON[n.type]}</span><span class="nt"><b>${esc(n.title)}</b>${n.text ? `<small>${esc(n.text)}</small>` : ''}<time>${hhmm(n.ts)}${n.go ? ' · Ver' : ''}</time></span></button></li>`).join('');
+}
+
+function openNotif(id) {
+  const n = notifs.find((x) => x.id === id);
+  if (!n) return;
+  n.read = true;
+  renderNotifs();
+  closeNotifs(false);
+  if (!n.go) return;
+  if (n.go.view) { openView(n.go.view); return; }
+  openView('simulator');
+  if (n.go.phase <= unlocked && !processing) goTo(n.go.phase);
+  else showToast('Esa fase ya no está disponible: vuelve a validar los datos');
+}
+
+function openNotifs() {
+  $('notifPanel').hidden = false;
+  $('notifBtn').setAttribute('aria-expanded', 'true');
+  const first = $('notifList').querySelector('button') || $('notifReadAll');
+  if (first) first.focus();
+}
+function closeNotifs(returnFocus = true) {
+  if ($('notifPanel').hidden) return;
+  $('notifPanel').hidden = true;
+  $('notifBtn').setAttribute('aria-expanded', 'false');
+  if (returnFocus) $('notifBtn').focus();
+}
+
+/* Avisos que generan los resultados de la IA (solo si el análisis sigue siendo el mismo) */
+function notifyAi(kind, s) {
+  if (s.status === 'error') { if (!s.unavailable) notify('warn', `La IA no pudo completar «${AI_TITLE[kind]}»`, s.error); return; }
+  if (kind === 'proteccion') {
+    const o = s.data.observaciones;
+    const fraud = o.filter((x) => x.categoria === 'fraude').length;
+    notify(fraud ? 'warn' : o.length ? 'info' : 'ok', 'IA: señales de fraude y consistencia', o.length ? `${o.length} observación(es)${fraud ? `, ${fraud} de posible fraude` : ''}.` : 'Sin señales adicionales a las reglas.', { phase: 4 });
+  }
+  if (kind === 'decision') {
+    const d = s.data;
+    notify(d.relacion === 'mas_estricta' ? 'warn' : 'info', `IA recomienda: ${DECISION_LABELS[d.recomendacion]}`, { coincide: 'Coincide con las reglas.', mas_estricta: 'Más estricta que las reglas: revísala.', ajustada: 'Se ajustó al nivel de las reglas (la IA era más permisiva).' }[d.relacion], { phase: 5 });
+  }
+}
+
+$('notifBtn').addEventListener('click', () => ($('notifPanel').hidden ? openNotifs() : closeNotifs()));
+$('notifReadAll').addEventListener('click', () => { notifs.forEach((n) => { n.read = true; }); renderNotifs(); });
+$('notifClear').addEventListener('click', () => { notifs.length = 0; renderNotifs(); });
+$('notifList').addEventListener('click', (e) => { const b = e.target.closest('[data-notif]'); if (b) openNotif(Number(b.dataset.notif)); });
+$('notifList').addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  const buttons = [...$('notifList').querySelectorAll('button')];
+  const next = buttons[(buttons.indexOf(document.activeElement) + (e.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length];
+  if (next) { e.preventDefault(); next.focus(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeNotifs(); });
+document.addEventListener('click', (e) => { if (!$('notifPanel').hidden && !e.target.closest('.notif-wrap')) closeNotifs(false); });
 
 /* Paneles de fases 2–6: cabecera y acciones generadas desde `stages` */
 for (let i = 1; i <= 5; i += 1) {
@@ -626,3 +708,4 @@ renderHeader();
 fillPanels();
 render();
 openView('simulator');
+notify('info', 'Bienvenido a Banco 4.0', 'Carga un archivo o elige un caso de ejemplo y pulsa «Validar datos y continuar».', { phase: 0 });
