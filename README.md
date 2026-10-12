@@ -110,6 +110,6 @@ Los archivos que se cargan se envían a LlamaParse para leerlos. No cargues docu
 | `worker.js`, `wrangler.jsonc` | Lo mismo para Cloudflare Workers, con IA, contraseña y cabeceras de seguridad |
 | `ai.mjs` | Capa de IA: proveedores intercambiables, validadores y reintento estricto |
 | `ocr.mjs` | Espera progresiva del sondeo a LlamaParse |
-| `test/` | `npm test` (85 pruebas); `test/fixtures/` tiene estados financieros sintéticos de más de 24 KB con verdad conocida |
+| `test/` | `npm test` (87 pruebas); `test/fixtures/` tiene estados financieros sintéticos de más de 24 KB con verdad conocida |
 | `scripts/smoke.mjs` | Prueba en vivo contra un despliegue (sitio, IA y OCR) |
 | `.github/workflows/test.yml` | Corre las pruebas en cada PR |

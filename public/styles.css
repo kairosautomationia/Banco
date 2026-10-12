@@ -296,3 +296,31 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 /* Contraste WCAG AA de las iniciales de los avatares (antes 2,7:1 y 3,6:1) */
 .operator-avatar{background:#b4532f}
 .case-avatar{color:#0b5a66}
+
+/* Centro de notificaciones (campana del encabezado) */
+.notif-wrap{position:relative}
+.notification{cursor:pointer}
+.notification:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.notif-count{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border:2px solid #fff;border-radius:10px;background:#c0431f;color:#fff;font:700 10px/17px Manrope;text-align:center;box-sizing:content-box}
+.notif-panel{position:absolute;right:0;top:calc(100% + 10px);z-index:60;width:min(380px,calc(100vw - 32px));overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 18px 40px rgba(18,50,74,.18)}
+.notif-head,.notif-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px}
+.notif-head{border-bottom:1px solid var(--line)}
+.notif-head b{font-size:13px;color:#21425b}
+.notif-foot{justify-content:flex-end;border-top:1px solid var(--line)}
+.notif-link{padding:4px 2px;border:0;border-radius:4px;background:none;color:#1769d2;font:700 11.5px Manrope;cursor:pointer}
+.notif-link:hover{text-decoration:underline}
+.notif-link:focus-visible,.notif-item button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.notif-list{max-height:min(420px,60vh);margin:0;padding:0;overflow:auto;list-style:none}
+.notif-item button{display:flex;align-items:flex-start;gap:11px;width:100%;padding:11px 14px;border:0;border-bottom:1px solid #eef3f6;background:#fff;text-align:left;font:inherit;cursor:pointer}
+.notif-item button:hover{background:#f6fafc}
+.notif-item.unread button{background:#f4f9ff}
+.ni{display:grid;flex:none;place-items:center;width:22px;height:22px;border-radius:50%;color:#fff;font:800 12px Manrope}
+.notif-item.ok .ni{background:#17775b}.notif-item.info .ni{background:#1d5a9c}.notif-item.warn .ni{background:#9a520a}.notif-item.error .ni{background:#a8321f}
+.nt{display:grid;gap:2px;min-width:0}
+.nt b{font-size:12.5px;line-height:1.3;color:#183650}
+.nt small{font-size:11.5px;line-height:1.4;color:#4a6a73;overflow-wrap:anywhere}
+.nt time{font-size:10.5px;color:#587083}
+.notif-item.unread .nt b::after{content:'';display:inline-block;width:6px;height:6px;margin-left:6px;border-radius:50%;background:#1769d2;vertical-align:middle}
+.notif-empty{margin:0;padding:22px 14px;text-align:center;font-size:12px;color:#587083}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media(max-width:560px){.notif-panel{position:fixed;top:72px;right:16px;left:16px;width:auto}}
