@@ -2,9 +2,9 @@
 // Equivale a server.js. La clave vive como secreto del Worker (LLAMA_CLOUD_API_KEY); nunca llega al navegador.
 // Secretos/variables: LLAMA_CLOUD_API_KEY (para el OCR), LLAMA_PARSE_TIER (opcional: cost_effective | agentic | agentic_plus) y ACCESS_PASSWORD (opcional, protege sitio y OCR).
 // La IA (/api/ai/*) vive en ai.mjs y usa el binding "AI" de Workers AI; ver el README para cambiar de proveedor.
-import { handleAi } from './ai.mjs';
+import { handleAi, DEFAULT_MODEL } from './ai.mjs';
 import { MAX_WAIT_MS, pollDelay } from './ocr.mjs';
-import { BASE, configuration, jobIdOf, statusOf, isDone, isFailed } from './llamaparse.mjs';
+import { BASE, DEFAULT_TIER, configuration, jobIdOf, statusOf, isDone, isFailed } from './llamaparse.mjs';
 
 const MAX_BYTES = 20 * 1024 * 1024;
 const ALLOWED_EXT = new Set(['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv']);
@@ -82,6 +82,18 @@ async function readCapped(request, max) {
   return new Blob(chunks);
 }
 
+// Estado de la configuración, sin llamar a LlamaParse ni a la IA y sin revelar ningún secreto: sirve para comprobar un despliegue.
+function health(env) {
+  const aiBinding = Boolean(env.AI && typeof env.AI.run === 'function');
+  const ocrKey = Boolean(env.LLAMA_CLOUD_API_KEY);
+  return {
+    ok: ocrKey && aiBinding,
+    ocr: { clave_configurada: ocrKey, api: 'LlamaParse v2', nivel: env.LLAMA_PARSE_TIER || DEFAULT_TIER },
+    ia: { binding: aiBinding, modelo: env.AI_MODEL || DEFAULT_MODEL },
+    protegido_con_contrasena: Boolean(env.ACCESS_PASSWORD)
+  };
+}
+
 async function extract(request, env) {
   if (!env.LLAMA_CLOUD_API_KEY) return json(500, { error: 'Falta el secreto LLAMA_CLOUD_API_KEY en Cloudflare' });
 
@@ -133,6 +145,10 @@ const handler = {
         });
       }
       const url = new URL(request.url);
+      if (url.pathname === '/api/health') {
+        if (request.method !== 'GET') return json(405, { error: 'Método no permitido' }, { allow: 'GET' });
+        return json(200, health(env));
+      }
       if (url.pathname === '/api/extract') {
         if (request.method !== 'POST') return json(405, { error: 'Método no permitido' }, { allow: 'POST' });
         return await extract(request, env);
