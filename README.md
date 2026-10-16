@@ -27,6 +27,14 @@ La IA sigue el flujo del Banco 4.0 (integra → predice → personaliza → dete
 - **Pruebas:** `npm test` valida los validadores, el extractor con estados financieros reales, el Worker (contraseña, rutas, subida de archivos de 30 KB a 20 MB y presupuesto de CPU) y el cambio de proveedor con un modelo simulado. No mide la calidad real de ningún modelo ni del OCR.
 - **Prueba en vivo:** `BASE_URL=https://tu-worker.workers.dev ACCESS_PASSWORD=... npm run smoke` comprueba el sitio desplegado y cada tarea de IA con el modelo real.
 
+## Pre-análisis asistido: la IA propone, las reglas validan, el analista decide
+
+- **Evidencia por cifra:** cada campo leído de un documento muestra la línea de donde salió y su origen (reglas o IA).
+- **Confirmación obligatoria:** las cifras que propone la IA no dejan validar el expediente hasta que el analista las confirma contra el documento o las corrige.
+- **Decisión del analista:** en la fase 06 el analista aprueba o devuelve la recomendación con su nombre. La app nunca decide por sí sola.
+- **Expediente de revisión:** botón «Descargar expediente (JSON)» con cada cifra, su origen, su evidencia, qué se confirmó o corrigió, el resultado de las reglas, el estado de la IA y la decisión. Se genera en el navegador y no se guarda en ningún servidor.
+- **Score de referencia:** el score y la probabilidad de incumplimiento son indicadores sin calibrar con datos reales; no son una predicción.
+
 ## Operación y límites conocidos
 
 Lo que conviene saber antes de depender del sistema (verificado, no supuesto):

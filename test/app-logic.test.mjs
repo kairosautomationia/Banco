@@ -98,3 +98,40 @@ test('notificaciones: el texto de un archivo o de la IA se escapa (sin XSS)', ()
   assert.ok(html.includes('&lt;img src=x onerror=alert(1)>') && html.includes('&lt;script>'));
   assert.ok(!html.includes('<img') && !html.includes('<script'));
 });
+
+test('revisión: una cifra propuesta por la IA bloquea la validación hasta que el analista la confirma o la corrige', () => {
+  const run = (code) => vm.runInContext(code, ctx);
+  run("applyCase('guia'); unlocked = 0; processing = false; review = { cash: { source: 'ia', evidence: '| Efectivo | 28.128 |', confirmed: false, edited: false }, ebitda: { source: 'regla', evidence: 'EBITDA 400.000', confirmed: false, edited: false } }; advance();");
+  assert.match(els.get('formErrors').innerHTML, /Efectivo[^<]*la IA propuso/);   // solo la cifra de la IA bloquea, no la leída por reglas
+  assert.doesNotMatch(els.get('formErrors').innerHTML, /EBITDA/);
+  assert.equal(run('processing'), false);
+  run('review.cash.confirmed = true; advance();');                                  // confirmada: deja pasar
+  assert.equal(run('processing'), true);
+  run("clearTimeout(timer); processing = false; unlocked = 0; review.cash.confirmed = false; review.cash.edited = true; advance();");   // corregida: también
+  assert.equal(run('processing'), true);
+  run('clearTimeout(timer); processing = false; unlocked = 0; review = {};');
+});
+
+test('expediente de revisión: registra origen, evidencia, revisión y decisión del analista', () => {
+  const run = (code) => vm.runInContext(code, ctx);
+  run("applyCase('guia'); lastCalc = compute(readInputs()); review = { cash: { source: 'ia', evidence: '| Efectivo | 28.128 |', confirmed: true, edited: false }, debt: { source: 'regla', evidence: 'Deuda 999.922', confirmed: false, edited: false }, equity: { source: 'ia', evidence: 'x', confirmed: false, edited: true } }; lastCalc.approval = { decision: 'aprobada', analyst: 'Ana', iso: '2026-10-16T10:00:00.000Z', label: 'x' };");
+  const rec = JSON.parse(run('JSON.stringify(buildRecord())'));
+  const f = (id) => rec.campos.find((c) => c.campo === id);
+  assert.equal(rec.campos.length, 15);
+  assert.deepEqual([f('cash').origen, f('cash').revision, f('cash').evidencia], ['documento · IA', 'confirmado por el analista', '| Efectivo | 28.128 |']);
+  assert.deepEqual([f('debt').origen, f('debt').revision], ['documento · reglas', 'leído por reglas']);
+  assert.equal(f('equity').revision, 'corregido por el analista');
+  assert.deepEqual([f('sales24').origen, f('sales24').revision], ['caso de ejemplo', null]);
+  assert.equal(rec.reglas.score_referencia, 714);
+  assert.equal(rec.ia.decision, 'no solicitada');
+  assert.deepEqual(rec.decision_analista, { decision: 'aprobada', analista: 'Ana', fecha: '2026-10-16T10:00:00.000Z' });
+  assert.match(rec.nota, /no están calibrados/);
+  run('review = {}; lastCalc = null;');
+});
+
+test('decisión del analista: el nombre se escapa y los botones esperan a la recomendación de la IA', () => {
+  const html = vm.runInContext("lastCalc = compute(readInputs()); approverName = '<img onerror=1>'; lastCalc.ai = { decision: { status: 'loading' } }; const h = approvalHtml(lastCalc); approverName = ''; lastCalc = null; h", ctx);
+  assert.ok(html.includes('&lt;img onerror=1>') && !html.includes('<img'));
+  assert.equal((html.match(/ disabled>/g) || []).length, 2);              // aprobar y devolver; descargar sigue disponible
+  assert.match(html, /Espera a que la IA termine/);
+});

@@ -323,3 +323,19 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .notif-empty{margin:0;padding:22px 14px;text-align:center;font-size:12px;color:#587083}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(max-width:560px){.notif-panel{position:fixed;top:72px;right:16px;left:16px;width:auto}}
+/* Revisión del analista: confirmación de cifras de la IA y decisión registrada */
+.ai-tag.ok{color:#17644e;background:#e6f6f0}
+.confirm-btn{margin-top:6px;min-height:32px;padding:0 12px;border:1px solid #4352b8;border-radius:6px;background:#fff;color:#3441a3;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.confirm-btn:hover{background:#eceefd}
+.confirm-btn:focus-visible,.approval input:focus-visible{outline:2px solid #1769d2;outline-offset:2px}
+.approval{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.approval-name{display:flex;flex-direction:column;gap:6px;max-width:360px;margin-top:12px;font-size:12px;font-weight:700;color:#183650}
+.approval-name input{min-height:40px;padding:0 10px;border:1px solid #dde7ed;border-radius:6px;font:inherit;font-weight:400;color:#183650}
+.approval-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
+.approval-actions .run-button{margin-top:0;flex:0 1 auto;width:auto;padding:0 18px}
+.approval-actions .reset-button{width:auto;margin-top:0;padding:0 14px}
+.approval-actions button:disabled{opacity:.55;cursor:not-allowed}
+.approval-state{margin:12px 0 0;font-size:13px;color:#587083}
+.approval-state.aprobada{color:#17644e}
+.approval-state.devuelta{color:#84531b}
+@media(max-width:600px){.approval-actions{flex-direction:column;align-items:stretch}.approval-actions .run-button{padding:0 14px}}

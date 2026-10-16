@@ -39,6 +39,10 @@ let timer;
 let lastCalc = null;
 let customName = '';
 let docMarkdown = '';  // texto OCR del documento cargado; alimenta el contexto de la IA en la fase 02
+/* Revisión del analista: cada cifra leída de un documento guarda su origen (reglas o IA), su evidencia y si el analista la confirmó o la corrigió. */
+let review = {};
+let lastExtraction = null;
+let approverName = '';
 
 const grouped = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
 const money = (v) => `${v < 0 ? '-' : ''}$${grouped.format(Math.abs(Math.round(v)))}`;
@@ -119,10 +123,22 @@ function compute(d) {
 function ratioLabel(r) { return r >= .67 ? ['Fuerte', 'strong'] : r >= .34 ? ['Medio', 'mid'] : ['Débil', 'weak']; }
 
 function scoreBlock(c) {
-  return `<div class="score-block"><div class="score-head"><div><small>SCORE</small><b>${c.score}</b><span>/ 999</span></div><em class="band-pill ${c.band.css}">${c.band.label}</em></div>
+  return `<div class="score-block"><div class="score-head"><div><small>SCORE DE REFERENCIA</small><b>${c.score}</b><span>/ 999</span></div><em class="band-pill ${c.band.css}">${c.band.label}</em></div>
     <div class="score-scale" role="img" aria-label="Score ${c.score} de 999. Menor a 600 alto riesgo, 600 a 750 moderado, mayor a 750 bajo"><i class="seg high" style="flex:600"></i><i class="seg mod" style="flex:150"></i><i class="seg low" style="flex:249"></i><span class="pointer" style="left:${Math.min(100, c.score / 999 * 100)}%"></span></div>
     <div class="score-ticks"><span>0</span><span style="left:60.06%">600</span><span style="left:75.08%">750</span><span>999</span></div>
     <div class="score-legend"><span><i class="seg high"></i>Alto &lt; 600</span><span><i class="seg mod"></i>Moderado 600–750</span><span><i class="seg low"></i>Bajo &gt; 750</span></div></div>`;
+}
+
+/* La app solo recomienda: la decisión es del analista y queda registrada en el expediente de revisión. */
+function approvalHtml(c) {
+  const a = c.approval;
+  const waiting = c.ai && c.ai.decision && c.ai.decision.status === 'loading';
+  const state = a
+    ? `<p class="approval-state ${a.decision}" role="status"><b>${a.decision === 'aprobada' ? 'Recomendación aprobada' : 'Devuelta a revisión'}</b> por ${esc(a.analyst)} · ${esc(a.label)}</p>`
+    : `<p class="approval-state">${waiting ? 'Espera a que la IA termine su recomendación para decidir.' : 'Pendiente de tu decisión.'}</p>`;
+  return `<section class="approval" aria-labelledby="approvalTitle"><h4 class="body-title" id="approvalTitle">Decisión del analista</h4><p class="body-note">La app solo recomienda; la decisión es tuya y queda en el expediente de revisión.</p>
+    <label class="approval-name">Analista<input id="approver" type="text" maxlength="80" autocomplete="name" placeholder="Tu nombre" value="${esc(approverName)}"></label>
+    <div class="approval-actions"><button type="button" class="run-button" data-approve="aprobada"${waiting ? ' disabled' : ''}>Aprobar recomendación</button><button type="button" class="reset-button" data-approve="devuelta"${waiting ? ' disabled' : ''}>Devolver a revisión</button><button type="button" class="reset-button" data-export="1">Descargar expediente (JSON)</button></div>${state}</section>`;
 }
 
 function phaseHtml(i) {
@@ -156,12 +172,13 @@ function phaseHtml(i) {
   const items = [
     ['Integración', `Ventas de ${money(d.sales21)} (dic-21) a ${money(d.sales24)} (dic-24); ${d.institutions} institución(es) con deuda; accionistas ${d.overdue === 'si' ? 'con vencidos reportados' : 'sin vencidos reportados'}.`],
     ['Riesgo', `Cobertura ${times(c.cov)} y apalancamiento pro forma ${times(c.lev)}. Más fuerte: ${strongest.name.toLowerCase()}; más débil: ${weakest.name.toLowerCase()} (${Math.round(weakest.points)} / ${weakest.weight} pts).`],
-    ['Predicción', `Score ${c.score} / 999 · ${c.band.label.toLowerCase()}. Probabilidad de incumplimiento referencial ${(c.pd * 100).toFixed(1)}%.`],
+    ['Predicción', `Score ${c.score} / 999 · ${c.band.label.toLowerCase()}. Probabilidad de incumplimiento referencial ${(c.pd * 100).toFixed(1)}% (sin calibrar).`],
     ['Protección', `Monto sugerido ${money(c.suggested)} a ${c.rate.toFixed(1)}% anual; ${c.flagCount} de ${c.flags.length} señales de consistencia.`]
   ].map(([k, v]) => `<li><b>${k}</b><span>${v}</span></li>`).join('');
-  return `<div class="final-grid"><div>${scoreBlock(c)}<div class="decision-banner"><span aria-hidden="true">✓</span><div><small>DECISIÓN SUGERIDA</small><h4>${c.band.title}</h4></div></div><p class="decision-copy">${c.band.text}${c.flagCount ? ` ${c.flagCount} señal${c.flagCount > 1 ? 'es' : ''} de consistencia por validar.` : ''}</p></div>
+  return `<div class="final-grid"><div>${scoreBlock(c)}<div class="decision-banner"><span aria-hidden="true">✓</span><div><small>RECOMENDACIÓN DE LAS REGLAS</small><h4>${c.band.title}</h4></div></div><p class="decision-copy">${c.band.text}${c.flagCount ? ` ${c.flagCount} señal${c.flagCount > 1 ? 'es' : ''} de consistencia por validar.` : ''}</p></div>
     <div><div class="kpi-row two"><div><span>Monto sugerido</span><b>${money(c.suggested)}</b></div><div><span>Tasa (ref.)</span><b>${c.rate.toFixed(1)}%</b></div></div><h4 class="body-title">Por qué esta recomendación</h4><ol class="explain-list open">${items}</ol></div></div>
     ${aiSlot('decision')}
+    ${approvalHtml(c)}
     <p class="decision-disclaimer">No es una preaprobación de crédito: según el monto, debe estar cubierto por garantías adicionales. El resultado no considera filtros duros ni de entidades gubernamentales (SRI, IESS, entre otras). El score es una referencia inicial que debe profundizarse con toda la información de análisis.</p>`;
 }
 
@@ -260,7 +277,9 @@ function goTo(i) {
 function advance() {
   if (processing) return;
   if (unlocked === 0) {
-    const errors = validate(readInputs());
+    const pending = pendingReview();
+    const errors = [...validate(readInputs()), ...pending.map((id) => `${fieldLabel(id)}: la IA propuso esta cifra; confírmala contra el documento o corrígela`)];
+    if (pending.length) renderExtractReport(true);
     if (errors.length) {
       $('formErrors').hidden = false;
       setDataOpen(true);
@@ -370,7 +389,62 @@ $('caseSelect').addEventListener('change', (event) => {
   invalidateAnalysis(event);
 });
 MONEY_IDS.forEach((id) => $(id).addEventListener('input', () => formatMoneyInput($(id))));
-[...INPUT_IDS, 'overdue'].forEach((id) => $(id).addEventListener('input', invalidateAnalysis));
+[...INPUT_IDS, 'overdue'].forEach((id) => $(id).addEventListener('input', (event) => {
+  if (review[id] && !review[id].edited) { review[id].edited = true; renderExtractReport(); }   // el analista cambió la cifra: queda como corregida
+  invalidateAnalysis(event);
+}));
+$('extractReport').addEventListener('click', (event) => {
+  const b = event.target && event.target.closest ? event.target.closest('[data-confirm]') : null;
+  if (!b || !review[b.dataset.confirm]) return;
+  review[b.dataset.confirm].confirmed = true;
+  renderExtractReport();
+});
+
+/* Expediente de revisión: qué se leyó, de dónde, qué confirmó el analista y qué decidió. Se descarga en el navegador; no se guarda en ningún servidor. */
+function buildRecord() {
+  const c = lastCalc;
+  const d = c.d;
+  const example = $('caseSelect').value !== 'custom';
+  const origin = (id) => (review[id] ? (review[id].source === 'ia' ? 'documento · IA' : 'documento · reglas') : example ? 'caso de ejemplo' : 'manual');
+  const status = (id) => { const r = review[id]; return !r ? null : r.edited ? 'corregido por el analista' : r.source === 'ia' ? (r.confirmed ? 'confirmado por el analista' : 'sin confirmar') : 'leído por reglas'; };
+  const ai = (k) => { const s = c.ai && c.ai[k]; return !s ? 'no solicitada' : s.status === 'ok' ? `ok (${s.data.model})` : s.status === 'loading' ? 'en curso' : `no disponible: ${s.error}`; };
+  const dec = c.ai && c.ai.decision && c.ai.decision.status === 'ok' ? c.ai.decision.data : null;
+  return {
+    formato: 'banco-4.0/expediente-revision/1',
+    generado: new Date().toISOString(),
+    nota: 'Pre-análisis asistido: la IA propone, las reglas validan y el analista decide. El score y la probabilidad de incumplimiento son de referencia y no están calibrados.',
+    expediente: $('caseClient').textContent,
+    archivo: example ? null : customName || null,
+    campos: FIELD_KEYS.map((id) => ({ campo: id, etiqueta: fieldLabel(id), valor: d[id], origen: origin(id), evidencia: review[id] ? review[id].evidence : null, revision: status(id) })),
+    reglas: { score_referencia: c.score, banda: c.band.label, monto_sugerido: c.suggested, tasa_referencial: Number(c.rate.toFixed(1)), prob_incumplimiento_referencial_sin_calibrar: Number(c.pd.toFixed(4)), controles_activados: c.flags.filter((f) => f.hit).map((f) => f.label) },
+    ia: { perfil: ai('perfil'), proteccion: ai('proteccion'), decision: ai('decision'), recomendacion: dec ? dec.recomendacion : null },
+    decision_analista: c.approval ? { decision: c.approval.decision, analista: c.approval.analyst, fecha: c.approval.iso } : null
+  };
+}
+
+function downloadRecord() {
+  const blob = new Blob([JSON.stringify(buildRecord(), null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `expediente-revision-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+$('phaseBody5').addEventListener('input', (event) => { if (event.target && event.target.id === 'approver') approverName = event.target.value; });
+$('phaseBody5').addEventListener('click', (event) => {
+  const b = event.target && event.target.closest ? event.target.closest('[data-approve], [data-export]') : null;
+  if (!b || !lastCalc || !isComplete()) return;
+  if (b.dataset.export) { downloadRecord(); return; }
+  const name = approverName.trim();
+  if (!name) { showToast('Escribe tu nombre para registrar la decisión'); if ($('approver')) $('approver').focus(); return; }
+  const now = new Date();
+  lastCalc.approval = { decision: b.dataset.approve, analyst: name, iso: now.toISOString(), label: now.toLocaleString('es') };
+  $('phaseBody5').innerHTML = phaseHtml(5);
+  notify(b.dataset.approve === 'aprobada' ? 'ok' : 'warn', b.dataset.approve === 'aprobada' ? 'Recomendación aprobada' : 'Devuelta a revisión', `Decisión registrada por ${name}. Descarga el expediente de revisión desde la fase 06.`, { phase: 5 });
+});
 $('runSimulation').addEventListener('click', () => { if (unlocked > 0) goTo(1); else advance(); });
 document.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', () => {
   if (viewPhase < unlocked) goTo(viewPhase + 1); else advance();
@@ -397,6 +471,8 @@ document.querySelectorAll('[data-go]').forEach((item) => item.addEventListener('
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
 function clearExtractionMarks() {
+  review = {};
+  lastExtraction = null;
   FIELD_KEYS.forEach((id) => { const l = $(id).closest('label'); if (l) l.classList.remove('field-extracted', 'field-missing'); });
   $('extractReport').hidden = true;
   $('uploadStatus').hidden = true;
@@ -408,6 +484,36 @@ function setUploadStatus(kind, text) {
   el.className = `upload-status ${kind}`;
   el.textContent = text;
   if (kind === 'error') notify('error', 'No se pudo cargar el archivo', text, { phase: 0 });
+}
+
+const fieldLabel = (id) => (id === 'overdue' ? '¿Accionista ha reportado vencidos?' : FIELD_LABELS[id]);
+const fieldShown = (id) => {
+  if (id === 'overdue') return $(id).value === 'si' ? 'Sí' : 'No';
+  const n = parseField(id);
+  return !isFinite(n) ? 'vacío' : id === 'employees' || id === 'institutions' ? String(n) : money(n);
+};
+const pendingReview = () => FIELD_KEYS.filter((id) => review[id] && review[id].source === 'ia' && !review[id].confirmed && !review[id].edited);
+
+function reviewTag(id) {
+  const r = review[id];
+  if (r.edited) return ' <em class="ai-tag ok">Corregido por el analista</em>';
+  if (r.source !== 'ia') return '';
+  return r.confirmed ? ' <em class="ai-tag ok">IA · confirmado</em>' : ' <em class="ai-tag">IA · confirma contra el documento</em>';
+}
+
+/* Lista de cifras leídas con su evidencia. Las que propuso la IA exigen que el analista las confirme (o las corrija) antes de validar. */
+function renderExtractReport(forceOpen) {
+  const x = lastExtraction;
+  if (!x) return;
+  const prev = $('extractReport').querySelector('details');
+  const open = forceOpen || !!(prev && prev.open);
+  const pending = pendingReview();
+  const nAi = x.found.filter((id) => review[id] && review[id].source === 'ia').length;
+  const rows = x.found.map((id) => `<li${review[id].source === 'ia' ? ' class="ai"' : ''}><b>${fieldLabel(id)}${reviewTag(id)}</b><span>${fieldShown(id)}</span><small>${esc(review[id].evidence)}</small>${pending.includes(id) ? `<button type="button" class="confirm-btn" data-confirm="${id}">Confirmar cifra</button>` : ''}</li>`).join('');
+  const miss = x.missing.map((id) => `<li class="miss"><b>${fieldLabel(id)}</b><span>No encontrado</span><small>Complétalo manualmente</small></li>`).join('');
+  const warn = [...x.warnings, ...(pending.length ? [`Confirma contra el documento ${pending.length === 1 ? 'la cifra' : 'las ' + pending.length + ' cifras'} que propuso la IA antes de validar.`] : [])];
+  $('extractReport').hidden = false;
+  $('extractReport').innerHTML = `<div class="extract-head"><b>${x.found.length} de ${FIELD_KEYS.length} campos extraídos de ${esc(x.filename)}${nAi ? ` (${nAi} completados con IA)` : ''}</b>${warn.map((w) => `<p class="extract-warning">${esc(w)}</p>`).join('')}</div><details class="extract-more"${open ? ' open' : ''}><summary>Ver detalle y evidencia por campo</summary><ul>${rows}${miss}</ul></details>`;
 }
 
 function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
@@ -427,16 +533,14 @@ function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
   });
   const found = FIELD_KEYS.filter((id) => values[id] !== undefined);
   const missing = FIELD_KEYS.filter((id) => values[id] === undefined);
-  const labelOf = (id) => (id === 'overdue' ? '¿Accionista ha reportado vencidos?' : FIELD_LABELS[id]);
-  const show = (id) => (id === 'overdue' ? (values[id] === 'si' ? 'Sí' : 'No') : id === 'employees' || id === 'institutions' ? String(values[id]) : money(values[id]));
-  const rows = found.map((id) => `<li${byAi(id) ? ' class="ai"' : ''}><b>${labelOf(id)}${byAi(id) ? ' <em class="ai-tag">IA · verifícalo</em>' : ''}</b><span>${show(id)}</span><small>${esc(evidence[id] || '')}</small></li>`).join('');
-  const miss = missing.map((id) => `<li class="miss"><b>${labelOf(id)}</b><span>No encontrado</span><small>Complétalo manualmente</small></li>`).join('');
-  $('extractReport').hidden = false;
-  $('extractReport').innerHTML = `<div class="extract-head"><b>${found.length} de ${FIELD_KEYS.length} campos extraídos de ${esc(filename)}${Object.keys(ai.values).length ? ` (${Object.keys(ai.values).length} completados con IA)` : ''}</b>${warnings.map((w) => `<p class="extract-warning">${esc(w)}</p>`).join('')}</div><details class="extract-more"><summary>Ver detalle y evidencia por campo</summary><ul>${rows}${miss}</ul></details>`;
+  review = {};
+  found.forEach((id) => { review[id] = { source: byAi(id) ? 'ia' : 'regla', evidence: evidence[id] || '', confirmed: false, edited: false }; });
+  lastExtraction = { filename, warnings, found, missing };
+  renderExtractReport(found.some(byAi));
   $('caseSelect').value = 'custom';
   setDataOpen(true);  // tras cargar un documento hay que revisar lo extraído
   invalidateAnalysis({ target: { id: 'fileInput' } });
-  notify(missing.length || warnings.length ? 'warn' : 'ok', `“${filename}” leído: ${found.length} de ${FIELD_KEYS.length} campos`, [Object.keys(ai.values).length ? `${Object.keys(ai.values).length} completados con IA: verifícalos.` : '', missing.length ? `Faltan: ${missing.map(labelOf).join(', ')}.` : '', ...warnings].filter(Boolean).join(' '), { phase: 0 });
+  notify(missing.length || warnings.length ? 'warn' : 'ok', `“${filename}” leído: ${found.length} de ${FIELD_KEYS.length} campos`, [Object.keys(ai.values).length ? `${Object.keys(ai.values).length} completados con IA: verifícalos.` : '', missing.length ? `Faltan: ${missing.map(fieldLabel).join(', ')}.` : '', ...warnings].filter(Boolean).join(' '), { phase: 0 });
   setUploadStatus(missing.length || warnings.length ? 'warn' : 'ok', missing.length ? `Extracción parcial: faltan ${missing.length} campo(s). Complétalos abajo antes de validar.` : Object.keys(ai.values).length ? 'Extracción completa. Los campos marcados con IA requieren tu verificación contra el documento.' : warnings.length ? 'Extracción completa, con una advertencia. Revisa los valores.' : 'Extracción completa. Revisa los valores y valida los datos.');
 }
 
