@@ -65,7 +65,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .goal-bar i{display:block;height:100%;border-radius:6px;background:#36b994}
 .goal-bar em{position:absolute;top:-5px;width:2px;height:20px;background:#183650;margin-left:-1px}
 .goal-legend{position:relative;display:flex;justify-content:space-between;margin-top:8px;font:500 12px 'DM Mono';color:#587083;height:18px}
-.goal-legend .goal-mark{position:absolute;transform:translateX(-50%);color:#183650;font-weight:700;white-space:nowrap}
+.goal-legend .goal-mark{position:absolute;transform:translateX(-100%);padding-right:4px;color:#183650;font-weight:700;white-space:nowrap}
 .severity-bar{display:flex;gap:3px;height:10px;margin-top:22px}
 .severity-bar i{display:block;border-radius:5px}
 .severity-bar .high,.severity-legend .high{background:#d9694a}
