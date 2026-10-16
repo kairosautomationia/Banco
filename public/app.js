@@ -544,6 +544,15 @@ function applyExtraction(result, filename, ai = { values: {}, evidence: {} }) {
   setUploadStatus(missing.length || warnings.length ? 'warn' : 'ok', missing.length ? `Extracción parcial: faltan ${missing.length} campo(s). Complétalos abajo antes de validar.` : Object.keys(ai.values).length ? 'Extracción completa. Los campos marcados con IA requieren tu verificación contra el documento.' : warnings.length ? 'Extracción completa, con una advertencia. Revisa los valores.' : 'Extracción completa. Revisa los valores y valida los datos.');
 }
 
+/* Texto que devuelve el OCR: LlamaParse v2 lo entrega como markdown.pages[].markdown; el servidor local, como cadena. */
+function ocrText(data) {
+  if (!data || typeof data !== 'object') return '';
+  if (typeof data.markdown === 'string') return data.markdown;
+  if (typeof data.markdown_full === 'string') return data.markdown_full;
+  const pages = data.markdown && Array.isArray(data.markdown.pages) ? data.markdown.pages : [];
+  return pages.map((p) => (typeof p === 'string' ? p : (p && (p.markdown || p.text)) || '')).filter(Boolean).join('\n\n');
+}
+
 let uploadCtl = null;   // carga de archivo en curso
 function cancelUpload() {
   if (uploadCtl) { uploadCtl.abort(); uploadCtl = null; }
@@ -564,10 +573,11 @@ async function handleFile(file) {
     const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-filename': encodeURIComponent(file.name), 'content-type': file.type || 'application/octet-stream' }, body: file, signal: ctl.signal });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
-    if (!data.markdown || !data.markdown.trim()) throw new Error('El OCR no devolvió texto legible del documento.');
-    docMarkdown = data.markdown;
-    const result = Extractor.extract(data.markdown);
-    const ai = await aiFillMissing(data.markdown, result);
+    const text = ocrText(data);
+    if (!text.trim()) throw new Error('El OCR no devolvió texto legible del documento.');
+    docMarkdown = text;
+    const result = Extractor.extract(text);
+    const ai = await aiFillMissing(text, result);
     if (ctl.signal.aborted) return;
     if (!Object.keys(result.values).length && !Object.keys(ai.values).length) throw new Error('No se reconoció ninguno de los 15 campos. Ingresa los datos manualmente o prueba con otro archivo.');
     applyExtraction(result, file.name, ai);

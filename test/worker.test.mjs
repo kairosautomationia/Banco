@@ -1,6 +1,7 @@
 // Prueba el Worker real (worker.js + ai.mjs) con un entorno simulado: contraseña, enrutado y rutas de IA.
 import base from 'node:test';
 import assert from 'node:assert/strict';
+import { markdownOf } from '../llamaparse.mjs';
 // worker.js usa sintaxis ESM dentro de un paquete CommonJS: Node >= 22.7 lo detecta; en versiones anteriores se omiten estas pruebas.
 const worker = await import('../worker.js').then((m) => m.default, () => null);
 const test = worker ? base : base.skip;
@@ -87,7 +88,7 @@ test('las cabeceras de seguridad no alteran el contenido ni el estado de los ass
 
 // ---------- Subida de archivos (OCR) con LlamaParse simulado ----------
 const MB = 1024 * 1024;
-async function conOcrSimulado(fn, { markdown = '| Ventas netas | 12.400.000 |', jobStatus = 'SUCCESS', uploadStatus = 200 } = {}) {
+async function conOcrSimulado(fn, { markdown = '| Ventas netas | 12.400.000 |', jobStatus = 'COMPLETED', uploadStatus = 200 } = {}) {
   const realFetch = globalThis.fetch;
   const realTimeout = globalThis.setTimeout;
   const llamadas = [];
@@ -96,8 +97,8 @@ async function conOcrSimulado(fn, { markdown = '| Ventas netas | 12.400.000 |', 
     const u = String(url);
     llamadas.push({ url: u, method: init.method || 'GET', body: init.body });
     if (u.endsWith('/upload')) return uploadStatus === 200 ? Response.json({ id: 'job1' }) : new Response('boom', { status: uploadStatus });
-    if (u.endsWith('/job/job1')) return Response.json({ status: jobStatus });
-    if (u.endsWith('/markdown')) return Response.json({ markdown });
+    if (u.endsWith('/api/v2/parse/job1')) return Response.json({ job: { id: 'job1', status: jobStatus } });
+    if (u.endsWith('/api/v2/parse/job1?expand=markdown')) return Response.json({ job: { id: 'job1', status: jobStatus }, markdown: { pages: [{ page_number: 1, markdown }] } });
     throw new Error(`fetch inesperado: ${u}`);
   };
   try { return await fn(llamadas); } finally { globalThis.fetch = realFetch; globalThis.setTimeout = realTimeout; }
@@ -109,13 +110,42 @@ test('OCR: un estado financiero de 30 KB, 1 MB y 20 MB exactos se procesa y devu
     await conOcrSimulado(async (llamadas) => {
       const r = await subir(bytes);
       assert.equal(r.status, 200, `${bytes} bytes`);
-      assert.equal((await r.json()).markdown, '| Ventas netas | 12.400.000 |');
+      assert.equal(markdownOf(await r.json()), '| Ventas netas | 12.400.000 |');
       const up = llamadas.find((c) => c.url.endsWith('/upload'));
       const file = up.body.get('file');
       assert.equal(file.size, bytes);                                       // el archivo llega completo a LlamaParse
-      assert.equal(up.body.get('language'), 'es');
+      assert.deepEqual(JSON.parse(up.body.get('configuration')), { tier: 'cost_effective', version: 'latest' });   // Parse API v2
+      assert.ok(up.url.endsWith('/api/v2/parse/upload'));
     });
   }
+});
+
+test('OCR: LlamaParse v2 (la v1 da 410): flujo upload → estado → expand=markdown, y el nivel se elige con LLAMA_PARSE_TIER', async () => {
+  await conOcrSimulado(async (llamadas) => {
+    const r = await subir(4096, 'a.pdf', { LLAMA_PARSE_TIER: 'agentic' });
+    assert.equal(r.status, 200);
+    assert.deepEqual(llamadas.map((c) => `${c.method} ${c.url.replace('https://api.cloud.llamaindex.ai', '')}`),
+      ['POST /api/v2/parse/upload', 'GET /api/v2/parse/job1', 'GET /api/v2/parse/job1?expand=markdown']);
+    assert.deepEqual(JSON.parse(llamadas[0].body.get('configuration')), { tier: 'agentic', version: 'latest' });
+    assert.equal(llamadas[0].body.get('language'), null);                  // campo de la v1: la v2 no lo usa
+  });
+});
+
+test('OCR: si LlamaParse tarda, el sondeo espera PENDING/RUNNING y avanza al COMPLETED sin pasar de las subpeticiones del plan Free', async () => {
+  const realFetch = globalThis.fetch; const realTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (f) => realTimeout(f, 0);
+  let sondeos = 0; let total = 0;
+  globalThis.fetch = async (u) => {
+    total += 1; u = String(u);
+    if (u.endsWith('/upload')) return Response.json({ id: 'j' });
+    if (u.endsWith('?expand=markdown')) return Response.json({ markdown: { pages: [{ markdown: 'a' }, { markdown: 'b' }] } });
+    sondeos += 1; return Response.json({ job: { id: 'j', status: sondeos < 6 ? (sondeos % 2 ? 'PENDING' : 'RUNNING') : 'COMPLETED' } });
+  };
+  try {
+    const r = await subir(2048);
+    assert.equal(r.status, 200); assert.equal(markdownOf(await r.json()), 'a\n\nb');
+    assert.equal(sondeos, 6); assert.ok(total < 50);
+  } finally { globalThis.fetch = realFetch; globalThis.setTimeout = realTimeout; }
 });
 
 test('OCR: 20 MB + 1 byte se rechaza con 413 sin llamar a LlamaParse', async () => {
@@ -141,7 +171,7 @@ test('OCR: nombres con acentos, espacios y rutas se normalizan; un archivo vací
 
 test('OCR: errores de LlamaParse llegan como mensajes claros (502) y sin clave se explica el motivo', async () => {
   await conOcrSimulado(async () => { const r = await subir(2048); assert.equal(r.status, 502); assert.match((await r.json()).error, /OCR respondió 500/); }, { uploadStatus: 500 });
-  await conOcrSimulado(async () => { const r = await subir(2048); assert.equal(r.status, 502); assert.match((await r.json()).error, /ERROR/); }, { jobStatus: 'ERROR' });
+  await conOcrSimulado(async () => { const r = await subir(2048); assert.equal(r.status, 502); assert.match((await r.json()).error, /FAILED/); }, { jobStatus: 'FAILED' });
   const sinClave = await call('/api/extract', { ASSETS }, { method: 'POST', headers: { 'x-filename': 'a.pdf' }, body: new Uint8Array(10) });
   assert.equal(sinClave.status, 500);
   assert.match((await sinClave.json()).error, /LLAMA_CLOUD_API_KEY/);
@@ -149,17 +179,17 @@ test('OCR: errores de LlamaParse llegan como mensajes claros (502) y sin clave s
 
 test('OCR: un texto grande (varios MB de markdown) se devuelve completo', async () => {
   const grande = '| Fila | 1.000 |\n'.repeat(250000);                       // ~5 MB de texto
-  await conOcrSimulado(async () => { const r = await subir(60 * 1024); assert.equal((await r.json()).markdown.length, grande.length); }, { markdown: grande });
+  await conOcrSimulado(async () => { const r = await subir(60 * 1024); assert.equal(markdownOf(await r.json()).length, grande.length); }, { markdown: grande });
 });
 
 test('OCR: el texto se reenvía sin alterarlo (unicode, comillas, saltos) y sin copiar encabezados de LlamaParse', async () => {
-  const crudo = JSON.stringify({ markdown: '| Ventas netas | 12.400.000 |\n| Gastos "financieros" – ñ á é í ó ú € | (160.000) |\n\ttab', job_metadata: { credits: 3 } });
+  const crudo = JSON.stringify({ job: { id: 'j', status: 'COMPLETED' }, markdown: { pages: [{ page_number: 1, markdown: '| Ventas netas | 12.400.000 |\n| Gastos "financieros" – ñ á é í ó ú € | (160.000) |\n\ttab' }] } });
   const realFetch = globalThis.fetch;
   const realTimeout = globalThis.setTimeout;
   globalThis.setTimeout = (f) => realTimeout(f, 0);
   globalThis.fetch = async (u) => {
     if (String(u).endsWith('/upload')) return Response.json({ id: 'j' });
-    if (String(u).endsWith('/j')) return Response.json({ status: 'SUCCESS' });
+    if (String(u).endsWith('/parse/j')) return Response.json({ job: { id: 'j', status: 'COMPLETED' } });
     return new Response(crudo, { headers: { 'content-type': 'application/json', 'content-encoding': 'gzip', 'set-cookie': 'a=b', 'x-interno': '1' } });
   };
   try {

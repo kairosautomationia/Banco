@@ -16,7 +16,7 @@ const API_KEY = process.env.LLAMA_CLOUD_API_KEY;
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '127.0.0.1'; // en un hosting: HOST=0.0.0.0
 const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || ''; // opcional: protege el sitio y el OCR con contraseña
-const BASE = 'https://api.cloud.llamaindex.ai/api/parsing';
+const lp = import('./llamaparse.mjs');   // Parse API v2 (módulo ES compartido con el Worker)
 const MAX_BYTES = 20 * 1024 * 1024;
 const ALLOWED_EXT = new Set(['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv']);
 const STATIC = {
@@ -48,6 +48,7 @@ function readBody(req) {
 }
 
 async function llama(pathname, options = {}) {
+  const { BASE } = await lp;
   const res = await fetch(`${BASE}${pathname}`, { ...options, headers: { Authorization: `Bearer ${API_KEY}`, accept: 'application/json', ...(options.headers || {}) } });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
@@ -66,20 +67,21 @@ async function extract(req, res) {
 
   const form = new FormData();
   form.append('file', new Blob([buffer]), path.basename(filename));
-  form.append('language', 'es');
-  const job = await llama('/upload', { method: 'POST', body: form });
+  const { configuration, jobIdOf, statusOf, isDone, isFailed, markdownOf } = await lp;
+  form.append('configuration', configuration(process.env.LLAMA_PARSE_TIER));
+  const jobId = jobIdOf(await llama('/upload', { method: 'POST', body: form }));
+  if (!jobId) throw Object.assign(new Error('LlamaParse no devolvió el identificador del trabajo'), { status: 502 });
 
   const started = Date.now();
   for (;;) {
     await sleep(2000);
-    const info = await llama(`/job/${job.id}`);
-    const status = String(info.status || '').toUpperCase();
-    if (status === 'SUCCESS') break;
-    if (status === 'ERROR' || status === 'CANCELED') throw Object.assign(new Error(`El OCR terminó con estado ${status}`), { status: 502 });
+    const status = statusOf(await llama(`/${jobId}`));
+    if (isDone(status)) break;
+    if (isFailed(status)) throw Object.assign(new Error(`El OCR terminó con estado ${status}`), { status: 502 });
     if (Date.now() - started > 150000) throw Object.assign(new Error('El OCR tardó demasiado; intenta de nuevo'), { status: 504 });
   }
-  const result = await llama(`/job/${job.id}/result/markdown`);
-  send(res, 200, { markdown: result.markdown || '', filename: path.basename(filename) });
+  const result = await llama(`/${jobId}?expand=markdown`);
+  send(res, 200, { markdown: markdownOf(result), filename: path.basename(filename) });
 }
 
 function authorized(req) {
