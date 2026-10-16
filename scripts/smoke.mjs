@@ -45,6 +45,15 @@ async function call(path, init) {
 const home = await call('/');
 report(home.res && home.res.status === 200 && /Banco/.test(home.text), 'El sitio carga', home.error || `HTTP ${home.res && home.res.status}${home.res && home.res.status === 401 ? ' — ' + hint(401) : ''}`);
 if (!home.res || home.res.status !== 200) process.exit(1);
+{
+  const h = await call('/api/health');
+  let d = {};
+  try { d = JSON.parse(h.text); } catch { /* sin JSON */ }
+  if (h.res && h.res.status === 200 && d.ocr) {
+    report(d.ocr.clave_configurada, 'OCR: secreto LLAMA_CLOUD_API_KEY configurado', d.ocr.clave_configurada ? `${d.ocr.api}, nivel ${d.ocr.nivel}` : 'falta el secreto en Cloudflare (Settings > Variables and Secrets, tipo Secret)');
+    report(d.ia.binding, 'IA: binding "AI" configurado', d.ia.binding ? `modelo ${d.ia.modelo}` : 'falta "ai": { "binding": "AI" } en wrangler.jsonc');
+  } else report(false, 'Estado de la configuración (/api/health)', 'el Worker desplegado no lo tiene: aún no se publicó la versión nueva');
+}
 const js = await call('/app.js');
 { const ok = js.res.status === 200 && js.text.includes('requestAi') && js.text.includes('aiFillMissing'); report(ok, 'El front publicado incluye la IA (app.js nuevo)', ok ? '' : 'recarga con Ctrl+F5 o revisa que el build de main terminó'); }
 

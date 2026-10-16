@@ -120,6 +120,17 @@ test('OCR: un estado financiero de 30 KB, 1 MB y 20 MB exactos se procesa y devu
   }
 });
 
+test('/api/health: informa qué falta configurar sin revelar secretos, exige GET y respeta la contraseña', async () => {
+  const completo = await (await call('/api/health', { ASSETS, AI: aiOk, LLAMA_CLOUD_API_KEY: 'llx-secreta', ACCESS_PASSWORD: 'pw' }, { headers: { authorization: basic('pw') } })).json();
+  assert.deepEqual(completo, { ok: true, ocr: { clave_configurada: true, api: 'LlamaParse v2', nivel: 'cost_effective' }, ia: { binding: true, modelo: '@cf/google/gemma-4-26b-a4b-it' }, protegido_con_contrasena: true });
+  assert.ok(!JSON.stringify(completo).includes('llx-secreta') && !JSON.stringify(completo).includes('pw"'));
+  const vacio = await (await call('/api/health', { ASSETS })).json();
+  assert.equal(vacio.ok, false); assert.equal(vacio.ocr.clave_configurada, false); assert.equal(vacio.ia.binding, false);
+  assert.equal((await call('/api/health', { ASSETS, LLAMA_PARSE_TIER: 'agentic', AI_MODEL: '@cf/a/b' })).status, 200);
+  assert.equal((await call('/api/health', { ASSETS }, { method: 'POST' })).status, 405);
+  assert.equal((await call('/api/health', { ASSETS, ACCESS_PASSWORD: 'pw' })).status, 401);
+});
+
 test('OCR: LlamaParse v2 (la v1 da 410): flujo upload → estado → expand=markdown, y el nivel se elige con LLAMA_PARSE_TIER', async () => {
   await conOcrSimulado(async (llamadas) => {
     const r = await subir(4096, 'a.pdf', { LLAMA_PARSE_TIER: 'agentic' });

@@ -574,7 +574,7 @@ async function handleFile(file) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
     const text = ocrText(data);
-    if (!text.trim()) throw new Error('El OCR no devolvió texto legible del documento.');
+    if (!text.trim()) throw new Error(`El OCR no devolvió texto legible del documento (la respuesta trae: ${data && typeof data === 'object' ? Object.keys(data).join(', ') || 'nada' : 'nada'}).`);
     docMarkdown = text;
     const result = Extractor.extract(text);
     const ai = await aiFillMissing(text, result);
