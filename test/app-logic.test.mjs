@@ -16,7 +16,7 @@ class El {
 const els = new Map();
 const document = { getElementById: (id) => { if (!els.has(id)) els.set(id, new El(id === 'caseSelect' ? 'guia' : id === 'overdue' ? 'no' : '')); return els.get(id); }, querySelectorAll: () => [], querySelector: () => new El(), addEventListener() {} };
 const ctx = vm.createContext({ document, console, Intl, setTimeout, clearTimeout, AbortController, AbortSignal, location: { protocol: 'http:' }, fetch: async () => { throw new Error('sin red en las pruebas'); } });
-for (const f of ['extractor.js', 'app.js']) vm.runInContext(fs.readFileSync(new URL(`../public/${f}`, import.meta.url), 'utf8'), ctx, { filename: f });
+for (const f of ['extractor.js', 'sheet-reader.js', 'app.js']) vm.runInContext(fs.readFileSync(new URL(`../public/${f}`, import.meta.url), 'utf8'), ctx, { filename: f });
 const { compute, validate, stripCents, cases, ocrText } = vm.runInContext('({ compute, validate, stripCents, cases, ocrText })', ctx);
 
 test('puntuaciones de referencia de los 3 casos de ejemplo (regresión del modelo)', () => {
