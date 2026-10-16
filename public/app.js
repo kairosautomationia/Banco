@@ -559,6 +559,17 @@ function cancelUpload() {
   $('dropzone').classList.remove('is-busy');
 }
 
+/* Excel (.xlsx) y CSV se leen en el navegador, sin OCR ni enviar el archivo; si no se pueden leer, se sigue con el OCR. */
+async function readLocally(file, ext) {
+  if (ext !== '.xlsx' && ext !== '.csv') return '';
+  try {
+    const buffer = await file.arrayBuffer();
+    return ext === '.csv' ? SheetReader.csvToMarkdown(SheetReader.decodeCsv(buffer)) : await SheetReader.xlsxToMarkdown(buffer);
+  } catch {
+    return '';
+  }
+}
+
 async function handleFile(file) {
   if (!file) return;
   const ext = (file.name.match(/\.[^.]+$/) || [''])[0].toLowerCase();
@@ -568,13 +579,18 @@ async function handleFile(file) {
   cancelUpload();
   const ctl = (uploadCtl = new AbortController());
   $('dropzone').classList.add('is-busy');
-  setUploadStatus('busy', `Leyendo “${file.name}” con OCR… puede tardar hasta un par de minutos.`);
+  setUploadStatus('busy', `Leyendo “${file.name}”…`);
   try {
-    const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-filename': encodeURIComponent(file.name), 'content-type': file.type || 'application/octet-stream' }, body: file, signal: ctl.signal });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
-    const text = ocrText(data);
-    if (!text.trim()) throw new Error(`El OCR no devolvió texto legible del documento (la respuesta trae: ${data && typeof data === 'object' ? Object.keys(data).join(', ') || 'nada' : 'nada'}).`);
+    let text = await readLocally(file, ext);
+    if (ctl.signal.aborted) return;
+    if (!text.trim()) {
+      setUploadStatus('busy', `Leyendo “${file.name}” con OCR… puede tardar hasta un par de minutos.`);
+      const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-filename': encodeURIComponent(file.name), 'content-type': file.type || 'application/octet-stream' }, body: file, signal: ctl.signal });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+      text = ocrText(data);
+      if (!text.trim()) throw new Error(`El OCR no devolvió texto legible del documento (la respuesta trae: ${data && typeof data === 'object' ? Object.keys(data).join(', ') || 'nada' : 'nada'}).`);
+    }
     docMarkdown = text;
     const result = Extractor.extract(text);
     const ai = await aiFillMissing(text, result);
@@ -630,9 +646,10 @@ async function aiFillMissing(markdown, result) {
       if (id === 'overdue') { out.values[id] = c.valor; out.evidence[id] = c.evidencia; return; }
       const n = Extractor.parseNumber(c.cifra);
       if (!isFinite(n)) return;
-      out.values[id] = INT_IDS.has(id) ? Math.round(n) : n;
+      const k = INT_IDS.has(id) ? 1 : result.scale || 1;   // si las reglas convirtieron un documento «en miles», la IA cita cifras impresas: misma escala
+      out.values[id] = INT_IDS.has(id) ? Math.round(n) : Math.round(n * k * 100) / 100;
       out.evidence[id] = `${c.evidencia}${c.escala > 1 ? ` (el documento declara cifras en ${c.escala === 1000 ? 'miles' : 'millones'}; se dejó el valor impreso)` : ''}`;
-      if (c.escala > 1) out.scaleNote = true;
+      if (c.escala > 1 && !(result.scale > 1)) out.scaleNote = true;
     });
   } catch (err) {
     if (!err.unavailable) out.error = err.message;

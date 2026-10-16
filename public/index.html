@@ -58,12 +58,12 @@
           <div class="upload-block">
             <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Cargar un archivo PDF, Word, Excel o CSV con los datos financieros">
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
-              <div><b>Arrastra tu archivo aquí o haz clic para cargarlo</b><small>PDF, Word (.docx), Excel (.xlsx) o CSV · máx. 20 MB · el OCR extrae los 15 campos y tú los revisas</small></div>
+              <div><b>Arrastra tu archivo aquí o haz clic para cargarlo</b><small>PDF, Word (.docx), Excel (.xlsx) o CSV · máx. 20 MB · se extraen los 15 campos y tú los revisas</small></div>
               <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" hidden />
             </div>
             <div class="upload-status" id="uploadStatus" role="status" aria-live="polite" hidden></div>
             <div class="extract-report" id="extractReport" hidden></div>
-            <p class="upload-privacy">El archivo se envía al servicio de OCR (LlamaParse) para leerlo. No cargues documentos que no puedas compartir con un tercero.</p>
+            <p class="upload-privacy">Los PDF y Word se envían al servicio de OCR (LlamaParse); Excel (.xlsx) y CSV se leen en tu navegador. Si faltan datos, el texto leído puede enviarse a la IA para completarlos. No cargues documentos que no puedas compartir con un tercero.</p>
           </div>
           <div class="case-picker"><label>O usa un caso de ejemplo<select id="caseSelect"><option value="guia">Caso de la guía</option><option value="andina">Distribuidora Andina S.A.</option><option value="delta">Constructora Delta S.A.</option><option value="custom">Personalizado</option></select></label></div>
           <details class="data-section" id="dataDetails">
@@ -142,6 +142,7 @@
   </div>
   <div class="toast" id="toast"></div>
   <script src="extractor.js"></script>
+  <script src="sheet-reader.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

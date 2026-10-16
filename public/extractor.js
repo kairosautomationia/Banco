@@ -46,7 +46,7 @@
   // («Ventas | 5 | 6.337.000», «Efectivo | 4 | 800») es el número de nota, no un dato.
   function cleanTokens(tokens, int) {
     let list = int ? tokens : tokens.filter((x) => !/^(19|20)\d{2}$/.test(x.raw));
-    if (list.length > 1 && /^\d{1,2}$/.test(list[0].raw) && list.slice(1).some((x) => Math.abs(x.value) >= Math.max(50, Number(list[0].raw) * 8))) list = list.slice(1);
+    if (list.length > 1 && /^[1-9]\d?$/.test(list[0].raw) && list.slice(1).some((x) => Math.abs(x.value) >= Math.max(50, Number(list[0].raw) * 8))) list = list.slice(1);
     return list;
   }
   const dropNoteColumn = (tokens) => cleanTokens(tokens, false);
@@ -82,22 +82,25 @@
     if (years.length < 2) { (text.match(/\b20\d{2}\b/g) || []).forEach((y) => years.push(Number(y))); }
     return years;
   }
-  // Por línea: ¿los periodos van de más antiguo a más reciente? Cada tabla trae su encabezado; antes del primero rige el primero del documento.
+  // Por línea: ¿los periodos van de más antiguo a más reciente, y cuántos trae su tabla? Cada tabla trae su encabezado; antes del primero rige el primero del documento.
   function ascendingMap(lines) {
     const heads = lines.map((l) => (/[|;\t]|\s{2,}/.test(l) ? yearsOf(l) : []));   // una frase con dos años no es un encabezado
     const first = heads.find((y) => y.length >= 2);
     let cur = first ? first[0] < first[first.length - 1] : false;
-    return heads.map((y) => { if (y.length >= 2) cur = y[0] < y[y.length - 1]; return cur; });
+    let count = first ? first.length : 0;
+    const asc = [], periods = [];
+    heads.forEach((y) => { if (y.length >= 2) { cur = y[0] < y[y.length - 1]; count = y.length; } asc.push(cur); periods.push(count); });
+    return { asc, periods };
   }
 
   const FIELDS = [
-    { id: 'sales', multi: 4, keepRatios: true, patterns: [/^(total )?ventas( netas| anuales| totales)?\b/, /^ingresos (por )?(ventas|operacionales|ordinarios|de actividades)/, /^ventas\b/, /^ingresos\b/] },
+    { id: 'sales', multi: 4, keepRatios: true, patterns: [/^(total )?ventas( netas| anuales| totales)?\b/, /^ingresos (netos )?(por )?(ventas|operacionales|ordinarios|de actividades)/, /^ventas\b/, /^ingresos\b/] },
     { id: 'ebitda', patterns: [/\bebitda\b/] },
     { id: 'finExp', abs: true, patterns: [/gastos? financieros?/, /intereses (pagados|por pagar|financieros|generados)/, /costos? financieros?/] },
     { id: 'cash', exclude: /inicio|aumento|disminucion|variacion|generado|utilizado|actividades|neto de|restringid|comprometid|gravad/, patterns: [/efectivo.*(certificados|equivalentes)/, /^efectivo\b/, /caja y bancos/, /^disponible/] },
     { id: 'employees', int: true, keepRatios: true, patterns: [/n(u|ú)mero de empleados/, /^empleados/, /^personal\b/, /^n(o|°|º)\.? de empleados/] },
-    { id: 'netIncome', patterns: [/utilidad neta/, /resultado neto/, /ganancia neta/, /utilidad del ejercicio/, /perdida neta/, /resultado del (periodo|ejercicio)/] },
-    { id: 'equity', patterns: [/^total patrimonio( neto| contable)?\b/, /^patrimonio( neto| contable)?\b/], exclude: /pasivo|atribuible|controlador|minoritari|participacion/ },
+    { id: 'netIncome', patterns: [/utilidad neta/, /resultado neto/, /ganancia neta/, /ganancia \(?perdida\)? neta/, /utilidad del ejercicio/, /perdida neta/, /resultado del (periodo|ejercicio)/] },
+    { id: 'equity', patterns: [/^total (de )?patrimonio( neto| contable)?\b/, /^patrimonio( neto| contable)?\b/], exclude: /pasivo|atribuible|controlador|minoritari|participacion/ },
     { id: 'institutions', int: true, keepRatios: true, patterns: [/instituciones financieras/, /n(u|ú)mero de (bancos|instituciones)/, /cantidad de instituciones/] },
     { id: 'overdue', text: true, patterns: [/vencidos/] },
     { id: 'requested', patterns: [/deuda solicitada/, /incremento (en )?(el )?riesgo/, /monto solicitado/, /^solicitud\b/] },
@@ -107,7 +110,7 @@
 
   function extract(markdown) {
     const rawLines = String(markdown || '').split(/\r?\n/);
-    const ascAt = ascendingMap(rawLines);
+    const { asc: ascAt, periods: periodsAt } = ascendingMap(rawLines);
     const parsed = rawLines.map(splitLine);
     const used = new Set();
     const out = {};
@@ -116,6 +119,13 @@
 
     const setValue = (id, value, ev) => { out[id] = value; evidence[id] = ev; };
     const pickAt = (nums, i) => (ascAt[i] ? nums[nums.length - 1] : nums[0]);
+    // Celda vacía («n.d.», que deja el lector de hojas) en el periodo más reciente: el primer número sería de un año anterior. Solo cuando la fila tiene
+    // exactamente una celda por periodo del encabezado; con una celda de más es una columna de «Nota» vacía y no cuenta.
+    const latestMissing = (p, i) => {
+      const cells = p.rest.split(' | ');
+      if (periodsAt[i] && cells.length !== periodsAt[i]) return false;
+      return /^n\.d\.$/i.test((ascAt[i] ? cells[cells.length - 1] : cells[0]).trim());
+    };
 
     FIELDS.forEach((field) => {
       for (const pattern of field.patterns) {
@@ -125,7 +135,7 @@
           const label = norm(p.label);
           if (field.multi) continue;   // las ventas se resuelven abajo, comparando todas las filas candidatas
           if (!pattern.test(label) || (field.exclude && field.exclude.test(label)) || (!field.keepRatios && RATIO.test(label))) continue;
-          if (field.text) continue;   // «vencidos» se resuelve abajo: solo cuenta una respuesta explícita sobre accionistas
+          if (field.text || latestMissing(p, i)) continue;   // «vencidos» se resuelve abajo: solo cuenta una respuesta explícita sobre accionistas
           let nums = cleanTokens(numberTokens(p.rest), field.int).map((x) => x.value);
           if (!nums.length && /^[\s|$]*[-–—][\s|$-]*$/.test(p.rest)) nums = [0];
           if (!nums.length) {
@@ -159,7 +169,7 @@
           parsed.forEach((p, i) => {
             if (!p || used.has(i)) return;
             const label = norm(p.label);
-            if (!pattern.test(label) || NOT_SALES.test(label) || (exactOnly && !EXACT.test(label))) return;
+            if (!pattern.test(label) || NOT_SALES.test(label) || (exactOnly && !EXACT.test(label)) || latestMissing(p, i)) return;
             const nums = dropOutliers(dropNoteColumn(numberTokens(p.rest)).map((x) => x.value));
             if (nums.length && (!best || Math.min(nums.length, 4) > Math.min(best.nums.length, 4))) best = { i, nums, p };
           });
@@ -199,6 +209,21 @@
       else warnings.push('La deuda se leyó de un solo tramo (corto o largo plazo): verifica el total.');
     }
 
+    // Deuda de un balance sin línea de «deuda»: préstamos (corrientes y no corrientes) más bonos emitidos. Los derivados y otros pasivos no se incluyen.
+    if (out.debt === undefined) {
+      const find = (re) => parsed.findIndex((p, i) => p && !used.has(i) && re.test(norm(p.label)) && !RATIO.test(norm(p.label)) && !latestMissing(p, i) && dropNoteColumn(numberTokens(p.rest)).length);
+      const parts = [
+        find(/^(creditos y prestamos|prestamos|obligaciones bancarias|obligaciones financieras).*(no corrientes?|largo plazo)/),
+        find(/^(creditos y prestamos|prestamos|obligaciones bancarias|obligaciones financieras).*(?<!no )(corrientes?|corto plazo)/),
+        find(/^(deudas? por emision de bonos|bonos|obligaciones por emision|emision de obligaciones|titulos de deuda)/)
+      ].filter((i) => i !== -1);
+      if (parts.length) {
+        const total = parts.reduce((sum, i) => sum + pickAt(dropNoteColumn(numberTokens(parsed[i].rest)).map((x) => x.value), i), 0);
+        setValue('debt', total, `Calculado: ${parts.map((i) => parsed[i].label).join(' + ')}`);
+        warnings.push('La deuda se calculó como préstamos más bonos del balance; no incluye derivados ni otros pasivos financieros. Verifícala.');
+      }
+    }
+
     // Empleados dichos en una frase («la Compañía mantiene 112 empleados»).
     if (out.employees === undefined) {
       for (const line of rawLines) {
@@ -217,12 +242,31 @@
       }
     }
 
+    // Fila «Unidades | Miles USD | Miles USD…» (exportaciones tipo EMIS): todas las cifras monetarias se pasan a USD completos. Solo con una declaración explícita
+    // y uniforme; el texto suelto «en miles» solo avisa (más abajo).
+    let scale = 1;
+    const unitsRow = parsed.find((p) => p && /^unidades?$/.test(norm(p.label)));
+    if (unitsRow) {
+      const cells = norm(unitsRow.rest).split(' | ').map((c) => c.trim()).filter(Boolean);
+      if (cells.length && cells.every((c) => /\bmiles\b/.test(c))) scale = 1000;
+      else if (cells.length && cells.every((c) => /\bmillones\b/.test(c))) scale = 1000000;
+    }
+    if (scale > 1) {
+      const note = ` (cifras en ${scale === 1000 ? 'miles' : 'millones'} según la fila «Unidades»: ×${scale === 1000 ? '1.000' : '1.000.000'})`;
+      Object.keys(out).forEach((id) => {
+        if (id === 'employees' || id === 'institutions' || id === 'overdue') return;
+        out[id] = Math.round(out[id] * scale);
+        evidence[id] += note;
+      });
+      warnings.push(`El documento declara sus cifras en ${scale === 1000 ? 'miles' : 'millones'} (fila «Unidades»): se convirtieron a unidades completas (×${scale === 1000 ? '1.000' : '1.000.000'}).`);
+    }
+
     // Escala: «en miles», «cifras en millones de USD», «(miles)», «USD miles», «US$ 000», «MUSD»…
-    if (/(cifras|valores|montos|importes|expresad[oa]s?|presentad[oa]s?|\ben)\s+(\w+\s+){0,3}(miles|millones)\b|\b(miles|millones) de (usd|dolares|us\$|\$)|\((miles|millones|000)\)|\b(usd|us\$)\s*(miles|millones|000)\b|\bmusd\b/.test(norm(markdown))) {
+    if (scale === 1 && /(cifras|valores|montos|importes|expresad[oa]s?|presentad[oa]s?|\ben)\s+(\w+\s+){0,3}(miles|millones)\b|\b(miles|millones) de (usd|dolares|us\$|\$)|\((miles|millones|000)\)|\b(usd|us\$)\s*(miles|millones|000)\b|\bmusd\b/.test(norm(markdown))) {
       warnings.push('El documento parece expresado en miles o millones: verifica la escala de las cifras antes de analizar.');
     }
     if (out.sales24 !== undefined && out.sales23 === undefined) warnings.push('Solo se encontró un periodo de ventas; completa los demás manualmente.');
-    return { values: out, evidence, warnings };
+    return { values: out, evidence, warnings, scale };
   }
 
   const api = { extract, parseNumber, numbersIn };
