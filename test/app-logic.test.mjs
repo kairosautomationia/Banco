@@ -17,7 +17,7 @@ const els = new Map();
 const document = { getElementById: (id) => { if (!els.has(id)) els.set(id, new El(id === 'caseSelect' ? 'guia' : id === 'overdue' ? 'no' : '')); return els.get(id); }, querySelectorAll: () => [], querySelector: () => new El(), addEventListener() {} };
 const ctx = vm.createContext({ document, console, Intl, setTimeout, clearTimeout, AbortController, AbortSignal, location: { protocol: 'http:' }, fetch: async () => { throw new Error('sin red en las pruebas'); } });
 for (const f of ['extractor.js', 'app.js']) vm.runInContext(fs.readFileSync(new URL(`../public/${f}`, import.meta.url), 'utf8'), ctx, { filename: f });
-const { compute, validate, stripCents, cases } = vm.runInContext('({ compute, validate, stripCents, cases })', ctx);
+const { compute, validate, stripCents, cases, ocrText } = vm.runInContext('({ compute, validate, stripCents, cases, ocrText })', ctx);
 
 test('puntuaciones de referencia de los 3 casos de ejemplo (regresión del modelo)', () => {
   const esperado = { guia: [714, 'Riesgo moderado', 400000], andina: [999, 'Bajo riesgo', 500000], delta: [337, 'Alto riesgo', 0] };
@@ -134,4 +134,11 @@ test('decisión del analista: el nombre se escapa y los botones esperan a la rec
   assert.ok(html.includes('&lt;img onerror=1>') && !html.includes('<img'));
   assert.equal((html.match(/ disabled>/g) || []).length, 2);              // aprobar y devolver; descargar sigue disponible
   assert.match(html, /Espera a que la IA termine/);
+});
+
+test('texto del OCR: LlamaParse v2 (markdown.pages[]), markdown_full y la cadena del servidor local', () => {
+  assert.equal(ocrText({ markdown: { pages: [{ markdown: 'uno' }, { markdown: 'dos' }] } }), 'uno\n\ndos');
+  assert.equal(ocrText({ markdown_full: 'completo' }), 'completo');
+  assert.equal(ocrText({ markdown: 'plano' }), 'plano');
+  for (const vacio of [null, undefined, {}, { markdown: { pages: [] } }, { error: 'x' }]) assert.equal(ocrText(vacio), '');
 });

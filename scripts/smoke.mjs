@@ -67,6 +67,7 @@ if (filePath) {
   const path = await import('node:path');
   const { createRequire } = await import('node:module');
   const { extract } = createRequire(import.meta.url)('../public/extractor.js');
+  const { markdownOf } = await import('../llamaparse.mjs');   // el OCR (LlamaParse v2) devuelve el texto por páginas
   const name = path.basename(filePath);
   const bytes = fs.readFileSync(filePath);
   console.log(`\nOCR real con ${name} (${(bytes.length / 1024).toFixed(0)} KB):`);
@@ -74,13 +75,14 @@ if (filePath) {
   const r = await call('/api/extract', { method: 'POST', headers: { 'content-type': 'application/octet-stream', 'x-filename': encodeURIComponent(name) }, body: bytes });
   let data = {};
   try { data = JSON.parse(r.text); } catch { /* no JSON */ }
-  if (r.error || r.res.status !== 200 || !data.markdown) {
+  const text = markdownOf(data);
+  if (r.error || r.res.status !== 200 || !text) {
     report(false, 'OCR', r.error || `HTTP ${r.res.status}: ${data.error || r.text.slice(0, 200)}${r.res && r.res.status === 500 ? ' → falta el secreto LLAMA_CLOUD_API_KEY en el Worker' : ''}`);
   } else {
-    report(true, `OCR (${((Date.now() - t0) / 1000).toFixed(1)} s)`, `${data.markdown.length.toLocaleString('es')} caracteres de texto`);
+    report(true, `OCR (${((Date.now() - t0) / 1000).toFixed(1)} s)`, `${text.length.toLocaleString('es')} caracteres de texto`);
     const truthFile = new URL('../test/fixtures/ground-truth.json', import.meta.url);
     const truth = /^estados-financieros/.test(name) && fs.existsSync(truthFile) ? JSON.parse(fs.readFileSync(truthFile, 'utf8')) : null;
-    const { values, evidence, warnings } = extract(data.markdown);
+    const { values, evidence, warnings } = extract(text);
     const keys = ['sales24', 'sales23', 'sales22', 'sales21', 'debt', 'ebitda', 'finExp', 'cash', 'employees', 'netIncome', 'equity', 'institutions', 'overdue', 'bbDebt', 'requested'];
     let ok = 0;
     for (const k of keys) {

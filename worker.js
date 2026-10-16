@@ -1,11 +1,11 @@
 // Cloudflare Worker: sirve el sitio (carpeta public/) y hace de proxy hacia LlamaParse (OCR).
 // Equivale a server.js. La clave vive como secreto del Worker (LLAMA_CLOUD_API_KEY); nunca llega al navegador.
-// Secretos/variables: LLAMA_CLOUD_API_KEY (para el OCR) y ACCESS_PASSWORD (opcional, protege sitio y OCR).
+// Secretos/variables: LLAMA_CLOUD_API_KEY (para el OCR), LLAMA_PARSE_TIER (opcional: cost_effective | agentic | agentic_plus) y ACCESS_PASSWORD (opcional, protege sitio y OCR).
 // La IA (/api/ai/*) vive en ai.mjs y usa el binding "AI" de Workers AI; ver el README para cambiar de proveedor.
 import { handleAi } from './ai.mjs';
 import { MAX_WAIT_MS, pollDelay } from './ocr.mjs';
+import { BASE, configuration, jobIdOf, statusOf, isDone, isFailed } from './llamaparse.mjs';
 
-const BASE = 'https://api.cloud.llamaindex.ai/api/parsing';
 const MAX_BYTES = 20 * 1024 * 1024;
 const ALLOWED_EXT = new Set(['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv']);
 
@@ -104,21 +104,21 @@ async function extract(request, env) {
   const baseName = filename.split(/[\\/]/).pop();
   const form = new FormData();
   form.append('file', file, baseName);
-  form.append('language', 'es');
-  const job = await llama(env, '/upload', { method: 'POST', body: form });
+  form.append('configuration', configuration(env.LLAMA_PARSE_TIER));
+  const jobId = jobIdOf(await llama(env, '/upload', { method: 'POST', body: form }));
+  if (!jobId) throw new HttpError('LlamaParse no devolvió el identificador del trabajo', 502);
 
   const started = Date.now();
   for (let attempt = 0; ; attempt += 1) {
     await sleep(pollDelay(attempt));
-    const info = await llama(env, `/job/${job.id}`);
-    const status = String(info.status || '').toUpperCase();
-    if (status === 'SUCCESS') break;
-    if (status === 'ERROR' || status === 'CANCELED') throw new HttpError(`El OCR terminó con estado ${status}`, 502);
+    const status = statusOf(await llama(env, `/${jobId}`));
+    if (isDone(status)) break;
+    if (isFailed(status)) throw new HttpError(`El OCR terminó con estado ${status}`, 502);
     if (Date.now() - started > MAX_WAIT_MS) throw new HttpError('El OCR tardó demasiado; intenta de nuevo', 504);
   }
   // El texto del OCR puede ser de varios MB: se reenvía como flujo, sin parsearlo ni reserializarlo (con JSON.stringify costaba ~16 ms por MB de CPU).
   // Solo se reenvía el tipo de contenido: no los demás encabezados (p. ej. content-encoding), porque el cuerpo ya viene descomprimido.
-  const res = await fetch(`${BASE}/job/${job.id}/result/markdown`, { headers: { Authorization: `Bearer ${env.LLAMA_CLOUD_API_KEY}`, accept: 'application/json' } });
+  const res = await fetch(`${BASE}/${jobId}?expand=markdown`, { headers: { Authorization: `Bearer ${env.LLAMA_CLOUD_API_KEY}`, accept: 'application/json' } });
   if (!res.ok) throw new HttpError(`OCR respondió ${res.status}`, 502);
   return new Response(res.body, { status: 200, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
