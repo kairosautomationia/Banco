@@ -8,3 +8,6 @@ Thumbs.db
 .wrangler/
 .dev.vars
 .dev.vars.*
+
+# Diagramas generados con Archify (se regeneran)
+.archify/
